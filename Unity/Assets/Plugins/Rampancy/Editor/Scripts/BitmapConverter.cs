@@ -66,8 +66,8 @@ namespace Plugins.Rampancy.Editor.Scripts
         {
             var tex = new Texture2D(width, height, TextureFormat.BGRA32, true);
             tex.SetPixelData(pixels, 0);
-            if (width % 4 == 0 && height % 4 == 0)
-                tex.Compress(true);
+            //if (width % 4 == 0 && height % 4 == 0)
+                //tex.Compress(true);
             tex.Apply(true);
 
             return tex;
