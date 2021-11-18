@@ -24,6 +24,7 @@ This might change later but for now.
 * Clone this project ```git clone --recurse-submodules https://github.com/GoomiiV2/Rampancy.git```
 * Open the project in Unity
 * Browse and set the paths for the mod tools you will use
+* Click the Rampency menu at the top and then Debug > Debug Ui and then click Import bitmaps
 * Open the test scene in ``Scenes/Tests/Test``
 * Press f6 to compile
 * * Then set it up in guerilla to set the sky
