@@ -8,10 +8,11 @@
 A new level editor for the Halo games based on a CSG / brush workflow, think Source / Quake.
  
 ## Example
-<div style="width:100%;height:0px;position:relative;padding-bottom:52.188%;"><iframe src="https://streamable.com/e/ofi10w" frameborder="0" width="100%" height="100%" allowfullscreen style="width:100%;height:100%;position:absolute;left:0px;top:0px;overflow:hidden;"></iframe></div>
- 
- 
- 
+https://user-images.githubusercontent.com/5684215/142354890-78fd68fd-8048-478d-88af-c18a7746a4b7.mp4
+
+
+
+
 ## Status
 THe project is still early in dev and some core issues need to be worked out, but works as a proof of concept I think :>
  
