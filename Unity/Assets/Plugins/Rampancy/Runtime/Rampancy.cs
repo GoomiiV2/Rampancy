@@ -17,24 +17,6 @@ namespace Plugins.Rampancy.Runtime
         public static string BaseUnityDir => Path.Combine("Assets", $"{Config.GameVersion}");
         public static string SceneDir     => Path.Combine(BaseUnityDir, Statics.SrcLevelsName);
 
-        static Rampancy()
-        {
-            Init();
-        }
-
-        public static void Init()
-        {
-            Config = Config.Load();
-            
-            if (string.IsNullOrEmpty(Config.ActiveGameConfig.ToolBasePath)) {
-                Config.ActiveGameConfig.ToolBasePath = EditorUtility.OpenFolderPanel($"{Config.GameVersion} base tool dir, where the data and tags folder are", "", "");
-                Config.Save();
-            }
-
-            //AssetDB.BasePath = Config.ToolBasePath;
-            AssetDB.ScanTags();
-        }
-
         public static void RunToolCommand(string cmdStr)
         {
             RunProgram(Config.ActiveGameConfig.ToolPath, cmdStr);

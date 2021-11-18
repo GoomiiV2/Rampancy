@@ -181,7 +181,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
             }
 
             if (GUILayout.Button("Import Bitmaps")) {
-                global::Plugins.Rampancy.Runtime.Rampancy.Init();
+                global::Plugins.Rampancy.Editor.Scripts.Rampancy.Init();
                 BitmapConverter.ImportBitmaps();
             }
 

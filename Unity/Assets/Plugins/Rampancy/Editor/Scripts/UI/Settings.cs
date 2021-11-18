@@ -33,6 +33,9 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             if (GUILayout.Button("Save")) {
                 Runtime.Rampancy.Config.Save();
+                
+                // TODO: only do this is the path of a game changed or the game version
+                Runtime.Rampancy.AssetDB.ScanTags();
             }
         }
 
