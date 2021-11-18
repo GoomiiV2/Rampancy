@@ -21,7 +21,7 @@ namespace Plugins.Rampancy.Runtime
         private FileSystemWatcher DebugWrlWatcher = null;
         private bool              ShouldReloadWrl = true;
         
-        public string GetWrlPath() => Path.Combine(Rampancy.Config.ActiveGameConfig.DataPath, "models", $"{LevelName}_errors.wrl");
+        public string GetWrlPath() => Path.Combine(Rampancy.Config.ActiveGameConfig.DataPath, DataDir, "models", $"{LevelName}_errors.wrl");
 
         public static RampancySentinel GetOrCreateInScene()
         {
