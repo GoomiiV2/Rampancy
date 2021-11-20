@@ -69,5 +69,14 @@ namespace Plugins.Rampancy.Editor.Scripts
         {
             BitmapConverter.ImportBitmaps();
         }
+
+        public static void LaunchTagTest(string map)
+        {
+            switch (Runtime.Rampancy.Config.GameVersion) {
+                case GameVersions.Halo1Mcc:
+                    H1_LaunchTagTest(map);
+                    break;
+            }
+        }
     }
 }

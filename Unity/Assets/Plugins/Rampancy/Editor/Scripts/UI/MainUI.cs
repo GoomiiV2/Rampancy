@@ -40,7 +40,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
         {
             var rs   = RampancySentinel.GetOrCreateInScene();
             var path = $@"{rs.DataDir}\{rs.LevelName}".Replace("/", @"\");
-            ToolCommands.LaunchTagTestToMap(path);
+            Actions.H1_LaunchTagTest(path);
         }
 
         public static void RunExeIfExists(string exePath)
