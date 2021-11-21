@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Plugins.Rampancy.RampantC20;
 using Plugins.Rampancy.Runtime;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Plugins.Rampancy.Editor.Scripts
@@ -77,6 +79,46 @@ namespace Plugins.Rampancy.Editor.Scripts
                     H1_LaunchTagTest(map);
                     break;
             }
+        }
+
+        // Quick and dirty fix up for guid mismatches
+        public static void UpdateSceneMatRefs()
+        {
+            var scene = EditorSceneManager.GetActiveScene();
+
+            if (!File.Exists(scene.path)) return;
+
+            var sceneFile   = File.ReadAllText(scene.path);
+            var sentinel    = GameObject.FindObjectOfType<RampancySentinel>();
+            
+            if (sentinel == null) return;
+            var matIdLookup = sentinel.GetMatIdToPathLookup();
+            var newGuids    = new Dictionary<string, string>();
+
+            foreach (var matIdItem in matIdLookup) {
+                var newGuid = AssetDatabase.AssetPathToGUID(matIdItem.Value);
+                if (newGuid != matIdItem.Key && !newGuids.ContainsKey(newGuid)) {
+                    newGuids.Add(newGuid, matIdItem.Key);
+                }
+            }
+
+            foreach (var newGuidKvp in newGuids) {
+                sceneFile = sceneFile.Replace(newGuidKvp.Value, newGuidKvp.Key);
+            }
+
+            if (newGuids.Count == 0) return;
+            Debug.Log("Material Ids didn't match, remapping from paths");
+            
+            //Back up
+            var backupPath = $"{scene.path}.backup";
+            File.Copy(scene.path, backupPath, true);
+            
+            File.WriteAllText(scene.path, sceneFile);
+            EditorSceneManager.OpenScene(scene.path);
+            
+            File.Delete(backupPath);
+            
+            Debug.Log("Material IDs reassigned from paths");
         }
     }
 }

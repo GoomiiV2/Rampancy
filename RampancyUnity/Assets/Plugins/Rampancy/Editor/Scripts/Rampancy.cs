@@ -2,6 +2,8 @@
 using Plugins.Rampancy.Editor.Scripts.UI;
 using Plugins.Rampancy.Runtime;
 using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
 
 namespace Plugins.Rampancy.Editor.Scripts
 {
@@ -31,6 +33,20 @@ namespace Plugins.Rampancy.Editor.Scripts
             else {
                 Runtime.Rampancy.AssetDB.ScanTags();
             }
+
+            EditorSceneManager.sceneSaving += (scene, path) =>
+            {
+                var rampancySentinelGO = GameObject.Find(RampancySentinel.NAME);
+                if (rampancySentinelGO != null) {
+                    var rampancySentinel = rampancySentinelGO.GetComponent<RampancySentinel>();
+                    rampancySentinel.BuildMatIdToPathList();
+                }
+            };
+
+            EditorSceneManager.sceneOpened += (scene, mode) =>
+            {
+                Actions.UpdateSceneMatRefs();
+            };
         }
     }
 }

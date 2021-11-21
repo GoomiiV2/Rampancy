@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Plugins.Rampancy.RampantC20;
 using Rampancy.RampantC20;
+using RealtimeCSG.Components;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,7 +23,10 @@ namespace Plugins.Rampancy.Runtime
         private DebugGeoData      DebugGeo        = null;
         private FileSystemWatcher DebugWrlWatcher = null;
         private bool              ShouldReloadWrl = true;
-        
+
+        [SerializeField] public string[] MatIdToPathLookup_Guids;
+        [SerializeField] public string[] MatIdToPathLookup_Paths;
+
         public string GetWrlPath() => Path.Combine(Rampancy.Config.ActiveGameConfig.DataPath, DataDir, "models", $"{LevelName}_errors.wrl");
 
         public static RampancySentinel GetOrCreateInScene()
@@ -40,13 +46,15 @@ namespace Plugins.Rampancy.Runtime
             WatchForWrlFile();
         }
 
+    #region Debug Geo Handling
+
         public void WatchForWrlFile()
         {
             var dirPath = Path.GetDirectoryName(GetWrlPath());
             if (!Directory.Exists(dirPath)) {
                 Directory.CreateDirectory(dirPath);
             }
-            
+
             DebugWrlWatcher = new FileSystemWatcher(dirPath);
 
             DebugWrlWatcher.NotifyFilter = NotifyFilters.CreationTime
@@ -60,7 +68,7 @@ namespace Plugins.Rampancy.Runtime
             DebugWrlWatcher.Filter                = Path.GetFileName(GetWrlPath());
             DebugWrlWatcher.IncludeSubdirectories = true;
             DebugWrlWatcher.EnableRaisingEvents   = true;
-            
+
             Debug.Log($"Setup debug wrl watcher for: {GetWrlPath()}");
         }
 
@@ -76,11 +84,13 @@ namespace Plugins.Rampancy.Runtime
                 WatchForWrlFile();
                 ShouldReloadWrl = true;
             }
-            
+
             if (ShouldReloadWrl) {
                 ReloadWrl();
                 ShouldReloadWrl = false;
             }
+
+            //BuildMatIdToPathList();
         }
 
         public void ReloadWrl()
@@ -161,7 +171,7 @@ namespace Plugins.Rampancy.Runtime
                         GL.End();
                         GL.PopMatrix();
                     }
-                    
+
                     // Draw a small sphere on the verts to help make it easyier to see multiple problems near each other :>
                     foreach (var vert in debugItem.Verts) {
                         var pos = rot * Vector3.Scale(scale, vert);
@@ -171,5 +181,45 @@ namespace Plugins.Rampancy.Runtime
                 }
             }
         }
+
+    #endregion
+
+    #region Material tracking
+
+        public void BuildMatIdToPathList()
+        {
+            var matIdLookup = new Dictionary<string, string>();
+            var allBrushes  = FindObjectsOfType<CSGBrush>();
+            foreach (var brush in allBrushes) {
+                foreach (var texGen in brush.Shape.TexGens) {
+                    if (texGen.RenderMaterial != null) {
+                        var path = AssetDatabase.GetAssetPath(texGen.RenderMaterial);
+                        if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(texGen.RenderMaterial, out string guid, out long localId)) {
+                            if (!matIdLookup.ContainsKey(guid)) {
+                                matIdLookup.Add(guid, path);
+                            }
+                        }
+                    }
+                }
+            }
+
+            MatIdToPathLookup_Guids = matIdLookup.Keys.ToArray();
+            MatIdToPathLookup_Paths = matIdLookup.Values.ToArray();
+        }
+
+        public Dictionary<string, string> GetMatIdToPathLookup()
+        {
+            var matIdToPathLookup = new Dictionary<string, string>();
+
+            for (int i = 0; i < MatIdToPathLookup_Guids.Length; i++) {
+                var guid = MatIdToPathLookup_Guids[i];
+                var path = MatIdToPathLookup_Paths[i];
+                matIdToPathLookup.Add(guid, path);
+            }
+
+            return matIdToPathLookup;
+        }
+
+    # endregion
     }
 }
