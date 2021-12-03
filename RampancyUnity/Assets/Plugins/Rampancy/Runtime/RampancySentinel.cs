@@ -27,7 +27,7 @@ namespace Plugins.Rampancy.Runtime
         [SerializeField] public string[] MatIdToPathLookup_Guids;
         [SerializeField] public string[] MatIdToPathLookup_Paths;
 
-        public string GetWrlPath() => Path.Combine(Rampancy.Config.ActiveGameConfig.DataPath, DataDir, "models", $"{LevelName}_errors.wrl");
+        public string GetWrlPath() => Path.Combine(Rampancy.Config.ActiveGameConfig.DataPath, DataDir ?? "", "models", $"{LevelName}_errors.wrl");
 
         public static RampancySentinel GetOrCreateInScene()
         {

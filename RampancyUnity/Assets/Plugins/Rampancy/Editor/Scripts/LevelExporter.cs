@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using InternalRealtimeCSG;
 using UnityEditor;
 using UnityEngine;
@@ -7,11 +8,44 @@ namespace Plugins.Rampancy.Editor.Scripts
 {
     public static class LevelExporter
     {
-        public static void ExportLevel(string path)
+        public static void ExportLevel(string path, bool tJunctionFix = true)
         {
             var meshData = GetRcsgMesh();
-            var jms      = JmsConverter.MeshToJms(meshData.mehs, meshData.matNames);
+            var mesh     = meshData.mehs;
+
+            // Fix up t junction by splitting the edges
+            if (tJunctionFix) {
+                mesh = FixTJunctions(mesh);
+            }
+            
+            var jms      = JmsConverter.MeshToJms(mesh, meshData.matNames);
             jms.Save(path);
+        }
+        
+        // Todo: Improve
+        public static Mesh FixTJunctions(Mesh mesh)
+        {
+            var halfEdgeMesh = new HalfMesh();
+            halfEdgeMesh.FromUnityMesh(mesh);
+            var tJunctions = halfEdgeMesh.FindTJunctions();
+
+            var groupedByEdge = tJunctions.GroupBy(x => x.edgeIdx);
+            var maxLoops      = tJunctions.Count > 1 ? groupedByEdge.Select(x => x.Count()).Max() : 0;
+
+            // Lazy fix for now
+            for (int i = 0; i < maxLoops; i++) {
+                tJunctions = halfEdgeMesh.FindTJunctions();
+                tJunctions = tJunctions.GroupBy(x => x.edgeIdx).Select(x => x.First()).ToList();
+                
+                foreach (var (edgeIdx, vertIdx) in tJunctions) {
+                    var vert = halfEdgeMesh.Verts[vertIdx];
+                    halfEdgeMesh.SplitEdge(edgeIdx, vert.Pos);
+                }
+            }
+
+            var fixedMesh = halfEdgeMesh.ToMesh();
+
+            return fixedMesh;
         }
         
         public static void ExportLevelCollision(string path)

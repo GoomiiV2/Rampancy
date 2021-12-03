@@ -1,12 +1,16 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Plugins.Rampancy.RampantC20;
 using Plugins.Rampancy.Runtime;
+using Plugins.Rampancy.Runtime.Tests;
 using Rampancy.RampantC20;
+using RealtimeCSG.Legacy;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 using Utils = RampantC20.Utils;
 
 namespace Plugins.Rampancy.Editor.Scripts.UI
@@ -31,10 +35,10 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
 
         [MenuItem("Rampancy/Launch/TagTest", false, 3)]
         public static void LaunchTagTest() => RunExeIfExists(Runtime.Rampancy.Config.ActiveGameConfig.TagTestPath);
-        
+
         [MenuItem("Rampancy/Launch/Tool CMD", false, 4)]
         public static void LaunchToolCmd() => Runtime.Rampancy.LaunchCMD("");
-        
+
         [MenuItem("Rampancy/Launch/Open level in Tag Test _F5", false, 5)]
         public static void OpenInTagTest()
         {
@@ -49,6 +53,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
                 Runtime.Rampancy.LaunchProgram(exePath, "");
             }
         }
+
     #endregion
 
     #region Compile
@@ -61,7 +66,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
         }
 
         [MenuItem("Rampancy/Compile/Preview lightmaps", false, 2)]
-        public static void CompilePreviewLightmaps() => Actions.H1_CompileToolLightmaps(true, 0.01f);
+        public static void CompilePreviewLightmaps() => Actions.H1_CompileToolLightmaps(false, 0.1f);
 
         [MenuItem("Rampancy/Compile/Structure and Preview lightmaps _F6", false, 2)]
         public static void CompileStructureAndPreviewLightmaps()
@@ -281,6 +286,47 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
                 debugData.LoadFromWrl(@"D:\Games\Steam\steamapps\common\Chelan_1\data\levels\test\rampentTest\models/rampenttest_errors.wrl");
 
                 Debug.Log("");
+            }
+
+
+            if (GUILayout.Button("Test Half Mesh")) {
+                var levelMesh    = LevelExporter.GetRcsgMesh();
+                var halfEdgeTest = FindObjectOfType<HalfEdgeMeshTester>();
+                halfEdgeTest.Mesh         = levelMesh.mehs;
+                halfEdgeTest.HalfEdgeMesh = new HalfMesh();
+                
+                var makeHalfEdgeMeshTime = Stopwatch.StartNew();
+                halfEdgeTest.HalfEdgeMesh.FromUnityMesh(halfEdgeTest.Mesh);
+                makeHalfEdgeMeshTime.Stop();
+                Debug.Log($"FromUnityMesh took: {makeHalfEdgeMeshTime.Elapsed}");
+                
+                var tJunctions = halfEdgeTest.HalfEdgeMesh.FindTJunctions();
+                foreach (var tJunction in tJunctions) {
+                    halfEdgeTest.HalfEdgeMesh.SplitEdge(tJunction.Item1, halfEdgeTest.HalfEdgeMesh.Verts[tJunction.Item2].Pos);
+                }
+
+                var testGo = new GameObject();
+                testGo.transform.position = new Vector3(50, 0, 0);
+                var meshRender = testGo.AddComponent<MeshRenderer>();
+                var meshFilter = testGo.AddComponent<MeshFilter>();
+                
+                var halfEdgeMeshToUnityMeshTime = Stopwatch.StartNew();
+                meshFilter.mesh = halfEdgeTest.HalfEdgeMesh.ToMesh();
+                halfEdgeMeshToUnityMeshTime.Stop();
+                Debug.Log($"ToMesh took: {halfEdgeMeshToUnityMeshTime.Elapsed}");
+
+                LevelExporter.AddMatsToRender(meshRender, levelMesh.matNames);
+            }
+
+            if (GUILayout.Button("Show T-Junctions")) {
+                var levelMesh    = LevelExporter.GetRcsgMesh();
+                var halfEdgeTest = FindObjectOfType<HalfEdgeMeshTester>();
+                halfEdgeTest.Mesh         = levelMesh.mehs;
+                halfEdgeTest.HalfEdgeMesh = new HalfMesh();
+                halfEdgeTest.HalfEdgeMesh.FromUnityMesh(halfEdgeTest.Mesh);
+
+                halfEdgeTest.RefreshTJunctionFinder = true;
+                halfEdgeTest.DrawTJunctions         = true;
             }
         }
     }
