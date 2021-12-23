@@ -30,7 +30,7 @@ namespace Plugins.Rampancy.Editor.Scripts
             for (int i = 0; i < jms.Verts.Count; i++) {
                 var jmsVert = jms.Verts[i];
                 verts[i] = rot * Vector3.Scale(scale, jmsVert.Position);
-                norms[i] = rot * jmsVert.Normal;
+                norms[i] = jmsVert.Normal;
                 uvs[i]   = jmsVert.UV;
             }
 

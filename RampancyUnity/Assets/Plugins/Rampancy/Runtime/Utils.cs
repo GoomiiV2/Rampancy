@@ -35,5 +35,18 @@ namespace Plugins.Rampancy.Runtime
 
             return mesh;
         }
+        
+        public static int GetHashCodeForVector3(Vector3 vector3)
+        {
+            int hash = vector3.x.GetHashCode();
+            hash = CombineHashCodes(hash, vector3.y.GetHashCode());
+            hash = CombineHashCodes(hash, vector3.z.GetHashCode());
+            return hash;
+        }
+        
+        public static int CombineHashCodes(int h1, int h2)
+        {
+            return (((h1 << 5) + h1) ^ h2);
+        }
     }
 }
