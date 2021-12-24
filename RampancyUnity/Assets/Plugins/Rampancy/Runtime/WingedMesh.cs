@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -51,31 +54,37 @@ namespace Plugins.Rampancy.Runtime
                     var idx2 = triIdxs[triIdx + 1];
                     var idx3 = triIdxs[triIdx + 2];
 
-                    ConnectivityMap.Add(Edge.Create(Vert_Positions[idx2], Vert_Positions[idx1]), faceIdx);
-                    ConnectivityMap.Add(Edge.Create(Vert_Positions[idx3], Vert_Positions[idx2]), faceIdx);
-                    ConnectivityMap.Add(Edge.Create(Vert_Positions[idx1], Vert_Positions[idx3]), faceIdx);
+                    var area = Utils.CalcAreaOfTri(Vert_Positions[idx1], Vert_Positions[idx2], Vert_Positions[idx3]);
+                    if (area != 0f) {
+                        ConnectivityMap.Add(Edge.Create(Vert_Positions[idx2], Vert_Positions[idx1]), faceIdx);
+                        ConnectivityMap.Add(Edge.Create(Vert_Positions[idx3], Vert_Positions[idx2]), faceIdx);
+                        ConnectivityMap.Add(Edge.Create(Vert_Positions[idx1], Vert_Positions[idx3]), faceIdx);
 
-                    Triangles.Array[faceIdx].Id            = faceIdx;
-                    Triangles.Array[faceIdx].SubMeshId     = (ushort) subMeshIdx;
-                    Triangles.Array[faceIdx].VertIdx[0]    = idx1;
-                    Triangles.Array[faceIdx].VertIdx[1]    = idx2;
-                    Triangles.Array[faceIdx].VertIdx[2]    = idx3;
-                    Triangles.Array[faceIdx].NextTriIdx[0] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx1], Vert_Positions[idx2]), out var connectedTri1) ? connectedTri1 : -1;
-                    Triangles.Array[faceIdx].NextTriIdx[1] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx2], Vert_Positions[idx3]), out var connectedTri2) ? connectedTri2 : -1;
-                    Triangles.Array[faceIdx].NextTriIdx[2] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx3], Vert_Positions[idx1]), out var connectedTri3) ? connectedTri3 : -1;
+                        Triangles.Array[faceIdx].Id            = faceIdx;
+                        Triangles.Array[faceIdx].SubMeshId     = (ushort) subMeshIdx;
+                        Triangles.Array[faceIdx].VertIdx[0]    = idx1;
+                        Triangles.Array[faceIdx].VertIdx[1]    = idx2;
+                        Triangles.Array[faceIdx].VertIdx[2]    = idx3;
+                        Triangles.Array[faceIdx].NextTriIdx[0] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx1], Vert_Positions[idx2]), out var connectedTri1) ? connectedTri1 : -1;
+                        Triangles.Array[faceIdx].NextTriIdx[1] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx2], Vert_Positions[idx3]), out var connectedTri2) ? connectedTri2 : -1;
+                        Triangles.Array[faceIdx].NextTriIdx[2] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx3], Vert_Positions[idx1]), out var connectedTri3) ? connectedTri3 : -1;
 
-                    for (int i = 0; i < 3; i++) {
-                        if (Triangles.Array[faceIdx].NextTriIdx[i] != -1) { // This face was connected
-                            for (int j = 0; j < 3; j++) {
-                                if (Triangles.Array[Triangles.Array[faceIdx].NextTriIdx[i]].NextTriIdx[j] == -1) {
-                                    Triangles.Array[Triangles.Array[faceIdx].NextTriIdx[i]].NextTriIdx[j] = Triangles.Array[faceIdx].Id;
-                                    break;
+                        for (int i = 0; i < 3; i++) {
+                            if (Triangles.Array[faceIdx].NextTriIdx[i] != -1) { // This face was connected
+                                for (int j = 0; j < 3; j++) {
+                                    if (Triangles.Array[Triangles.Array[faceIdx].NextTriIdx[i]].NextTriIdx[j] == -1) {
+                                        Triangles.Array[Triangles.Array[faceIdx].NextTriIdx[i]].NextTriIdx[j] = Triangles.Array[faceIdx].Id;
+                                        break;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    faceIdx++;
+                        faceIdx++;
+                    }
+                    else {
+                        Triangles.Array[faceIdx].Id = -1; // Blank
+                    }
                 }
             }
 
@@ -105,9 +114,11 @@ namespace Plugins.Rampancy.Runtime
                 var indices    = new int[subMesh.Count() * 3];
                 var indicesIdx = 0;
                 foreach (var tri in subMesh) {
-                    indices[indicesIdx++] = tri.VertIdx[0];
-                    indices[indicesIdx++] = tri.VertIdx[1];
-                    indices[indicesIdx++] = tri.VertIdx[2];
+                    if (tri.Id != -1) {
+                        indices[indicesIdx++] = tri.VertIdx[0];
+                        indices[indicesIdx++] = tri.VertIdx[1];
+                        indices[indicesIdx++] = tri.VertIdx[2];
+                    }
                 }
 
                 mesh.SetTriangles(indices, subMesh.Key);
@@ -238,7 +249,8 @@ namespace Plugins.Rampancy.Runtime
 
             var keys = groupedTJunctions.Keys.ToArray();
             for (int i = 0; i < keys.Length; i++) {
-                groupedTJunctions[keys[i]] = groupedTJunctions[keys[i]].OrderBy(x => x.Edge.Vert1Idx)
+                groupedTJunctions[keys[i]] = groupedTJunctions[keys[i]].DistinctBy(x => Vert_Positions[x.SplitingVertIdx])
+                                                                       .OrderBy(x => x.Edge.Vert1Idx)
                                                                        .ThenBy(x => Vector3.Distance(Vert_Positions[Triangles.Array[x.FaceIdx].VertIdx[x.Edge.Vert1Idx]], Vert_Positions[x.SplitingVertIdx]))
                                                                        .ToList();
             }
@@ -250,10 +262,11 @@ namespace Plugins.Rampancy.Runtime
         public unsafe void FixTJunctions(Dictionary<int, List<TJunctionInfo>> tJunctions)
         {
             foreach (var faceTJs in tJunctions) {
-                var perEdge       = faceTJs.Value.GroupBy(x => x.Edge.Vert1Idx);
-                var faceIdx       = faceTJs.Key;
-                var fistFaceAdded = -1;
-                var edgeNum       = 0;
+                var perEdge              = faceTJs.Value.GroupBy(x => x.Edge.Vert1Idx);
+                var faceIdx              = faceTJs.Key;
+                var fistFaceAdded        = -1;
+                var edgeNum              = 0;
+                var lastSplittingVertPos = Vector3.zero;
                 foreach (var edgeGroup in perEdge) {
                     var tjs = edgeGroup;
 
@@ -262,11 +275,15 @@ namespace Plugins.Rampancy.Runtime
                     }
 
                     foreach (var tj in tjs) {
-                        //Debug.Log($"Fixing t-junction for face: {faceTJs.Key}, edge: {tj.Edge.Vert1Idx} -> {tj.Edge.Vert2Idx}, ({edgeNum})");
-                        faceIdx = SplitFaceOnEdge(faceIdx, tj.Edge, tj.SplitingVertIdx, edgeNum == 2);
-                        //Debug.Log($"New face: {faceIdx}, ({Triangles.Array[faceIdx].VertIdx[0]}, {Triangles.Array[faceIdx].VertIdx[1]}, {Triangles.Array[faceIdx].VertIdx[2]})");
+                        if (lastSplittingVertPos != Vert_Positions[tj.SplitingVertIdx]) {
+                            //Debug.Log($"Fixing t-junction for face: {faceTJs.Key}, edge: {tj.Edge.Vert1Idx} -> {tj.Edge.Vert2Idx}, ({edgeNum})");
+                            faceIdx = SplitFaceOnEdge(faceIdx, tj.Edge, tj.SplitingVertIdx, edgeNum == 2);
+                            //Debug.Log($"New face: {faceIdx}, ({Triangles.Array[faceIdx].VertIdx[0]}, {Triangles.Array[faceIdx].VertIdx[1]}, {Triangles.Array[faceIdx].VertIdx[2]})");
 
-                        if (fistFaceAdded == -1) fistFaceAdded = faceIdx;
+                            if (fistFaceAdded == -1) fistFaceAdded = faceIdx;
+                        }
+
+                        lastSplittingVertPos = Vert_Positions[tj.SplitingVertIdx];
                     }
 
                     edgeNum++;
@@ -284,8 +301,10 @@ namespace Plugins.Rampancy.Runtime
             else if (edge.Vert1Idx == 1 && edge.Vert2Idx == 2) rootVertIdx = 0;
             else if (edge.Vert1Idx == 2 && edge.Vert2Idx == 0) rootVertIdx = 1;
 
-            var oldVertIdx = Triangles.Array[face].VertIdx[edge.Vert2Idx];
-            var newVertIdx = AddVert(Vert_Positions[splittingVert], Vert_Normals[splittingVert], Vert_Uvs[splittingVert]);
+            var originalFaceNorm = Triangles.Array[face].GetNormal(this);
+            var oldVertIdx       = Triangles.Array[face].VertIdx[edge.Vert2Idx];
+            var newUvs           = GetUvsForPointOnEdge(Triangles.Array[face].VertIdx[edge.Vert1Idx], Triangles.Array[face].VertIdx[edge.Vert2Idx], splittingVert);
+            var newVertIdx       = AddVert(Vert_Positions[splittingVert], Vert_Normals[splittingVert], newUvs);
 
             // Update the existing face
             Triangles.Array[face].VertIdx[edge.Vert2Idx] = newVertIdx;
@@ -298,13 +317,37 @@ namespace Plugins.Rampancy.Runtime
                 2 => new[] {newVertIdx, oldVertIdx, Triangles.Array[face].VertIdx[rootVertIdx]}
             };
 
-            if (flipFace) {
+            var newFaceN    = GetTriNormal(indices[0], indices[1], indices[2]);
+            var normsDiffer = Math.Abs(Vector3.Distance(originalFaceNorm, newFaceN)) > 0.1f;
+
+            if (normsDiffer) {
                 (indices[0], indices[2]) = (indices[2], indices[0]);
+            }
+
+            var newTriArea = Utils.CalcAreaOfTri(Vert_Positions[indices[0]], Vert_Positions[indices[1]], Vert_Positions[indices[2]]);
+            Debug.Log($"faceIdx: {face}, newTriArea: {newTriArea}, did norms differ: {normsDiffer}, edge: {edge.Vert1Idx}, {edge.Vert2Idx}, rootVertIdx: {rootVertIdx} splittingVert: {splittingVert} ({Vert_Positions[splittingVert]})");
+
+            if (newTriArea == 0) {
+                Triangles.Array[face].VertIdx[edge.Vert2Idx] = oldVertIdx;
+                return face;
             }
 
             var newFaceIdx = AddTri(indices[0], indices[1], indices[2], Triangles.Array[face].SubMeshId, addEdgesToConnectivityMap: false);
 
             return newFaceIdx;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3 GetTriNormal(int vi1, int vi2, int vi3) => Utils.GetTriNormal(Vert_Positions[vi1], Vert_Positions[vi2], Vert_Positions[vi3]);
+
+        public Vector2 GetUvsForPointOnEdge(int v1, int v2, int splittingVert)
+        {
+            var edgeLen     = Mathf.Abs(Vector3.Distance(Vert_Positions[v1], Vert_Positions[v2]));
+            var distToPoint = Mathf.Abs(Vector3.Distance(Vert_Positions[v1], Vert_Positions[splittingVert]));
+            var pct         = distToPoint / edgeLen;
+            var newUv       = Vector2.Lerp(Vert_Uvs[v1], Vert_Uvs[v2], pct);
+
+            return newUv;
         }
 
     #region Types
@@ -317,8 +360,10 @@ namespace Plugins.Rampancy.Runtime
             public fixed int    NextTriIdx[3];
 
             // Get the center point of the tri
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Vector3 GetCenter(WingedMesh mesh) => (mesh.Vert_Positions[VertIdx[0]] + mesh.Vert_Positions[VertIdx[1]] + mesh.Vert_Positions[VertIdx[2]]) / 3;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Vector3 GetNormal(WingedMesh mesh)
             {
                 var v0 = mesh.Vert_Positions[VertIdx[1]] - mesh.Vert_Positions[VertIdx[0]];
@@ -327,6 +372,9 @@ namespace Plugins.Rampancy.Runtime
 
                 return n.normalized;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float GetArea(WingedMesh mesh) => Utils.CalcAreaOfTri(mesh.Vert_Positions[VertIdx[0]], mesh.Vert_Positions[VertIdx[1]], mesh.Vert_Positions[VertIdx[2]]);
         }
 
         public struct Edge
@@ -344,6 +392,14 @@ namespace Plugins.Rampancy.Runtime
 
                 return edge;
             }
+
+            public override bool Equals(object obj)
+            {
+                const float TOLRANCE = 0.00000001f;
+                if (obj is not Edge other) return false;
+                var equal = Vector3.Distance(other.V1, V1) < TOLRANCE && Vector3.Distance(other.V2, V2) < TOLRANCE;
+                return equal;
+            }
         }
 
         public struct EdgeRef
@@ -352,7 +408,7 @@ namespace Plugins.Rampancy.Runtime
             public int Vert1Idx;
             public int Vert2Idx;
         }
-        
+
         public struct TJunctionInfo
         {
             public int     FaceIdx;

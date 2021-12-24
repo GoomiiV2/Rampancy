@@ -19,7 +19,8 @@ namespace Plugins.Rampancy.Runtime.Tests
         public bool ShowFaceCenters  = false;
         public bool AddTestTriToMesh = false;
         public bool ShowOpenEdges    = false;
-        public bool ShowTJunctions    = true;
+        public bool ShowTJunctions   = true;
+        public bool FixTJunctions    = false;
 
         private int                                             FaceIdxToDrawInfo = 0;
         private List<WingedMesh.EdgeRef>                        OpenEdges         = new();
@@ -60,7 +61,8 @@ namespace Plugins.Rampancy.Runtime.Tests
             
             OpenEdges  = WingedMesh.FindOpenTris();
             TJunctions = WingedMesh.FindTJunctions();
-            WingedMesh.FixTJunctions(TJunctions);
+            
+            if (FixTJunctions) WingedMesh.FixTJunctions(TJunctions);
 
             var mf = GetComponent<MeshFilter>();
             mf.sharedMesh = WingedMesh.ToUnityMesh();
@@ -111,7 +113,7 @@ namespace Plugins.Rampancy.Runtime.Tests
 
                 if (FaceIdxToDrawInfo != -1 && FaceIdxToDrawInfo < WingedMesh.Triangles.Count) {
                     var tri    = WingedMesh.Triangles.Array[FaceIdxToDrawInfo];
-                    var center = tri.GetCenter(WingedMesh);
+                    var center = transform.position + tri.GetCenter(WingedMesh);
 
                     var height = 0.5f;
                     if (tri.NextTriIdx[0] != -1) DrawFaceLink(tri.Id, tri.NextTriIdx[0], Color.magenta, height);
@@ -142,7 +144,7 @@ namespace Plugins.Rampancy.Runtime.Tests
             if (showFaceCenters) {
                 for (var index = 0; index < WingedMesh.Triangles.Count; index++) {
                     var tri    = WingedMesh.Triangles.Array[index];
-                    var center = tri.GetCenter(WingedMesh);
+                    var center = transform.position + tri.GetCenter(WingedMesh);
 
                     Handles.color = index == FaceIdxToDrawInfo ? Color.blue : Color.white;
                     Handles.DrawWireCube(center, Vector3.one * 0.005f);
@@ -169,8 +171,8 @@ namespace Plugins.Rampancy.Runtime.Tests
             var tri1 = WingedMesh.Triangles.Array[face1Idx];
             var tri2 = WingedMesh.Triangles.Array[face2Idx];
 
-            var center1 = tri1.GetCenter(WingedMesh);
-            var center2 = tri2.GetCenter(WingedMesh);
+            var center1 = transform.position + tri1.GetCenter(WingedMesh);
+            var center2 = transform.position + tri2.GetCenter(WingedMesh);
 
             Handles.DrawBezier(center1, center2, center1 + (tri1.GetNormal(WingedMesh) * height), center2 + (tri2.GetNormal(WingedMesh) * height), color, Texture2D.grayTexture, 4);
         }
@@ -179,9 +181,9 @@ namespace Plugins.Rampancy.Runtime.Tests
         {
             var tri = WingedMesh.Triangles.Array[edgeRef.FaceIdx];
             var (v1, v2) = WingedMesh.GetFullEdgePositions(edgeRef);
-            Gizmos.DrawSphere(v1, 0.02f);
-            Gizmos.DrawSphere(v2, 0.02f);
-            Gizmos.DrawLine(v1, v2);
+            Gizmos.DrawSphere(transform.position + v1, 0.02f);
+            Gizmos.DrawSphere(transform.position + v2, 0.02f);
+            Gizmos.DrawLine(transform.position  + v1, transform.position + v2);
         }
 
         private void DrawTJunction(WingedMesh.TJunctionInfo tJunctionInfo)
@@ -190,7 +192,7 @@ namespace Plugins.Rampancy.Runtime.Tests
             DrawEdge(tJunctionInfo.Edge);
             
             Gizmos.color = Color.red;
-            Gizmos.DrawSphere(WingedMesh.Vert_Positions[tJunctionInfo.SplitingVertIdx], 0.02f);
+            Gizmos.DrawSphere(transform.position + WingedMesh.Vert_Positions[tJunctionInfo.SplitingVertIdx], 0.02f);
         }
     }
 }

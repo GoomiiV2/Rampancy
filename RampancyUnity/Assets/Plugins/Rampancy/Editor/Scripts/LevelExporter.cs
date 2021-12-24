@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using InternalRealtimeCSG;
+using Plugins.Rampancy.Runtime;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace Plugins.Rampancy.Editor.Scripts
 
             // Fix up t junction by splitting the edges
             if (tJunctionFix) {
-                mesh = FixTJunctions(mesh);
+                mesh = FixTJunctionsV2(mesh);
             }
             
             var jms      = JmsConverter.MeshToJms(mesh, meshData.matNames);
@@ -46,6 +47,17 @@ namespace Plugins.Rampancy.Editor.Scripts
             var fixedMesh = halfEdgeMesh.ToMesh();
 
             return fixedMesh;
+        }
+
+        public static Mesh FixTJunctionsV2(Mesh mesh)
+        {
+            var wingedMesh = new WingedMesh();
+            wingedMesh.FromUnityMesh(mesh);
+            var tJunctions = wingedMesh.FindTJunctions();
+            wingedMesh.FixTJunctions(tJunctions);
+            var outputMesh = wingedMesh.ToUnityMesh();
+
+            return outputMesh;
         }
         
         public static void ExportLevelCollision(string path)
