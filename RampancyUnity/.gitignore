@@ -73,3 +73,16 @@ crashlytics-build.properties
 /UserSettingss/*
 RampancyConfig.json
 
+UserSettings/*
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend1.meta
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend1
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend.meta
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend1.meta
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend.meta
+Assets/Tests.meta
+Assets/Scenes/Tests/Test.unity
+Assets/Scenes/Tests/HMeshTest.unity
+Assets/Scenes/Tests/HMeshTest.unity.meta
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend.meta
+Assets/Tests/TJunctionTests/Meshes/TestMeshes.blend1.meta

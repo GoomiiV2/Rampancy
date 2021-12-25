@@ -30,7 +30,7 @@ namespace Plugins.Rampancy.Editor.Scripts
             for (int i = 0; i < jms.Verts.Count; i++) {
                 var jmsVert = jms.Verts[i];
                 verts[i] = rot * Vector3.Scale(scale, jmsVert.Position);
-                norms[i] = jmsVert.Normal;
+                norms[i] = rot * jmsVert.Normal;
                 uvs[i]   = jmsVert.UV;
             }
 
@@ -112,8 +112,8 @@ namespace Plugins.Rampancy.Editor.Scripts
                 {
                     Position   = rot * Vector3.Scale(scale, positions[i]),
                     UV         = hasUvs ? uvs[i] : Vector2.zero,
-                    Normal     = hasNormals ? rot * normals[i] : Vector3.one,
-                    NodeIdx    = -1,
+                    Normal     = hasNormals ? new Vector3(normals[i].x, normals[i].z, normals[i].y) : Vector3.one,
+                    NodeIdx    = 0,
                     NodeWeight = 0f
                 };
 
