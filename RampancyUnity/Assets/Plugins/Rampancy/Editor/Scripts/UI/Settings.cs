@@ -1,5 +1,6 @@
 ﻿using Plugins.Rampancy.RampantC20;
 using Plugins.Rampancy.Runtime;
+using Rampancy.RampantC20;
 using UnityEditor;
 using UnityEngine;
 
@@ -37,6 +38,19 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
                 // TODO: only do this is the path of a game changed or the game version
                 Runtime.Rampancy.AssetDB.ScanTags();
             }
+
+            ShowVersion();
+        }
+
+        private static void ShowVersion()
+        {
+            GUILayout.Space(10);
+            EditorGUILayout.BeginHorizontal();
+            {
+                GUILayout.Label("Version: ");
+                GUILayout.Label(Statics.Version);
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         private void DrawGameConfig(string name, GameConfig config)

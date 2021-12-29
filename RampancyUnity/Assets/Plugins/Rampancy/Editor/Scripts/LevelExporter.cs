@@ -76,11 +76,19 @@ namespace Plugins.Rampancy.Editor.Scripts
             var matNames = new List<string>();
             for (int i = 0; i < baseMeshs.transform.childCount; i++) {
                 var childMesh = baseMeshs.transform.GetChild(i);
+                AddMeshCombiner(childMesh);
+            }
+
+            mesh.CombineMeshes(combines.ToArray(), false);
+            mesh.Optimize();
+            
+            void AddMeshCombiner(Transform childMesh)
+            {
                 if (childMesh.name != "[generated-collider-mesh]") {
                     var mf          = childMesh.GetComponent<MeshFilter>();
                     var mr          = childMesh.GetComponent<MeshRenderer>();
-                    var trimmedName = mr.material.name.Replace(" (Instance)", "").Replace("_mat", "");
-                    if (trimmedName != "Skip") {
+                    var trimmedName = mr.sharedMaterial.name.Replace(" (Instance)", "").Replace("_mat", "");
+                    if (trimmedName.ToLower() != "skip" && trimmedName != "transparentSpecialSurface_hidden" && trimmedName != "Default-Diffuse") {
                         var combine = new CombineInstance
                         {
                             mesh      = mf.mesh,
@@ -92,9 +100,6 @@ namespace Plugins.Rampancy.Editor.Scripts
                     }
                 }
             }
-
-            mesh.CombineMeshes(combines.ToArray(), false);
-            mesh.Optimize();
             
             return (mesh, matNames.ToArray());
         }

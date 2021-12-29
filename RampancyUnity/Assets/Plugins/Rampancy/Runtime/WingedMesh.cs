@@ -325,7 +325,7 @@ namespace Plugins.Rampancy.Runtime
             }
 
             var newTriArea = Utils.CalcAreaOfTri(Vert_Positions[indices[0]], Vert_Positions[indices[1]], Vert_Positions[indices[2]]);
-            Debug.Log($"faceIdx: {face}, newTriArea: {newTriArea}, did norms differ: {normsDiffer}, edge: {edge.Vert1Idx}, {edge.Vert2Idx}, rootVertIdx: {rootVertIdx} splittingVert: {splittingVert} ({Vert_Positions[splittingVert]})");
+            //Debug.Log($"faceIdx: {face}, newTriArea: {newTriArea}, did norms differ: {normsDiffer}, edge: {edge.Vert1Idx}, {edge.Vert2Idx}, rootVertIdx: {rootVertIdx} splittingVert: {splittingVert} ({Vert_Positions[splittingVert]})");
 
             if (newTriArea == 0) {
                 Triangles.Array[face].VertIdx[edge.Vert2Idx] = oldVertIdx;
@@ -395,7 +395,7 @@ namespace Plugins.Rampancy.Runtime
 
             public override bool Equals(object obj)
             {
-                const float TOLRANCE = 0.00000001f;
+                const float TOLRANCE = 0.0000000001f;
                 if (obj is not Edge other) return false;
                 var equal = Vector3.Distance(other.V1, V1) < TOLRANCE && Vector3.Distance(other.V2, V2) < TOLRANCE;
                 return equal;

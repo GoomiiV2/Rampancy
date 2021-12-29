@@ -90,6 +90,14 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
 
     #endregion
 
+    #region Help
+        [MenuItem("Rampancy/Help/Rampancy Docs", false, 4)]
+        public static void HelpRampancyDocs() => Application.OpenURL("https://github.com/GoomiiV2/Rampancy/wiki");
+        
+        [MenuItem("Rampancy/Help/Realtime CSG Docs", false, 4)]
+        public static void HelpRealtimeCsgDocs() => Application.OpenURL("https://realtimecsg.com");
+    #endregion
+
     #region Debug
 
         [MenuItem("Rampancy/Debug/Debug UI", false, 4)]
@@ -294,12 +302,12 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
                 var halfEdgeTest = FindObjectOfType<HalfEdgeMeshTester>();
                 halfEdgeTest.Mesh         = levelMesh.mehs;
                 halfEdgeTest.HalfEdgeMesh = new HalfMesh();
-                
+
                 var makeHalfEdgeMeshTime = Stopwatch.StartNew();
                 halfEdgeTest.HalfEdgeMesh.FromUnityMesh(halfEdgeTest.Mesh);
                 makeHalfEdgeMeshTime.Stop();
                 Debug.Log($"FromUnityMesh took: {makeHalfEdgeMeshTime.Elapsed}");
-                
+
                 var tJunctions = halfEdgeTest.HalfEdgeMesh.FindTJunctions();
                 foreach (var tJunction in tJunctions) {
                     halfEdgeTest.HalfEdgeMesh.SplitEdge(tJunction.Item1, halfEdgeTest.HalfEdgeMesh.Verts[tJunction.Item2].Pos);
@@ -309,7 +317,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
                 testGo.transform.position = new Vector3(50, 0, 0);
                 var meshRender = testGo.AddComponent<MeshRenderer>();
                 var meshFilter = testGo.AddComponent<MeshFilter>();
-                
+
                 var halfEdgeMeshToUnityMeshTime = Stopwatch.StartNew();
                 meshFilter.mesh = halfEdgeTest.HalfEdgeMesh.ToMesh();
                 halfEdgeMeshToUnityMeshTime.Stop();
