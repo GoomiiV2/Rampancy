@@ -114,7 +114,8 @@ namespace Plugins.Rampancy.Runtime
                 var indices    = new int[subMesh.Count() * 3];
                 var indicesIdx = 0;
                 foreach (var tri in subMesh) {
-                    if (tri.Id != -1) {
+                    var area = Utils.CalcAreaOfTri(Vert_Positions[tri.VertIdx[0]], Vert_Positions[tri.VertIdx[1]], Vert_Positions[tri.VertIdx[2]]);
+                    if (tri.Id != -1 && area > 0.0000000001f) {
                         indices[indicesIdx++] = tri.VertIdx[0];
                         indices[indicesIdx++] = tri.VertIdx[1];
                         indices[indicesIdx++] = tri.VertIdx[2];
@@ -303,8 +304,8 @@ namespace Plugins.Rampancy.Runtime
 
             var originalFaceNorm = Triangles.Array[face].GetNormal(this);
             var oldVertIdx       = Triangles.Array[face].VertIdx[edge.Vert2Idx];
-            var newUvs           = GetUvsForPointOnEdge(Triangles.Array[face].VertIdx[edge.Vert1Idx], Triangles.Array[face].VertIdx[edge.Vert2Idx], splittingVert);
-            var newVertIdx       = AddVert(Vert_Positions[splittingVert], Vert_Normals[splittingVert], newUvs);
+            var (newUvs, newNorms) = GetUvsAndNormsForPointOnEdge(Triangles.Array[face].VertIdx[edge.Vert1Idx], Triangles.Array[face].VertIdx[edge.Vert2Idx], splittingVert);
+            var newVertIdx = AddVert(Vert_Positions[splittingVert], newNorms, newUvs);
 
             // Update the existing face
             Triangles.Array[face].VertIdx[edge.Vert2Idx] = newVertIdx;
@@ -319,17 +320,8 @@ namespace Plugins.Rampancy.Runtime
 
             var newFaceN    = GetTriNormal(indices[0], indices[1], indices[2]);
             var normsDiffer = Math.Abs(Vector3.Distance(originalFaceNorm, newFaceN)) > 0.1f;
-
             if (normsDiffer) {
                 (indices[0], indices[2]) = (indices[2], indices[0]);
-            }
-
-            var newTriArea = Utils.CalcAreaOfTri(Vert_Positions[indices[0]], Vert_Positions[indices[1]], Vert_Positions[indices[2]]);
-            //Debug.Log($"faceIdx: {face}, newTriArea: {newTriArea}, did norms differ: {normsDiffer}, edge: {edge.Vert1Idx}, {edge.Vert2Idx}, rootVertIdx: {rootVertIdx} splittingVert: {splittingVert} ({Vert_Positions[splittingVert]})");
-
-            if (newTriArea == 0) {
-                Triangles.Array[face].VertIdx[edge.Vert2Idx] = oldVertIdx;
-                return face;
             }
 
             var newFaceIdx = AddTri(indices[0], indices[1], indices[2], Triangles.Array[face].SubMeshId, addEdgesToConnectivityMap: false);
@@ -340,14 +332,15 @@ namespace Plugins.Rampancy.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3 GetTriNormal(int vi1, int vi2, int vi3) => Utils.GetTriNormal(Vert_Positions[vi1], Vert_Positions[vi2], Vert_Positions[vi3]);
 
-        public Vector2 GetUvsForPointOnEdge(int v1, int v2, int splittingVert)
+        public (Vector2 uvs, Vector3 norms) GetUvsAndNormsForPointOnEdge(int v1, int v2, int splittingVert)
         {
             var edgeLen     = Mathf.Abs(Vector3.Distance(Vert_Positions[v1], Vert_Positions[v2]));
             var distToPoint = Mathf.Abs(Vector3.Distance(Vert_Positions[v1], Vert_Positions[splittingVert]));
             var pct         = distToPoint / edgeLen;
             var newUv       = Vector2.Lerp(Vert_Uvs[v1], Vert_Uvs[v2], pct);
+            var newNorm     = Vector3.Lerp(Vert_Normals[v1], Vert_Normals[v2], pct);
 
-            return newUv;
+            return (newUv, newNorm);
         }
 
     #region Types
