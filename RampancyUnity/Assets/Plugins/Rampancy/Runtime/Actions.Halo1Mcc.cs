@@ -4,7 +4,7 @@ using System.Text;
 using Plugins.Rampancy.Runtime;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Editor.Scripts
+namespace Plugins.Rampancy.Runtime
 {
     public static partial class Actions
     {

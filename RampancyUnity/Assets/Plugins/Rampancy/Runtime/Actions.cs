@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Editor.Scripts
+namespace Plugins.Rampancy.Runtime
 {
     // Actions to be called from menus or shortcuts or scripts
     public static partial class Actions

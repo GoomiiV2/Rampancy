@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Plugins.Rampancy.Runtime;
-using Unity.VisualScripting;
 using UnityEngine;
-using Utils = RampantC20.Utils;
 
 namespace Plugins.Rampancy.RampantC20
 {

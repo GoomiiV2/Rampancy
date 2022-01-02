@@ -5,7 +5,7 @@ using Plugins.Rampancy.Runtime;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Editor.Scripts
+namespace Plugins.Rampancy.Runtime
 {
     public static class LevelExporter
     {

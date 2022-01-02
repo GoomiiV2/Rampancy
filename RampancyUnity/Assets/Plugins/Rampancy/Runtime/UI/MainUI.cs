@@ -3,17 +3,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Plugins.Rampancy.RampantC20;
-using Plugins.Rampancy.Runtime;
 using Plugins.Rampancy.Runtime.Tests;
 using Rampancy.RampantC20;
-using RealtimeCSG.Legacy;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
-using Utils = RampantC20.Utils;
 
-namespace Plugins.Rampancy.Editor.Scripts.UI
+namespace Plugins.Rampancy.Runtime.UI
 {
     public class LevelUI : EditorWindow
     {
@@ -50,7 +47,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
         public static void RunExeIfExists(string exePath)
         {
             if (File.Exists(exePath)) {
-                Runtime.Rampancy.LaunchProgram(exePath, "");
+                Rampancy.LaunchProgram(exePath, "");
             }
         }
 
@@ -190,17 +187,17 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
                 assetDb.ScanTags();
 
                 var bitmapTagInfo = assetDb.TagLookup["bitmap"].First(x => x.Name == "example_tutorial_panels");
-                var colorPlate    = Utils.GetColorPlateFromBitMap(bitmapTagInfo);
+                var colorPlate    = RampantC20.Utils.GetColorPlateFromBitMap(bitmapTagInfo);
             }
 
             if (GUILayout.Button("Import Bitmaps")) {
-                global::Plugins.Rampancy.Editor.Scripts.Rampancy.Init();
+                Rampancy.Init();
                 BitmapConverter.ImportBitmaps();
             }
 
             if (GUILayout.Button("Export Level")) {
                 var sceneName = SceneManager.GetActiveScene().name;
-                var path      = EditorUtility.SaveFilePanel("Save jms export", global::Plugins.Rampancy.Runtime.Rampancy.AssetDB.BaseDataDir, sceneName, "jms");
+                var path      = EditorUtility.SaveFilePanel("Save jms export", Rampancy.AssetDB.BaseDataDir, sceneName, "jms");
                 var frame     = GameObject.Find("Frame");
                 //frame.transform.localScale = new Vector3(1, 1, -1);
                 var baseMeshs = GameObject.Find("Frame/LevelGeo/[generated-meshes]");

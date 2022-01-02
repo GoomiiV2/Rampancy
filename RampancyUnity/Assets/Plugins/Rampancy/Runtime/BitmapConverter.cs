@@ -1,21 +1,15 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Plugins.Rampancy.RampantC20;
-using RampantC20;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
-namespace Plugins.Rampancy.Editor.Scripts
+namespace Plugins.Rampancy.Runtime
 {
     public static class BitmapConverter
     {
         public static void ImportBitmaps()
         {
-            var bitmapTagsInfos = Runtime.Rampancy.AssetDB.TagsOfType("bitmap");
+            var bitmapTagsInfos = Rampancy.AssetDB.TagsOfType("bitmap");
             Texture.allowThreadedTextureCreation = true;
             
             // Unitys texture creation is from the main thread only, so this is slow, for now
@@ -27,7 +21,7 @@ namespace Plugins.Rampancy.Editor.Scripts
 
         public static void ImportShaders()
         {
-            var bitmapTagsInfos = global::Plugins.Rampancy.Runtime.Rampancy.AssetDB.TagsOfType(
+            var bitmapTagsInfos = Rampancy.AssetDB.TagsOfType(
                 "shader_environment",
                 "shader_transparent_generic",
                 "shader_transparent_chicago",
@@ -43,11 +37,11 @@ namespace Plugins.Rampancy.Editor.Scripts
 
         public static void ImportBitmap(AssetDb.TagInfo tagInfo)
         {
-            var (width, height, pixels) = Utils.GetColorPlateFromBitMap(tagInfo).Value;
+            var (width, height, pixels) = RampantC20.Utils.GetColorPlateFromBitMap(tagInfo).Value;
             var tex = BitMapToTex2D(width, height, pixels);
             tex.name = tagInfo.Name;
 
-            var path = GetProjectRelPath(tagInfo, Runtime.Rampancy.AssetDB);
+            var path = GetProjectRelPath(tagInfo, Rampancy.AssetDB);
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             AssetDatabase.CreateAsset(tex, $"{path}.asset");
 
@@ -56,7 +50,7 @@ namespace Plugins.Rampancy.Editor.Scripts
 
         public static string GetProjectRelPath(AssetDb.TagInfo tagInfo, AssetDb assetDb)
         {
-            var basse         = $"Assets/{Runtime.Rampancy.Config.GameVersion}/TagData";
+            var basse         = $"Assets/{Rampancy.Config.GameVersion}/TagData";
             var assetBasePath = basse + assetDb.GetBaseTagPath(tagInfo);
             assetBasePath = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
             return assetBasePath;

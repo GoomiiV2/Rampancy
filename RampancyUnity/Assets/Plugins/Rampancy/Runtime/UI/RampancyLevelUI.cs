@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Editor.Scripts.UI
+namespace Plugins.Rampancy.Runtime.UI
 {
     public class RampancyLevelUI : EditorWindow
     {
@@ -43,7 +43,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
         {
             if (Sentinel == null) return;
 
-            GUILayout.Button($"Sync materials from {Rampancy.Runtime.Rampancy.Config.GameVersion}");
+            GUILayout.Button($"Sync materials from {Rampancy.Config.GameVersion}");
             
             foreach (var matInfo in Sentinel.MatIdToPathLookup_Paths) {
                 

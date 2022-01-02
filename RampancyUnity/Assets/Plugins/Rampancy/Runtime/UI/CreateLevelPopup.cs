@@ -6,7 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Plugins.Rampancy.Editor.Scripts.UI
+namespace Plugins.Rampancy.Runtime.UI
 {
     public class CreateLevelPopup : EditorWindow
     {
@@ -35,7 +35,7 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
                 var csgModel = levelGeo.AddComponent<CSGModel>();
                 csgModel.Settings = ModelSettingsFlags.InvertedWorld | ModelSettingsFlags.NoCollider;
                 
-                var scenePath = $"{Runtime.Rampancy.SceneDir}/{LevelName}.unity";
+                var scenePath = $"{Rampancy.SceneDir}/{LevelName}.unity";
                 Directory.CreateDirectory(Path.GetDirectoryName(scenePath));
                 EditorSceneManager.SaveScene(scene, scenePath);
                 SceneManager.SetActiveScene(currentScene);

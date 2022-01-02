@@ -2,8 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using Plugins.Rampancy.RampantC20;
+using Plugins.Rampancy.Runtime.UI;
 using Rampancy.RampantC20;
 using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace Plugins.Rampancy.Runtime
@@ -16,6 +19,45 @@ namespace Plugins.Rampancy.Runtime
 
         public static string BaseUnityDir => Path.Combine("Assets", $"{Config.GameVersion}");
         public static string SceneDir     => Path.Combine(BaseUnityDir, Statics.SrcLevelsName);
+        
+        static Rampancy()
+        {
+            Init();
+        }
+
+        public static void Init()
+        {
+            Config = Config.Load();
+
+            if (Config == null) {
+                Config = new Config();
+
+                EditorApplication.CallbackFunction showSettings = null;
+                showSettings = () =>
+                {
+                    Settings.ShowWindow();
+                    EditorApplication.update -= showSettings;
+                };
+                EditorApplication.update += showSettings;
+            }
+            else {
+                AssetDB.ScanTags();
+            }
+
+            EditorSceneManager.sceneSaving += (scene, path) =>
+            {
+                var rampancySentinelGO = GameObject.Find(RampancySentinel.NAME);
+                if (rampancySentinelGO != null) {
+                    var rampancySentinel = rampancySentinelGO.GetComponent<RampancySentinel>();
+                    rampancySentinel.BuildMatIdToPathList();
+                }
+            };
+
+            EditorSceneManager.sceneOpened += (scene, mode) =>
+            {
+                Actions.UpdateSceneMatRefs();
+            };
+        }
 
         public static void RunToolCommand(string cmdStr)
         {

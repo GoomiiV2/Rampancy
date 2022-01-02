@@ -4,7 +4,7 @@ using Ionic.Zlib;
 using Plugins.Rampancy.RampantC20;
 using UnityEngine;
 
-namespace RampantC20
+namespace Plugins.Rampancy.RampantC20
 {
     public class Utils
     {

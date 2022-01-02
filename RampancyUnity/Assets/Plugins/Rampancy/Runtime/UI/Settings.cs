@@ -4,7 +4,7 @@ using Rampancy.RampantC20;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Editor.Scripts.UI
+namespace Plugins.Rampancy.Runtime.UI
 {
     public class Settings : EditorWindow
     {
@@ -17,26 +17,26 @@ namespace Plugins.Rampancy.Editor.Scripts.UI
         
         void OnGUI()
         {
-            Runtime.Rampancy.Config ??= Config.Load();
+            Rampancy.Config ??= Config.Load();
 
             GUILayout.Space(5);
             EditorGUILayout.BeginHorizontal();
             {
                 GUILayout.Label("Active Game Version");
-                Runtime.Rampancy.Config.GameVersion = (GameVersions) EditorGUILayout.EnumPopup("", Runtime.Rampancy.Config.GameVersion, GUILayout.Width(150));
+                Rampancy.Config.GameVersion = (GameVersions) EditorGUILayout.EnumPopup("", Rampancy.Config.GameVersion, GUILayout.Width(150));
             }
             EditorGUILayout.EndHorizontal();
             
             // Game configs
-            DrawGameConfig("Halo 1 MCC", Runtime.Rampancy.Config.Halo1MccGameConfig);
-            DrawGameConfig("Halo 3 MCC", Runtime.Rampancy.Config.Halo3MccGameConfig);
+            DrawGameConfig("Halo 1 MCC", Rampancy.Config.Halo1MccGameConfig);
+            DrawGameConfig("Halo 3 MCC", Rampancy.Config.Halo3MccGameConfig);
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             if (GUILayout.Button("Save")) {
-                Runtime.Rampancy.Config.Save();
+                Rampancy.Config.Save();
                 
                 // TODO: only do this is the path of a game changed or the game version
-                Runtime.Rampancy.AssetDB.ScanTags();
+                Rampancy.AssetDB.ScanTags();
             }
 
             ShowVersion();

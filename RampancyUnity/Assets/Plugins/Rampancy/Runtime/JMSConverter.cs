@@ -11,7 +11,7 @@ using UnityEngine;
 //using UnityEngine.ProBuilder.MeshOperations;
 //using EditorUtility = UnityEditor.ProBuilder.EditorUtility;
 
-namespace Plugins.Rampancy.Editor.Scripts
+namespace Plugins.Rampancy.Runtime
 {
     public static class JmsConverter
     {
