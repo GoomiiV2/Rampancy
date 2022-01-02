@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace Plugins.Rampancy.Runtime.UI
 {
     // TODO: Do this better :>
     public class ToolOutput : EditorWindow

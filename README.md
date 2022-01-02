@@ -52,5 +52,4 @@ I like to do silly things and creating a new level editor for the old Halo games
 
 ## Libraries used with love! <3
 * [Realtime CSG](https://github.com/LogicalError/realtime-CSG-for-unity)
-* [inputsimulator](https://github.com/michaelnoonan/inputsimulator)
 * [com.ionic.zlib](https://github.com/PixelWizards/com.ionic.zlib)

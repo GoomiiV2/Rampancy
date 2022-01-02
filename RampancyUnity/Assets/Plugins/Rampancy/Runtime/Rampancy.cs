@@ -59,10 +59,7 @@ namespace Plugins.Rampancy.Runtime
             };
         }
 
-        public static void RunToolCommand(string cmdStr)
-        {
-            RunProgram(Config.ActiveGameConfig.ToolPath, cmdStr);
-        }
+        public static void RunToolCommand(string cmdStr) => RunProgram(Config.ActiveGameConfig.ToolPath, cmdStr);
 
         // Run a program like tool hidden and log the output
         public static void RunProgram(string program, string cmd)
@@ -80,8 +77,8 @@ namespace Plugins.Rampancy.Runtime
                 ps.WindowStyle            = ProcessWindowStyle.Hidden;
                 var process = Process.Start(ps);
 
-                process.OutputDataReceived += (sender, args) => ToolOutput.LogInfo(args.Data);  //Debug.Log(args.Data);
-                process.ErrorDataReceived  += (sender, args) => ToolOutput.LogError(args.Data); //Debug.LogError(args.Data);
+                process.OutputDataReceived += (_, args) => ToolOutput.LogInfo(args.Data);  //Debug.Log(args.Data);
+                process.ErrorDataReceived  += (_, args) => ToolOutput.LogError(args.Data); //Debug.LogError(args.Data);
 
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
@@ -109,8 +106,8 @@ namespace Plugins.Rampancy.Runtime
                 ps.WindowStyle            = ProcessWindowStyle.Normal;
                 var process = Process.Start(ps);
 
-                process.OutputDataReceived += (sender, args) => ToolOutput.LogInfo(args.Data);
-                process.ErrorDataReceived  += (sender, args) => ToolOutput.LogError(args.Data);
+                process.OutputDataReceived += (_, args) => ToolOutput.LogInfo(args.Data);
+                process.ErrorDataReceived  += (_, args) => ToolOutput.LogError(args.Data);
 
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();

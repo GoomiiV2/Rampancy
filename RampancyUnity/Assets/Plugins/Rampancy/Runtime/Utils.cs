@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Plugins.Rampancy.RampantC20;
 using UnityEngine;
-using Color = System.Drawing.Color;
 
 namespace Plugins.Rampancy.Runtime
 {
@@ -29,7 +28,6 @@ namespace Plugins.Rampancy.Runtime
 
             mesh.subMeshCount = 1;
             mesh.SetVertices(verts);
-            //mesh.SetIndices(indices, MeshTopology.Triangles, 0);
             mesh.SetTriangles(indices, 0);
             mesh.SetColors(colors);
 

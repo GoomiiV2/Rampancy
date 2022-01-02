@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using InternalRealtimeCSG;
-using Plugins.Rampancy.Runtime;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,7 +10,7 @@ namespace Plugins.Rampancy.Runtime
         public static void ExportLevel(string path, bool tJunctionFix = true)
         {
             var meshData = GetRcsgMesh();
-            var mesh     = meshData.mehs;
+            var mesh     = meshData.mesh;
 
             // Fix up t junction by splitting the edges
             if (tJunctionFix) {
@@ -22,33 +20,8 @@ namespace Plugins.Rampancy.Runtime
             var jms      = JmsConverter.MeshToJms(mesh, meshData.matNames);
             jms.Save(path);
         }
-        
-        // Todo: Improve
-        public static Mesh FixTJunctions(Mesh mesh)
-        {
-            var halfEdgeMesh = new HalfMesh();
-            halfEdgeMesh.FromUnityMesh(mesh);
-            var tJunctions = halfEdgeMesh.FindTJunctions();
 
-            var groupedByEdge = tJunctions.GroupBy(x => x.edgeIdx);
-            var maxLoops      = tJunctions.Count > 1 ? groupedByEdge.Select(x => x.Count()).Max() : 0;
-
-            // Lazy fix for now
-            for (int i = 0; i < maxLoops; i++) {
-                tJunctions = halfEdgeMesh.FindTJunctions();
-                tJunctions = tJunctions.GroupBy(x => x.edgeIdx).Select(x => x.First()).ToList();
-                
-                foreach (var (edgeIdx, vertIdx) in tJunctions) {
-                    var vert = halfEdgeMesh.Verts[vertIdx];
-                    halfEdgeMesh.SplitEdge(edgeIdx, vert.Pos);
-                }
-            }
-
-            var fixedMesh = halfEdgeMesh.ToMesh();
-
-            return fixedMesh;
-        }
-
+        // Fix T-Junctions by converting to a wingedMesh, finding, fixing and back to a unity mesh
         public static Mesh FixTJunctionsV2(Mesh mesh)
         {
             var wingedMesh = new WingedMesh();
@@ -60,6 +33,7 @@ namespace Plugins.Rampancy.Runtime
             return outputMesh;
         }
         
+        // Export just the RCSG collision mesh
         public static void ExportLevelCollision(string path)
         {
             var cMesh = GetRcsgCollisionMesh();
@@ -67,15 +41,15 @@ namespace Plugins.Rampancy.Runtime
             jms.Save(path);
         }
         
-        public static (Mesh mehs, string[] matNames) GetRcsgMesh()
+        public static (Mesh mesh, string[] matNames) GetRcsgMesh()
         {
-            var baseMeshs = GameObject.Find("Frame/LevelGeo/[generated-meshes]");
+            var baseMesh = GameObject.Find("Frame/LevelGeo/[generated-meshes]");
 
             var mesh     = new Mesh();
-            var combines = new List<CombineInstance>(baseMeshs.transform.childCount - 1);
+            var combines = new List<CombineInstance>(baseMesh.transform.childCount - 1);
             var matNames = new List<string>();
-            for (int i = 0; i < baseMeshs.transform.childCount; i++) {
-                var childMesh = baseMeshs.transform.GetChild(i);
+            for (int i = 0; i < baseMesh.transform.childCount; i++) {
+                var childMesh = baseMesh.transform.GetChild(i);
                 AddMeshCombiner(childMesh);
             }
 

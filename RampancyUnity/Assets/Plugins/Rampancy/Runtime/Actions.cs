@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Plugins.Rampancy.RampantC20;
-using Plugins.Rampancy.Runtime;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -36,24 +35,21 @@ namespace Plugins.Rampancy.Runtime
         }
 
         public static void ExportLevelJms(string jmsPath)
-        { 
-            var dir           = Path.GetDirectoryName(jmsPath);
+        {
+            var dir = Path.GetDirectoryName(jmsPath);
             Directory.CreateDirectory(dir);
-            //JMSConverter.ExportLevel(jmsPath);
-            
             LevelExporter.ExportLevel(jmsPath);
         }
 
         public static void ExportLevelJmsDialog()
         {
             var path = EditorUtility.SaveFilePanel("Save the jms file", "", "export.jms", "jms");
-            if (!string.IsNullOrEmpty(path)) {
-                ExportLevelJms(path);
-            }
+            if (string.IsNullOrEmpty(path)) return;
+            ExportLevelJms(path);
         }
-        
+
         public static void ExportLevelCollisionJms(string jmsPath)
-        { 
+        {
             var dir = Path.GetDirectoryName(jmsPath);
             Directory.CreateDirectory(dir);
             LevelExporter.ExportLevelCollision(jmsPath);
@@ -62,9 +58,8 @@ namespace Plugins.Rampancy.Runtime
         public static void ExportLevelCollisionJmsDialog()
         {
             var path = EditorUtility.SaveFilePanel("Save the jms file", "", "export_collision.jms", "jms");
-            if (!string.IsNullOrEmpty(path)) {
-                ExportLevelCollisionJms(path);
-            }
+            if (string.IsNullOrEmpty(path)) return;
+            ExportLevelCollisionJms(path);
         }
 
         public static void ImportBitmaps()
@@ -74,7 +69,7 @@ namespace Plugins.Rampancy.Runtime
 
         public static void LaunchTagTest(string map)
         {
-            switch (Runtime.Rampancy.Config.GameVersion) {
+            switch (Rampancy.Config.GameVersion) {
                 case GameVersions.Halo1Mcc:
                     H1_LaunchTagTest(map);
                     break;
@@ -88,9 +83,9 @@ namespace Plugins.Rampancy.Runtime
 
             if (!File.Exists(scene.path)) return;
 
-            var sceneFile   = File.ReadAllText(scene.path);
-            var sentinel    = GameObject.FindObjectOfType<RampancySentinel>();
-            
+            var sceneFile = File.ReadAllText(scene.path);
+            var sentinel  = GameObject.FindObjectOfType<RampancySentinel>();
+
             if (sentinel == null) return;
             var matIdLookup = sentinel.GetMatIdToPathLookup();
             var newGuids    = new Dictionary<string, string>();
@@ -108,16 +103,16 @@ namespace Plugins.Rampancy.Runtime
 
             if (newGuids.Count == 0) return;
             Debug.Log("Material Ids didn't match, remapping from paths");
-            
+
             //Back up
             var backupPath = $"{scene.path}.backup";
             File.Copy(scene.path, backupPath, true);
-            
+
             File.WriteAllText(scene.path, sceneFile);
             EditorSceneManager.OpenScene(scene.path);
-            
+
             File.Delete(backupPath);
-            
+
             Debug.Log("Material IDs reassigned from paths");
         }
     }

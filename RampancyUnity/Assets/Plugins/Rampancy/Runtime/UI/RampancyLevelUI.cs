@@ -1,5 +1,4 @@
-﻿using Plugins.Rampancy.Runtime;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace Plugins.Rampancy.Runtime.UI

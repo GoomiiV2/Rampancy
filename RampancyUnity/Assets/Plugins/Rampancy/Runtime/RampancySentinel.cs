@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Plugins.Rampancy.RampantC20;
@@ -155,16 +154,8 @@ namespace Plugins.Rampancy.Runtime
                         GL.Begin(GL.TRIANGLES);
                         GL.Color(debugItem.Color);
 
-                        /*var vert1 = rot * Vector3.Scale(scale, face.Verts[0]);
-                        var vert2 = rot * Vector3.Scale(scale, face.Verts[1]);
-                        var vert3 = rot * Vector3.Scale(scale, face.Verts[2]);
-                        */
-                        //Handles.Label(vert1, $"\n{vert1}\n{vert2}\n{vert3}");
-
                         for (int i = 0; i < debugItem.Indices.Count; i++) {
                             var vert = rot * Vector3.Scale(scale, debugItem.Verts[debugItem.Indices[i]]);
-                            //Gizmos.DrawSphere(vert, 0.1f);
-                            //Handles.Label(vert, $"{new string('\n', faceidx + i)} faceidx: {faceidx}: idx: {i}, vert: {vert.ToString()}, indice: {face.Indices[i]}, org vert pos: {face.Verts[face.Indices[i]]}");
                             GL.Vertex(vert);
                         }
 
