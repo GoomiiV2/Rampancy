@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System;
+using Plugins.Rampancy.RampantC20;
+using UnityEditor;
 using UnityEngine;
 
 namespace Plugins.Rampancy.Runtime.UI
@@ -8,6 +10,7 @@ namespace Plugins.Rampancy.Runtime.UI
         private int ActiveTab = 0;
 
         private RampancySentinel _Sentinel;
+
         private RampancySentinel Sentinel
         {
             get
@@ -19,7 +22,7 @@ namespace Plugins.Rampancy.Runtime.UI
                 return _Sentinel;
             }
         }
-        
+
         [MenuItem("Rampancy/Open Level UI")]
         public static void ShowWindow()
         {
@@ -29,30 +32,42 @@ namespace Plugins.Rampancy.Runtime.UI
 
         void OnGUI()
         {
-            ActiveTab = GUILayout.Toolbar(ActiveTab, new [] {"Materials", "Debug"});
+            ActiveTab = GUILayout.Toolbar(ActiveTab, new[] {"Materials", "Debug"});
             switch (ActiveTab) {
                 case 0:
                     MaterialsTab();
                     break;
             }
         }
-        
-        #region Materials 
+
+    #region Materials
+
         private void MaterialsTab()
         {
             if (Sentinel == null) return;
 
-            GUILayout.Button($"Sync materials from {Rampancy.Config.GameVersion}");
-            
+            if (GUILayout.Button($"Sync materials from {Rampancy.Config.GameVersion}"))
+                SyncMats();
+
             foreach (var matInfo in Sentinel.MatIdToPathLookup_Paths) {
-                
             }
         }
 
         private void DrawMaterialInfo()
         {
-            
         }
+
+        private static void SyncMats()
+        {
+            Action func = Rampancy.Config.GameVersion switch
+            {
+                GameVersions.Halo1Mcc => Actions.H1_SyncMaterials,
+                _ => null
+            };
+
+            func?.Invoke();
+        }
+
     #endregion
     }
 }

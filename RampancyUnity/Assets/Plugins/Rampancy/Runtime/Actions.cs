@@ -115,5 +115,14 @@ namespace Plugins.Rampancy.Runtime
 
             Debug.Log("Material IDs reassigned from paths");
         }
+        
+        public static void CreateBasicMat(Texture2D tex, string path)
+        {
+            var mat = new Material(Shader.Find("Legacy Shaders/Diffuse"));
+            mat.mainTexture = tex;
+            mat.name        = Path.GetFileNameWithoutExtension(path);
+
+            AssetDatabase.CreateAsset(mat, $"{path}_mat.asset");
+        }
     }
 }

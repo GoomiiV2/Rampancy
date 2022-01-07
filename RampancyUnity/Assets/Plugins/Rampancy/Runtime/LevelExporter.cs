@@ -65,7 +65,7 @@ namespace Plugins.Rampancy.Runtime
                     if (trimmedName.ToLower() != "skip" && trimmedName != "transparentSpecialSurface_hidden" && trimmedName != "Default-Diffuse") {
                         var combine = new CombineInstance
                         {
-                            mesh      = mf.mesh,
+                            mesh      = mf.sharedMesh,
                             transform = childMesh.transform.localToWorldMatrix
                         };
 

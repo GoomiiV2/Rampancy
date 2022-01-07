@@ -55,7 +55,7 @@ namespace Plugins.Rampancy.Runtime.UI
         }
 
         [MenuItem("Rampancy/Compile/Preview lightmaps", false, 2)]
-        public static void CompilePreviewLightmaps() => Actions.H1_CompileToolLightmaps(false, 0.1f);
+        public static void CompilePreviewLightmaps() => Actions.H1_CompileToolLightmaps(true, 0.1f);
 
         [MenuItem("Rampancy/Compile/Structure and Preview lightmaps _F6", false, 2)]
         public static void CompileStructureAndPreviewLightmaps()

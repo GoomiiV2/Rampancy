@@ -10,7 +10,7 @@ namespace Plugins.Rampancy.RampantC20
         public string BaseTagDir  => Path.Combine(BasePath, "tags");
         public string BaseDataDir => Path.Combine(BasePath, "data");
 
-        public Dictionary<string, List<TagInfo>> TagLookup = new();
+        public Dictionary<string, Dictionary<string, TagInfo>> TagLookup = new();
 
         public void ScanTags()
         {
@@ -26,8 +26,12 @@ namespace Plugins.Rampancy.RampantC20
                     Path = fileInfo.FullName
                 };
 
-                if (!TagLookup.ContainsKey(type)) TagLookup[type] = new List<TagInfo>();
-                TagLookup[type].Add(tagInfo);
+                if (!TagLookup.ContainsKey(type)) TagLookup[type] = new Dictionary<string, TagInfo>();
+                var extension                                     = Path.GetExtension(fileInfo.FullName);
+                var start                                         = tagDir.Length            + 1;
+                var end                                           = fileInfo.FullName.Length - (start + extension.Length);
+                var tagPath                                       = fileInfo.FullName.Substring(start, end);
+                TagLookup[type].Add(tagPath, tagInfo);
             }
         }
 
@@ -35,7 +39,7 @@ namespace Plugins.Rampancy.RampantC20
         public TagInfo? FindTag(string name, string tagType)
         {
             if (!TagLookup.TryGetValue(tagType, out var ofType)) return null;
-            foreach (var tagInfo in ofType) {
+            foreach (var tagInfo in ofType.Values) {
                 if (tagInfo.Name == name) {
                     return tagInfo;
                 }
@@ -44,32 +48,39 @@ namespace Plugins.Rampancy.RampantC20
             return null;
         }
 
+        public TagInfo? FindTagByRelPath(string relPath, string tagType)
+        {
+            if (!TagLookup.TryGetValue(tagType, out var ofType)) return null;
+            if (ofType.TryGetValue(relPath, out var tagInfo)) return tagInfo;
+            return null;
+        }
+
         // Get all the tags of a type, eg. bitmap, shader
         public IEnumerable<TagInfo> TagsOfType(string tagType)
         {
             if (!TagLookup.TryGetValue(tagType, out var ofType)) return null;
-            return ofType;
+            return ofType.Values;
         }
-        
-        public IEnumerable<TagInfo> TagsOfType(params  string[] tagTypes)
+
+        public IEnumerable<TagInfo> TagsOfType(params string[] tagTypes)
         {
             var tagInfos = new List<TagInfo>();
 
             foreach (var tagType in tagTypes) {
                 if (TagLookup.TryGetValue(tagType, out var ofType)) {
-                    tagInfos.AddRange(ofType);
+                    tagInfos.AddRange(ofType.Values);
                 }
             }
-            
+
             return tagInfos;
         }
-        
+
         public string GetBaseTagPath(TagInfo tagInfo) => tagInfo.Path.Replace(Path.GetFullPath(Runtime.Rampancy.Config.ActiveGameConfig.TagsPath), "").TrimEnd('/', '\\');
 
         public struct TagInfo
         {
-            public  string  Name;
-            public  string  Path;
+            public string Name;
+            public string Path;
 
             // Give me spans!!
             public byte[]       GetFileBytes() => File.ReadAllBytes(Path);

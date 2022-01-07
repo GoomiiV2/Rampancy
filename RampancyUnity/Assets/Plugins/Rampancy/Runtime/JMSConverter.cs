@@ -105,7 +105,7 @@ namespace Plugins.Rampancy.Runtime
                 var vert = new JMS.Vert
                 {
                     Position   = rot * Vector3.Scale(scale, positions[i]),
-                    UV         = hasUvs ? uvs[i] : Vector2.zero,
+                    UV         = hasUvs ? uvs[i] * new Vector2(-1, 1) : Vector2.zero,
                     Normal     = hasNormals ? new Vector3(normals[i].x, normals[i].z, normals[i].y) : Vector3.one,
                     NodeIdx    = 0,
                     NodeWeight = 0f

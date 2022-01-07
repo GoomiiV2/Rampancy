@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Plugins.Rampancy.RampantC20;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace RampantC20
 {
-    public static class Utils
+    public static partial class Utils
     {
         public static Mesh TrisToMesh(List<DebugGeoData.Item> items)
         {
@@ -34,6 +34,25 @@ namespace Plugins.Rampancy.Runtime
             mesh.RecalculateNormals();
 
             return mesh;
+        }
+        
+        public static string GetProjectRelPath(AssetDb.TagInfo tagInfo, AssetDb assetDb)
+        {
+            var basse         = $"Assets/{Plugins.Rampancy.Runtime.Rampancy.Config.GameVersion}/TagData";
+            var assetBasePath = basse + assetDb.GetBaseTagPath(tagInfo);
+            assetBasePath = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
+            return assetBasePath;
+        }
+
+        public static Texture2D BitMapToTex2D(int width, int height, byte[] pixels)
+        {
+            var tex = new Texture2D(width, height, TextureFormat.BGRA32, true);
+            tex.SetPixelData(pixels, 0);
+            //if (width % 4 == 0 && height % 4 == 0)
+            //tex.Compress(true);
+            tex.Apply(true);
+
+            return tex;
         }
 
         public static int GetHashCodeForVector3(Vector3 vector3)
