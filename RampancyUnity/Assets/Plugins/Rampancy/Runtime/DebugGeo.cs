@@ -17,6 +17,8 @@ namespace Plugins.Rampancy.Runtime
                 root.transform.parent = frame.transform;
             }
 
+            root.hideFlags = HideFlags.DontSaveInEditor;
+
             var name = "Error Geo";
             if (item.Color.r == 255 && item.Color.g == 0 && item.Color.b == 0 && item.Flags == DebugGeoData.Item.ItemFlags.Tri) {
                 name = "Degenerate Tri";
