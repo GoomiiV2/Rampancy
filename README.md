@@ -8,7 +8,13 @@
 A new level editor for the Halo games based on a CSG/Brush workflow, similar to Source/Quake level editing.
 
 ## Example
-https://user-images.githubusercontent.com/5684215/142354890-78fd68fd-8048-478d-88af-c18a7746a4b7.mp4
+https://user-images.githubusercontent.com/5684215/148701369-66ef75eb-520c-46e7-a6d0-914bbc6bbbed.mp4
+
+
+
+
+![sapien_l3i7oo4Zha](https://user-images.githubusercontent.com/5684215/148701019-d1cb7d9d-8a81-4fb8-bf57-98a3e39e9b7a.jpg)
+![Unity_kmgOSmG7sh](https://user-images.githubusercontent.com/5684215/148701055-6dfe89b7-73e8-4011-a1dd-50d98bfb6c92.jpg)
 
 
 ## Status
@@ -21,8 +27,11 @@ The project is still early in development and some core issues need to be worked
 * Clone this project ```git clone --recurse-submodules https://github.com/GoomiiV2/Rampancy.git```
 * Open the project (Rampancy/Unity directory) in Unity
 * Browse and set the paths for the mod tools you will use
-* Click the Rampancy menu at the top and then `Debug > Debug UI` and then click `Import bitmaps`
-* Open the test scene at `Scenes/Tests/Test.unity`
+* Click the Rampancy menu at the top and then `Debug > Open Level UI > Materials` and then click `Sync Materials from`
+* Click `Rampancy > Create Level` give it a name with no spaces and then click `Create new Level`.
+* Click `Window > Realtime CSG Window` and dock it some where.
+* Click the `Generate` tab and create a large box in the scene, this will be the level.
+* You can then add more brushes to detail the level as you want later.
 * Press `F6` to compile
 * * The following only need to be done once/whenever you want to specifically edit just them.
 * * * In `Guerilla`, open the map scenario to configure the sky
