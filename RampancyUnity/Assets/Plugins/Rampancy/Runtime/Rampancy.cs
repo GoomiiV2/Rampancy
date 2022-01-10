@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using InternalRealtimeCSG;
 using Plugins.Rampancy.RampantC20;
 using Plugins.Rampancy.Runtime.UI;
 using Rampancy.RampantC20;
@@ -50,6 +52,11 @@ namespace Plugins.Rampancy.Runtime
                 if (rampancySentinelGO != null) {
                     var rampancySentinel = rampancySentinelGO.GetComponent<RampancySentinel>();
                     rampancySentinel.BuildMatIdToPathList();
+                }
+                
+                var meshes = GameObject.FindObjectsOfType<GameObject>().Where(x => x.name == "[generated-meshes]");
+                foreach (var mesh in meshes) {
+                    mesh.hideFlags = HideFlags.DontSaveInEditor;
                 }
             };
 
