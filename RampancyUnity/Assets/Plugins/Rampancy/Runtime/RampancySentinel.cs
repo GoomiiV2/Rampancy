@@ -96,12 +96,12 @@ namespace Plugins.Rampancy.Runtime
 
         public void ReloadWrl()
         {
+            var debugGeoRoot = GameObject.Find("Frame/DebugGeo");
+            DestroyImmediate(debugGeoRoot);
+            
             if (File.Exists(GetWrlPath())) {
                 DebugGeo = new();
                 DebugGeo.LoadFromWrl(GetWrlPath());
-
-                var debugGeoRoot = GameObject.Find("Frame/DebugGeo");
-                DestroyImmediate(debugGeoRoot);
 
                 foreach (var item in DebugGeo.Items) {
                     var debugGeoGO = DebugGeoObj.Create(item);

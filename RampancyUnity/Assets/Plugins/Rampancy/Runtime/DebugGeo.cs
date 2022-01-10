@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Plugins.Rampancy.RampantC20;
 using Rampancy.RampantC20;
 using RampantC20;
-using Unity.VisualScripting;
-using UnityEditor.Events;
 using UnityEngine;
 
 namespace Plugins.Rampancy.Runtime
