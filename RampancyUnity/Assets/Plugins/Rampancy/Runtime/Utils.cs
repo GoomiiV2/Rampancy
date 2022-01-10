@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -96,6 +97,21 @@ namespace RampantC20
             var area              = Mathf.Sqrt(areaToBeSqrRooted);
 
             return area;
+        }
+
+        public static bool IsDegenerateTri(Vector3 v1, Vector3 v2, Vector3 v3)
+        {
+            const float TOLERANCE = 0.0001f;
+            var         area     = CalcAreaOfTri(v1, v2, v3);
+
+            if (area <= TOLERANCE ||
+                Math.Abs(Vector3.Distance(v1, v2)) <= TOLERANCE ||
+                Math.Abs(Vector3.Distance(v1, v3)) <= TOLERANCE ||
+                Math.Abs(Vector3.Distance(v2, v3)) <= TOLERANCE) {
+                return true;
+            }
+
+            return false;
         }
     }
 }

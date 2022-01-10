@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Plugins.Rampancy.RampantC20;
 using Rampancy.RampantC20;
+using RampantC20;
 using UnityEngine;
 
 namespace Plugins.Rampancy.Runtime
@@ -60,7 +61,7 @@ namespace Plugins.Rampancy.Runtime
         public static JMS MeshToJms(Mesh mesh, string[] matNames)
         {
             var indices = new int[mesh.subMeshCount][];
-            
+
             for (int i = 0; i < mesh.subMeshCount; i++) {
                 var subMesh = mesh.GetSubMesh(i);
                 indices[i] = new int[subMesh.indexCount];
@@ -99,7 +100,7 @@ namespace Plugins.Rampancy.Runtime
                 });
             }
 
-            bool hasUvs     = uvs     != null && uvs.Length == positions.Length;
+            bool hasUvs     = uvs     != null && uvs.Length     == positions.Length;
             bool hasNormals = normals != null && normals.Length == positions.Length;
             for (int i = 0; i < positions.Length; i++) {
                 var vert = new JMS.Vert

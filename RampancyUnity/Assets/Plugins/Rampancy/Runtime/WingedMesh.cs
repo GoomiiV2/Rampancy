@@ -115,15 +115,14 @@ namespace Plugins.Rampancy.Runtime
                 var indices    = new int[subMesh.Count() * 3];
                 var indicesIdx = 0;
                 foreach (var tri in subMesh) {
-                    var area = Utils.CalcAreaOfTri(Vert_Positions[tri.VertIdx[0]], Vert_Positions[tri.VertIdx[1]], Vert_Positions[tri.VertIdx[2]]);
-                    if (tri.Id != -1 && area > 0.0000000001f) {
+                    if (tri.Id != -1 && !Utils.IsDegenerateTri(Vert_Positions[tri.VertIdx[0]], Vert_Positions[tri.VertIdx[1]], Vert_Positions[tri.VertIdx[2]])) {
                         indices[indicesIdx++] = tri.VertIdx[0];
                         indices[indicesIdx++] = tri.VertIdx[1];
                         indices[indicesIdx++] = tri.VertIdx[2];
                     }
                 }
 
-                mesh.SetTriangles(indices, subMesh.Key);
+                mesh.SetTriangles(indices.Take(indicesIdx).ToArray(), subMesh.Key);
             }
 
             timer.Stop();
