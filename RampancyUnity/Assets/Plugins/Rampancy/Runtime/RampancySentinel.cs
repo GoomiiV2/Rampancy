@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using InternalRealtimeCSG;
 using Plugins.Rampancy.RampantC20;
 using Rampancy.RampantC20;
 using RealtimeCSG.Components;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Plugins.Rampancy.Runtime
@@ -97,6 +99,13 @@ namespace Plugins.Rampancy.Runtime
             if (File.Exists(GetWrlPath())) {
                 DebugGeo = new();
                 DebugGeo.LoadFromWrl(GetWrlPath());
+
+                var debugGeoRoot = GameObject.Find("Frame/DebugGeo");
+                DestroyImmediate(debugGeoRoot);
+
+                foreach (var item in DebugGeo.Items) {
+                    var debugGeoGO = DebugGeoObj.Create(item);
+                }
             }
             else {
                 DebugGeo = null;
@@ -106,7 +115,7 @@ namespace Plugins.Rampancy.Runtime
         private void OnDrawGizmos() //OnRenderObject()
         {
             if (DisplayDebugGeo) {
-                DrawDebugGeo();
+                //DrawDebugGeo();
             }
         }
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Plugins.Rampancy.RampantC20;
+using Rampancy.RampantC20;
 using UnityEngine;
 
 namespace RampantC20
@@ -17,7 +18,12 @@ namespace RampantC20
             List<Color32> colors  = new();
 
             foreach (var item in items) {
-                verts.AddRange(item.Verts);
+                foreach (var vert in item.Verts) {
+                    var scale = new Vector3(Statics.ExportScale, -Statics.ExportScale, Statics.ExportScale);
+                    var rot   = Quaternion.Euler(new Vector3(-90, 0, 0));
+                    verts.Add(rot * Vector3.Scale(scale,vert));
+                }
+                
                 var nubIndices = indices.Count;
                 var newIndices = item.Indices.Select(x => nubIndices + x).ToList();
                 indices.AddRange(newIndices);

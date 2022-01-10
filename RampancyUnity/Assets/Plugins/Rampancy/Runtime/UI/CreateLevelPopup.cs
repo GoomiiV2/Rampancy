@@ -30,6 +30,9 @@ namespace Plugins.Rampancy.Runtime.UI
                 var frame    = new GameObject("Frame");
                 var levelGeo = new GameObject("LevelGeo");
                 levelGeo.transform.parent = frame.transform;
+                
+                var debugGeo = new GameObject("DebugGeo");
+                debugGeo.transform.parent = frame.transform;
 
                 var csgModel = levelGeo.AddComponent<CSGModel>();
                 csgModel.Settings = ModelSettingsFlags.InvertedWorld | ModelSettingsFlags.NoCollider;
