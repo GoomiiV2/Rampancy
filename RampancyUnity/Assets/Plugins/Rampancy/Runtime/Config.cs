@@ -8,9 +8,10 @@ namespace Plugins.Rampancy.Runtime
     {
         public static readonly string FileName = "RampancyConfig.json";
 
-        public GameVersions    GameVersion        = GameVersions.Halo1Mcc;
-        public H1MccGameConfig Halo1MccGameConfig = new();
-        public H3GameConfig    Halo3MccGameConfig = new();
+        public GameVersions    GameVersion              = GameVersions.Halo1Mcc;
+        public bool            ToolOutputClearOnCompile = true;
+        public H1MccGameConfig Halo1MccGameConfig       = new();
+        public H3GameConfig    Halo3MccGameConfig       = new();
 
         //public string ToolBasePath = "";
 
