@@ -27,15 +27,7 @@ namespace Plugins.Rampancy.Runtime.UI
             }
             
             ScrollPos = EditorGUILayout.BeginScrollView(ScrollPos);
-
-            var style = new GUIStyle
-            {
-                normal = new GUIStyleState()
-            };
-            
             foreach (var line in Lines) {
-                //if (line.StartsWith("!")) style.normal.textColor = Color.red;
-                
                 GUILayout.Label(line);
             }
             
