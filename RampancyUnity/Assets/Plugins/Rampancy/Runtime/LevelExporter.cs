@@ -43,14 +43,14 @@ namespace Plugins.Rampancy.Runtime
         
         public static (Mesh mesh, string[] matNames) GetRcsgMesh()
         {
-            var baseMesh = GameObject.Find("Frame/LevelGeo/[generated-meshes]");
-
+            var rootGo     = GameObject.Find("Frame/LevelGeo");
+            var rcsgMeshes = GameObject.FindObjectsOfType<GameObject>().Where(x => x.transform.IsChildOf(rootGo.transform) && x.name == "[generated-render-mesh]").ToList();
+            
             var mesh     = new Mesh();
-            var combines = new List<CombineInstance>(baseMesh.transform.childCount - 1);
+            var combines = new List<CombineInstance>(rcsgMeshes.Count);
             var matNames = new List<string>();
-            for (int i = 0; i < baseMesh.transform.childCount; i++) {
-                var childMesh = baseMesh.transform.GetChild(i);
-                AddMeshCombiner(childMesh);
+            for (int i = 0; i < rcsgMeshes.Count; i++) {
+                AddMeshCombiner(rcsgMeshes[i].transform);
             }
 
             mesh.CombineMeshes(combines.ToArray(), false);
