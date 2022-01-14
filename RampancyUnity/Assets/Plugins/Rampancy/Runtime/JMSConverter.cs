@@ -4,6 +4,7 @@ using System.Linq;
 using Plugins.Rampancy.RampantC20;
 using Rampancy.RampantC20;
 using RampantC20;
+using RampantC20.Halo1;
 using UnityEngine;
 
 namespace Plugins.Rampancy.Runtime

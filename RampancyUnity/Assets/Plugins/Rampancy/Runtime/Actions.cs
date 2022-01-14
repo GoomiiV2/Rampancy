@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Plugins.Rampancy.RampantC20;
+using RampantC20.Halo1;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -115,7 +116,7 @@ namespace Plugins.Rampancy.Runtime
 
             Debug.Log("Material IDs reassigned from paths");
         }
-        
+
         public static void CreateBasicMat(Texture2D tex, string path)
         {
             var mat = new Material(Shader.Find("Legacy Shaders/Diffuse"));
