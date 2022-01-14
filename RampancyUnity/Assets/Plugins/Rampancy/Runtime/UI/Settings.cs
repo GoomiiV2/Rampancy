@@ -3,6 +3,7 @@ using Rampancy.RampantC20;
 using UnityEditor;
 using UnityEngine;
 
+
 namespace Plugins.Rampancy.Runtime.UI
 {
     public class Settings : EditorWindow
