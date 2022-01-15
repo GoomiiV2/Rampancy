@@ -44,11 +44,11 @@ namespace Rampancy.UI
 
         private void MaterialsTab()
         {
-            if (Sentinel == null) return;
-
             if (GUILayout.Button($"Sync materials from {Rampancy.Cfg.GameVersion}"))
                 SyncMats();
 
+            if (Sentinel == null) return;
+            
             foreach (var matInfo in Sentinel.MatIdToPathLookup_Paths) {
             }
         }
