@@ -1,6 +1,3 @@
-[submodule "External/inputsimulator"]
-	path = External/inputsimulator
-	url = https://github.com/michaelnoonan/inputsimulator.git
 [submodule "External/realtime-CSG-for-unity"]
 	path = External/realtime-CSG-for-unity
 	url = https://github.com/LogicalError/realtime-CSG-for-unity.git
