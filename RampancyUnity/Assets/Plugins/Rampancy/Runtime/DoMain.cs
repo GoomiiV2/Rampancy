@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     // A helper to run stuff on the main thread
     // its abit crude atm

@@ -5,7 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Plugins.Rampancy.Runtime.UI
+namespace Rampancy.UI
 {
     public class CreateLevelPopup : EditorWindow
     {

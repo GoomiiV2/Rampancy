@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace Plugins.Rampancy.Runtime.Tests
+namespace Rampancy.Tests
 {
     public class HalfEdgeMeshTester : MonoBehaviour
     {

@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime.UI
+namespace Rampancy.UI
 {
     public class LevelUI : EditorWindow
     {
@@ -17,13 +17,13 @@ namespace Plugins.Rampancy.Runtime.UI
     #region Launch
 
         [MenuItem("Rampancy/Launch/Sapien", false, 1)]
-        public static void LaunchSapien() => RunExeIfExists(Rampancy.Config.ActiveGameConfig.SapienPath);
+        public static void LaunchSapien() => RunExeIfExists(Rampancy.Cfg.ActiveGameConfig.SapienPath);
 
         [MenuItem("Rampancy/Launch/Guerilla", false, 2)]
-        public static void LaunchGuerilla() => RunExeIfExists(Rampancy.Config.ActiveGameConfig.GuerillaPath);
+        public static void LaunchGuerilla() => RunExeIfExists(Rampancy.Cfg.ActiveGameConfig.GuerillaPath);
 
         [MenuItem("Rampancy/Launch/TagTest", false, 3)]
-        public static void LaunchTagTest() => RunExeIfExists(Rampancy.Config.ActiveGameConfig.TagTestPath);
+        public static void LaunchTagTest() => RunExeIfExists(Rampancy.Cfg.ActiveGameConfig.TagTestPath);
 
         [MenuItem("Rampancy/Launch/Tool CMD", false, 4)]
         public static void LaunchToolCmd() => Rampancy.LaunchCMD("");

@@ -1,4 +1,4 @@
-﻿namespace Rampancy.RampantC20
+﻿namespace RampantC20
 {
     public static partial class Statics
     {

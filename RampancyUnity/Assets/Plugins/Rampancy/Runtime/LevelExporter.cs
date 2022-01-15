@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     public static class LevelExporter
     {

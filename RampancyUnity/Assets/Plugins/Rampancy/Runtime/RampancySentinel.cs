@@ -1,15 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using InternalRealtimeCSG;
-using Plugins.Rampancy.RampantC20;
-using Rampancy.RampantC20;
+using Plugins.Rampancy.Runtime;
+using RampantC20;
 using RealtimeCSG.Components;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     // Store per level data
     [ExecuteInEditMode]
@@ -28,7 +26,7 @@ namespace Plugins.Rampancy.Runtime
         [SerializeField] public string[] MatIdToPathLookup_Guids;
         [SerializeField] public string[] MatIdToPathLookup_Paths;
 
-        public string GetWrlPath() => Path.Combine(Rampancy.Config.ActiveGameConfig.DataPath, DataDir ?? "", "models", $"{LevelName}_errors.wrl");
+        public string GetWrlPath() => Path.Combine(Rampancy.Cfg.ActiveGameConfig.DataPath, DataDir ?? "", "models", $"{LevelName}_errors.wrl");
 
         public static RampancySentinel GetOrCreateInScene()
         {
@@ -148,7 +146,7 @@ namespace Plugins.Rampancy.Runtime
 
             if (DebugGeo != null) {
                 foreach (var debugItem in DebugGeo.Items) {
-                    if (DebugGeoData.Item.ItemFlags.Line.HasFlag(debugItem.Flags)) {
+                    if (DebugGeoMarker.ItemFlags.Line.HasFlag(debugItem.Flags)) {
                         var startPoint = rot * Vector3.Scale(scale, debugItem.Verts[debugItem.Indices[0]]);
                         for (int i = 1; i < debugItem.Indices.Count; i++) {
                             var point = rot * Vector3.Scale(scale, debugItem.Verts[debugItem.Indices[i]]);

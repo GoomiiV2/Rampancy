@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime.Tests
+namespace Rampancy.Tests
 {
     [RequireComponent(typeof(MeshCollider))]
     [RequireComponent(typeof(MeshRenderer))]

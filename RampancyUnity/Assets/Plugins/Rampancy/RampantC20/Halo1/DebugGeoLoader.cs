@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace Plugins.Rampancy.RampantC20
+namespace RampantC20
 {
     public class DebugGeoData
     {
-        public List<Item> Items = new();
+        public List<DebugGeoMarker> Items = new();
 
         // If you want a nice proper wrl loader, then this isn't it
         // this is just to load the debug info and is far from right :D
@@ -17,7 +17,7 @@ namespace Plugins.Rampancy.RampantC20
         {
             try {
                 var lines       = File.ReadAllLines(path);
-                var currentItem = Item.Create();
+                var currentItem = DebugGeoMarker.Create();
                 var ignoreCase  = StringComparison.InvariantCultureIgnoreCase;
 
                 var vertsRegex   = new Regex(@".*?point\[(.*)]");
@@ -35,8 +35,8 @@ namespace Plugins.Rampancy.RampantC20
                         }
                     }
                     else if (line.StartsWith("MaterialBinding", ignoreCase)) {
-                        var showAsFace = line.ToUpper().Contains("PER_FACE") /* || Utils.CalcAreaOfTri(currentItem.Verts[0], currentItem.Verts[1], currentItem.Verts[2]) > 0.001f */;
-                        currentItem.Flags = showAsFace ? Item.ItemFlags.Tri : Item.ItemFlags.Line;
+                        var showAsFace = line.ToUpper().Contains("PER_FACE");
+                        currentItem.Flags = showAsFace ? DebugGeoMarker.ItemFlags.Tri : DebugGeoMarker.ItemFlags.Line;
                     }
                     else if (line.StartsWith("Material", StringComparison.InvariantCultureIgnoreCase)) {
                         var colors = colorRegex.Match(line).Groups;
@@ -47,8 +47,13 @@ namespace Plugins.Rampancy.RampantC20
                         currentItem.Indices.AddRange(indices);
                     }
                     else if (line.StartsWith("}")) {
+                        // Try and name
+                        if (currentItem.Color.r == 255 && currentItem.Color.g == 0 && currentItem.Color.b == 0 && currentItem.Flags == DebugGeoMarker.ItemFlags.Tri) {
+                            currentItem.Name = "Degenerate Tri";
+                        }
+
                         Items.Add(currentItem);
-                        currentItem = Item.Create();
+                        currentItem = DebugGeoMarker.Create();
                     }
                 }
             }
@@ -60,34 +65,6 @@ namespace Plugins.Rampancy.RampantC20
         public void Clear()
         {
             Items?.Clear();
-        }
-
-        public struct Item
-        {
-            public ItemFlags     Flags;
-            public List<Vector3> Verts;
-            public Color32       Color;
-            public List<short>   Indices; // may not be needed
-
-            public static Item Create()
-            {
-                var data = new Item
-                {
-                    Flags   = ItemFlags.Line,
-                    Verts   = new(),
-                    Color   = new Color32(255, 255, 0, 0),
-                    Indices = new()
-                };
-
-                return data;
-            }
-
-            [Flags]
-            public enum ItemFlags : byte
-            {
-                Line,
-                Tri
-            }
         }
     }
 }

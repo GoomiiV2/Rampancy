@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     // This is abit flawed so i'd like to redo it at some point
     // Maybe have faces have an array of edges for the links

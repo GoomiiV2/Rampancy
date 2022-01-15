@@ -1,10 +1,7 @@
-﻿using System.IO;
-using Plugins.Rampancy.RampantC20;
-using RampantC20.Halo1;
-using UnityEditor;
+﻿using RampantC20.Halo1;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     public static class BitmapConverter
     {

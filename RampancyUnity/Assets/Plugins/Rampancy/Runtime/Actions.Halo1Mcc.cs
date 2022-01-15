@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using Plugins.Rampancy.RampantC20;
 using RampantC20;
 using RampantC20.Halo1;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     public static partial class Actions
     {
@@ -16,7 +15,7 @@ namespace Plugins.Rampancy.Runtime
         {
             var rs = RampancySentinel.GetOrCreateInScene();
 
-            var exportJmsPath = $"{Rampancy.Config.ActiveGameConfig.DataPath}/{rs.DataDir}/models/{rs.LevelName}.jms";
+            var exportJmsPath = $"{Rampancy.Cfg.ActiveGameConfig.DataPath}/{rs.DataDir}/models/{rs.LevelName}.jms";
             ExportLevelJms(exportJmsPath);
 
             var cmd = $"structure {rs.DataDir} {rs.LevelName}";
@@ -38,7 +37,7 @@ namespace Plugins.Rampancy.Runtime
             try {
                 var sb = new StringBuilder();
 
-                var tagTestDir  = Rampancy.Config.Halo1MccGameConfig.ToolBasePath;
+                var tagTestDir  = Rampancy.Cfg.Halo1MccGameConfig.ToolBasePath;
                 var initTxtPath = Path.Combine(tagTestDir, "init.txt");
                 if (File.Exists(initTxtPath)) {
                     var initTxt = File.ReadAllText(initTxtPath);
@@ -51,7 +50,7 @@ namespace Plugins.Rampancy.Runtime
                 var rampancyInitPath = Path.Combine(tagTestDir, INIT_FILE_NAME);
                 File.WriteAllText(rampancyInitPath, sb.ToString());
 
-                Rampancy.LaunchProgram(Rampancy.Config.Halo1MccGameConfig.TagTestPath, $"-windowed -exec {INIT_FILE_NAME}");
+                Rampancy.LaunchProgram(Rampancy.Cfg.Halo1MccGameConfig.TagTestPath, $"-windowed -exec {INIT_FILE_NAME}");
             }
             catch (Exception e) {
                 Debug.LogError($"Error launching tag test for Halo 1: {e}");

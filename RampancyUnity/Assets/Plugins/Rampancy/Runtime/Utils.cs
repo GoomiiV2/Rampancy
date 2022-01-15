@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Plugins.Rampancy.RampantC20;
-using Rampancy.RampantC20;
 using UnityEngine;
+using RampancyInst = Rampancy.Rampancy;
 
 namespace RampantC20
 {
     public static partial class Utils
     {
-        public static Mesh TrisToMesh(List<DebugGeoData.Item> items)
+        public static Mesh TrisToMesh(List<DebugGeoMarker> items)
         {
             Mesh          mesh    = new Mesh();
             List<Vector3> verts   = new();
@@ -45,8 +44,8 @@ namespace RampantC20
         
         public static string GetProjectRelPath(AssetDb.TagInfo tagInfo, AssetDb assetDb)
         {
-            var basse         = $"Assets/{Plugins.Rampancy.Runtime.Rampancy.Config.GameVersion}/TagData";
-            var assetBasePath = basse + assetDb.GetBaseTagPath(tagInfo);
+            var tagBaseDir    = $"Assets/{RampancyInst.Cfg.GameVersion}/TagData";
+            var assetBasePath = tagBaseDir + tagInfo.Path.Replace(Path.GetFullPath(RampancyInst.Cfg.ActiveGameConfig.TagsPath), "").TrimEnd('/', '\\');;
             assetBasePath = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
             return assetBasePath;
         }

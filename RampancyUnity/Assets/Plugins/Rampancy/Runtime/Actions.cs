@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Plugins.Rampancy.RampantC20;
+using RampantC20;
 using RampantC20.Halo1;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     // Actions to be called from menus or shortcuts or scripts
     public static partial class Actions
@@ -70,7 +70,7 @@ namespace Plugins.Rampancy.Runtime
 
         public static void LaunchTagTest(string map)
         {
-            switch (Rampancy.Config.GameVersion) {
+            switch (Rampancy.Cfg.GameVersion) {
                 case GameVersions.Halo1Mcc:
                     H1_LaunchTagTest(map);
                     break;

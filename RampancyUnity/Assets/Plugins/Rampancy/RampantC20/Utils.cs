@@ -1,9 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Ionic.Zlib;
-using Plugins.Rampancy.RampantC20;
 
 namespace RampantC20
 {

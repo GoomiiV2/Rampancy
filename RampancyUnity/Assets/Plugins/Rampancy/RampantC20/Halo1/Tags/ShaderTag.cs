@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Plugins.Rampancy.RampantC20;
 
 namespace RampantC20.Halo1
 {

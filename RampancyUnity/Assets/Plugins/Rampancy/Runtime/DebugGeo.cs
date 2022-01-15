@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using Plugins.Rampancy.RampantC20;
-using Rampancy.RampantC20;
 using RampantC20;
 using UnityEngine;
 
@@ -8,7 +6,7 @@ namespace Plugins.Rampancy.Runtime
 {
     public class DebugGeoObj : MonoBehaviour
     {
-        public static GameObject Create(DebugGeoData.Item item)
+        public static GameObject Create(DebugGeoMarker item)
         {
             var root = GameObject.Find("Frame/DebugGeo");
             if (root == null) {
@@ -18,13 +16,8 @@ namespace Plugins.Rampancy.Runtime
             }
 
             root.hideFlags = HideFlags.DontSaveInEditor;
-
-            var name = "Error Geo";
-            if (item.Color.r == 255 && item.Color.g == 0 && item.Color.b == 0 && item.Flags == DebugGeoData.Item.ItemFlags.Tri) {
-                name = "Degenerate Tri";
-            }
-
-            var obj = new GameObject(name);
+            
+            var obj = new GameObject(item.Name);
             obj.transform.parent   = root.transform;
             
             var center = Vector3.zero;
@@ -46,7 +39,7 @@ namespace Plugins.Rampancy.Runtime
                 point.GetComponent<MeshRenderer>().material = mat;
             }
 
-            var mesh       = Utils.TrisToMesh(new List<DebugGeoData.Item> { item });
+            var mesh       = Utils.TrisToMesh(new List<DebugGeoMarker> { item });
             var meshFilter = obj.AddComponent<MeshFilter>();
             var meshRender = obj.AddComponent<MeshRenderer>();
             meshFilter.mesh = mesh;

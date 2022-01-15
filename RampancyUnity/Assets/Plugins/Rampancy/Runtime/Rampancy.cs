@@ -2,23 +2,22 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Plugins.Rampancy.RampantC20;
-using Plugins.Rampancy.Runtime.UI;
-using Rampancy.RampantC20;
+using Rampancy.UI;
+using RampantC20;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     [InitializeOnLoad]
     public class Rampancy
     {
-        public static Config  Config  = new();
+        public static Config  Cfg  = new();
         public static AssetDb AssetDB = new();
 
-        public static string BaseUnityDir => Path.Combine("Assets", $"{Config.GameVersion}");
+        public static string BaseUnityDir => Path.Combine("Assets", $"{Cfg.GameVersion}");
         public static string SceneDir     => Path.Combine(BaseUnityDir, Statics.SrcLevelsName);
         
         static Rampancy()
@@ -28,10 +27,10 @@ namespace Plugins.Rampancy.Runtime
 
         public static void Init()
         {
-            Config = Config.Load();
+            Cfg = Config.Load();
 
-            if (Config == null) {
-                Config = new Config();
+            if (Cfg == null) {
+                Cfg = new Config();
 
                 EditorApplication.CallbackFunction showSettings = null;
                 showSettings = () =>
@@ -42,7 +41,7 @@ namespace Plugins.Rampancy.Runtime
                 EditorApplication.update += showSettings;
             }
             else {
-                AssetDB.ScanTags();
+                AssetDB.ScanTags(Cfg.ActiveGameConfig.TagsPath);
             }
 
             EditorSceneManager.sceneSaving += (scene, path) =>
@@ -65,7 +64,7 @@ namespace Plugins.Rampancy.Runtime
             };
         }
 
-        public static void RunToolCommand(string cmdStr) => RunProgram(Config.ActiveGameConfig.ToolPath, cmdStr);
+        public static void RunToolCommand(string cmdStr) => RunProgram(Cfg.ActiveGameConfig.ToolPath, cmdStr);
 
         // Run a program like tool hidden and log the output
         public static void RunProgram(string program, string cmd)
@@ -74,7 +73,7 @@ namespace Plugins.Rampancy.Runtime
                 ToolOutput.LogInfo($"Running command: {Path.GetFileName(program)} {cmd}");
 
                 var ps = new ProcessStartInfo();
-                ps.WorkingDirectory       = Config.ActiveGameConfig.ToolBasePath;
+                ps.WorkingDirectory       = Cfg.ActiveGameConfig.ToolBasePath;
                 ps.FileName               = program;
                 ps.Arguments              = cmd;
                 ps.RedirectStandardOutput = true;
@@ -103,7 +102,7 @@ namespace Plugins.Rampancy.Runtime
                 ToolOutput.LogInfo($"Launching program: {Path.GetFileName(program)} {cmd}");
 
                 var ps = new ProcessStartInfo();
-                ps.WorkingDirectory       = Config.ActiveGameConfig.ToolBasePath;
+                ps.WorkingDirectory       = Cfg.ActiveGameConfig.ToolBasePath;
                 ps.FileName               = program;
                 ps.Arguments              = cmd;
                 ps.RedirectStandardOutput = true;
@@ -130,7 +129,7 @@ namespace Plugins.Rampancy.Runtime
         {
             try {
                 var ps = new ProcessStartInfo();
-                ps.WorkingDirectory = Config.ActiveGameConfig.ToolBasePath;
+                ps.WorkingDirectory = Cfg.ActiveGameConfig.ToolBasePath;
                 ps.FileName         = "cmd.exe";
                 ps.Arguments        = cmd;
                 ps.UseShellExecute  = true;

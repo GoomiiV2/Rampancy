@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace Plugins.Rampancy.RampantC20
+namespace RampantC20
 {
     // Scan and find tags / data in Halo
     public class AssetDb
@@ -12,10 +12,9 @@ namespace Plugins.Rampancy.RampantC20
 
         public Dictionary<string, Dictionary<string, TagInfo>> TagLookup = new();
 
-        public void ScanTags()
+        public void ScanTags(string tagDir)
         {
             TagLookup.Clear();
-            var tagDir  = Runtime.Rampancy.Config.ActiveGameConfig.TagsPath;
             var dirInfo = new DirectoryInfo(tagDir);
             var files   = dirInfo.GetFiles("*", SearchOption.AllDirectories);
             foreach (var fileInfo in files) {
@@ -74,8 +73,6 @@ namespace Plugins.Rampancy.RampantC20
 
             return tagInfos;
         }
-
-        public string GetBaseTagPath(TagInfo tagInfo) => tagInfo.Path.Replace(Path.GetFullPath(Runtime.Rampancy.Config.ActiveGameConfig.TagsPath), "").TrimEnd('/', '\\');
 
         public struct TagInfo
         {

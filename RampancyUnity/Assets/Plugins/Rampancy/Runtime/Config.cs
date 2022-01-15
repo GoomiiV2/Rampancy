@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
-using Plugins.Rampancy.RampantC20;
+using RampantC20;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     public class Config
     {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
     // A half edge mesh for doing edits on :>
     // This isn't a proper half edge mesh, its not fully linked twin edges and each vert with different attributes is separate

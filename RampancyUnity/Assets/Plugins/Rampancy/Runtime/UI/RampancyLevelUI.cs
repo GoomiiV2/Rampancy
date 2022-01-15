@@ -1,9 +1,9 @@
 ﻿using System;
-using Plugins.Rampancy.RampantC20;
+using RampantC20;
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime.UI
+namespace Rampancy.UI
 {
     public class RampancyLevelUI : EditorWindow
     {
@@ -46,7 +46,7 @@ namespace Plugins.Rampancy.Runtime.UI
         {
             if (Sentinel == null) return;
 
-            if (GUILayout.Button($"Sync materials from {Rampancy.Config.GameVersion}"))
+            if (GUILayout.Button($"Sync materials from {Rampancy.Cfg.GameVersion}"))
                 SyncMats();
 
             foreach (var matInfo in Sentinel.MatIdToPathLookup_Paths) {
@@ -59,7 +59,7 @@ namespace Plugins.Rampancy.Runtime.UI
 
         private static void SyncMats()
         {
-            Action func = Rampancy.Config.GameVersion switch
+            Action func = Rampancy.Cfg.GameVersion switch
             {
                 GameVersions.Halo1Mcc => Actions.H1_SyncMaterials,
                 _ => null

@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Plugins.Rampancy.Runtime.UI
+namespace Rampancy.UI
 {
     // TODO: Do this better :>
     public class ToolOutput : EditorWindow
@@ -29,9 +29,9 @@ namespace Plugins.Rampancy.Runtime.UI
         {
             GUILayout.BeginHorizontal();
             
-            var clearBefore = Rampancy.Config.ToolOutputClearOnCompile;
-            Rampancy.Config.ToolOutputClearOnCompile = GUILayout.Toggle(Rampancy.Config.ToolOutputClearOnCompile, "Clear on compile");
-            if (clearBefore != Rampancy.Config.ToolOutputClearOnCompile) Rampancy.Config.Save();
+            var clearBefore = Rampancy.Cfg.ToolOutputClearOnCompile;
+            Rampancy.Cfg.ToolOutputClearOnCompile = GUILayout.Toggle(Rampancy.Cfg.ToolOutputClearOnCompile, "Clear on compile");
+            if (clearBefore != Rampancy.Cfg.ToolOutputClearOnCompile) Rampancy.Cfg.Save();
             
             if (GUILayout.Button("Clear")) Clear();
             GUILayout.EndHorizontal();

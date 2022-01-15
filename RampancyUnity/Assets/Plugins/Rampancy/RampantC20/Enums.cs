@@ -1,4 +1,4 @@
-﻿namespace Plugins.Rampancy.RampantC20
+﻿namespace RampantC20
 {
     public enum GameVersions : short
     {

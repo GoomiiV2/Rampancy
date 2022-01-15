@@ -1,4 +1,4 @@
-﻿namespace Plugins.Rampancy.Runtime
+﻿namespace Rampancy
 {
     public class ResizeableArray<T>
     {
