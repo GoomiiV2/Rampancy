@@ -23,6 +23,8 @@ namespace Rampancy
 
                 meshFiler.mesh = JmsConverter.JmsToMesh(jmsModel);
                 JmsConverter.AddMatsToRender(meshRender, jmsModel);
+                
+                Debug.Log("Imported JMS");
             }
         }
 

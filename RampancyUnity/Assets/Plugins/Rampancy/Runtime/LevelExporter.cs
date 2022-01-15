@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -19,6 +20,8 @@ namespace Rampancy
             
             var jms      = JmsConverter.MeshToJms(mesh, meshData.matNames);
             jms.Save(path);
+            
+            Debug.Log($"Exported Level {Path.GetFileName(path)}");
         }
 
         // Fix T-Junctions by converting to a wingedMesh, finding, fixing and back to a unity mesh
@@ -39,12 +42,22 @@ namespace Rampancy
             var cMesh = GetRcsgCollisionMesh();
             var jms      = JmsConverter.MeshToJms(cMesh, new[] { "none" });
             jms.Save(path);
+            
+            Debug.Log($"Exported Level Collision {Path.GetFileName(path)}");
         }
         
         public static (Mesh mesh, string[] matNames) GetRcsgMesh()
         {
             var rootGo     = GameObject.Find("Frame/LevelGeo");
-            var rcsgMeshes = GameObject.FindObjectsOfType<GameObject>().Where(x => x.transform.IsChildOf(rootGo.transform) && x.name == "[generated-render-mesh]").ToList();
+            if (rootGo == null) Debug.LogError("No Frame/LevelGeo found, did you create this level from the menu?\nLevels should be created from the \"Rampancy > Create New Level\" UI menu");
+
+            var allGameObjects = GameObject.FindObjectsOfType<GameObject>();
+            if (allGameObjects == null) Debug.LogError("No GameObjects found, is the scene empty?");
+
+            var renderMeshes = allGameObjects.Where(x => x.transform.IsChildOf(rootGo.transform) && x.name == "[generated-render-mesh]");
+            if (!renderMeshes.Any()) Debug.LogError("No realtime csg meshes where found.\nPlease check you have at least one brush in the level");
+            
+            var rcsgMeshes   = renderMeshes.ToList();
             
             var mesh     = new Mesh();
             var combines = new List<CombineInstance>(rcsgMeshes.Count);
@@ -90,7 +103,7 @@ namespace Rampancy
             var mats = new Material[matNames.Length];
             for (int i = 0; i < matNames.Length; i++) {
                 var mat = AssetDatabase.FindAssets($"{matNames[i]}_mat");
-                if (mat != null && mat.Length > 0) {
+                if (mat is {Length: > 0}) {
                     var assetPath = AssetDatabase.GUIDToAssetPath(mat[0]);
                     mats[i] = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
                 }

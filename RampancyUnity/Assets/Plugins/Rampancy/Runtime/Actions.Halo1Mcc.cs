@@ -20,6 +20,8 @@ namespace Rampancy
 
             var cmd = $"structure {rs.DataDir} {rs.LevelName}";
             Rampancy.RunToolCommand(cmd);
+            
+            Debug.Log("Compiled Halo 1 structure");
         }
 
         public static void H1_CompileToolLightmaps(bool preview, float quality)
@@ -28,6 +30,8 @@ namespace Rampancy
             var path = rs.DataDir.Replace("/", "\\");
             var cmd  = $@"lightmaps ""{path}\{rs.LevelName}"" {rs.LevelName} {(preview ? 0 : 1)} {quality}";
             Rampancy.RunToolCommand(cmd);
+            
+            Debug.Log("Compiled Halo 1 lightmap");
         }
 
         public static void H1_LaunchTagTest(string map)
@@ -51,6 +55,8 @@ namespace Rampancy
                 File.WriteAllText(rampancyInitPath, sb.ToString());
 
                 Rampancy.LaunchProgram(Rampancy.Cfg.Halo1MccGameConfig.TagTestPath, $"-windowed -exec {INIT_FILE_NAME}");
+                
+                Debug.Log("Launched Halo 1 Tag Test");
             }
             catch (Exception e) {
                 Debug.LogError($"Error launching tag test for Halo 1: {e}");
@@ -60,6 +66,8 @@ namespace Rampancy
         public static void H1_SyncMaterials()
         {
             H1_ImportShaderEnvironments();
+            
+            Debug.Log("Synced Halo 1 shaders from tags");
         }
 
         public static Texture2D H1_ImportBitmap(AssetDb.TagInfo tagInfo, bool createBasicMat = false, bool convertToNormal = false)
