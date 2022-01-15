@@ -24,7 +24,7 @@ The project is still early in development and some core issues need to be worked
 
 * Download and Install [Unity 2021.2.0b4](https://unity3d.com/unity/beta/2021.2.0b4)
 * Download the mod tools for the Halo games you want, eg. [Halo 1 on Steam](steam://install/1532190)
-* Clone this project ```git clone --recurse-submodules https://github.com/GoomiiV2/Rampancy.git```
+* Clone this project from a command promt with admin (this is due to windows being annoying about creating symlinks) ```git clone --recurse-submodules -c core.symlinks=true https://github.com/GoomiiV2/Rampancy.git```
 * Open the project (Rampancy/Unity directory) in Unity
 * Browse and set the paths for the mod tools you will use
 * Click the Rampancy menu at the top and then `Debug > Open Level UI > Materials` and then click `Sync Materials from`
