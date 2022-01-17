@@ -38,6 +38,8 @@ The project is still early in development and some core issues need to be worked
 * * * In `Sapien`, open the map to add and configure player spawns
 * * Once configured (if needed), press `F5` in Unity to run the map in `halo_tag_test`
 
+A bit more indepth example of creating a level: https://github.com/GoomiiV2/Rampancy/wiki/Creating-a-new-level
+
 ## Supported Games
 * Halo 1 MCC
 * Halo 3 (Eventually)
