@@ -1,4 +1,6 @@
-﻿using RampantC20.Halo3;
+﻿using System.IO;
+using Plugins.Rampancy.Runtime;
+using RampantC20.Halo3;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,7 +20,9 @@ namespace Rampancy
         {
             Debug.Log("Importing Ass :D");
             
-            var ass = Ass.Load(path);
+            var ass  = Ass.Load(path);
+            var name = Path.GetFileNameWithoutExtension(path);
+            AssConverter.ImportToScene(ass, name);
         }
     }
 }

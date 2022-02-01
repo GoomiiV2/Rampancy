@@ -226,8 +226,8 @@ namespace RampantC20.Halo3
             var vert = new Vertex
             {
                 Position  = ParseVector3(sr),
-                Rotation  = ParseVector3(sr),
-                VertColor = ParseVector3(sr)
+                Normal  = ParseVector3(sr),
+                Color = ParseVector3(sr)
             };
 
             var numVertWeight = int.Parse(sr.ReadValidLine());
@@ -283,11 +283,11 @@ namespace RampantC20.Halo3
                 UniqueId         = int.Parse(sr.ReadValidLine()),
                 ParentId         = int.Parse(sr.ReadValidLine()),
                 InheritanceFlags = int.Parse(sr.ReadValidLine()),
-                Rotation         = ParseQuaternion(sr),
-                Position         = ParseVector3(sr),
+                Rotation         = ParseQuaternionUnity(sr),
+                Position         = ParseVector3Unity(sr),
                 Scale            = float.Parse(sr.ReadValidLine()),
-                PivotRotation    = ParseQuaternion(sr),
-                PivotPosition    = ParseVector3(sr),
+                PivotRotation    = ParseQuaternionUnity(sr),
+                PivotPosition    = ParseVector3Unity(sr),
                 PivotScale       = float.Parse(sr.ReadValidLine())
             };
 
@@ -301,12 +301,28 @@ namespace RampantC20.Halo3
             var vec3 = new Vector3(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]));
             return vec3;
         }
+        
+        protected static UnityEngine.Vector3 ParseVector3Unity(StreamReader sr)
+        {
+            var line = sr.ReadValidLine();
+            var nums = line.Split('\t');
+            var vec3 = new UnityEngine.Vector3(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]));
+            return vec3;
+        }
 
         protected static Quaternion ParseQuaternion(StreamReader sr)
         {
             var line = sr.ReadValidLine();
             var nums = line.Split('\t');
             var quat = new Quaternion(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]), float.Parse(nums[3]));
+            return quat;
+        }
+        
+        protected static UnityEngine.Quaternion ParseQuaternionUnity(StreamReader sr)
+        {
+            var line = sr.ReadValidLine();
+            var nums = line.Split('\t');
+            var quat = new UnityEngine.Quaternion(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]), float.Parse(nums[3]));
             return quat;
         }
     }

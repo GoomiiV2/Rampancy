@@ -16,7 +16,7 @@ namespace Rampancy.UI
             get
             {
                 if (_Sentinel == null) {
-                    _Sentinel = GameObject.Find(RampancySentinel.NAME).GetComponent<RampancySentinel>();
+                    _Sentinel = GameObject.Find(RampancySentinel.NAME)?.GetComponent<RampancySentinel>();
                 }
 
                 return _Sentinel;

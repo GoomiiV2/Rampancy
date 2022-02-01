@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
-using JetBrains.Annotations;
+using UnityEngine;
+using Quaternion = System.Numerics.Quaternion;
+using Vector3 = System.Numerics.Vector3;
 
 namespace RampantC20.Halo3
 {
@@ -10,7 +11,7 @@ namespace RampantC20.Halo3
         public Header          Head      = new();
         public List<Material>  Materials = new();
         public List<AssObject> Objects   = new();
-        public List<Instance>  Instances  = new();
+        public List<Instance>  Instances = new();
 
         public class Header
         {
@@ -32,11 +33,11 @@ namespace RampantC20.Halo3
             public string Name;
             public string Group;
 
-            public             BmFlags?      Flags       = null;
-            [CanBeNull] public LmRes         LmRes       = null;
-            [CanBeNull] public LmBasic       Basic       = null;
-            [CanBeNull] public LmAttenuation Attenuation = null;
-            [CanBeNull] public LmFrustum     Fustrum     = null;
+            public BmFlags?      Flags       = null;
+            public LmRes         LmRes       = null;
+            public LmBasic       Basic       = null;
+            public LmAttenuation Attenuation = null;
+            public LmFrustum     Fustrum     = null;
         }
 
         [Flags]
@@ -150,8 +151,8 @@ namespace RampantC20.Halo3
         public class Vertex
         {
             public Vector3 Position;
-            public Vector3 Rotation;
-            public Vector3 VertColor;
+            public Vector3 Normal;
+            public Vector3 Color;
 
             public List<VertexWeight> Weights;
             public List<Vector3>      Uvws;
@@ -171,19 +172,19 @@ namespace RampantC20.Halo3
             public int Vert3Idx;
         }
 
-        public class Instance
+        public class Instance : MonoBehaviour
         {
-            public int        ObjectIdx;
-            public string     Name;
-            public int        UniqueId;
-            public int        ParentId;
-            public int        InheritanceFlags;
-            public Quaternion Rotation;
-            public Vector3    Position;
-            public float      Scale;
-            public Quaternion PivotRotation;
-            public Vector3    PivotPosition;
-            public float      PivotScale;
+            public int                    ObjectIdx;
+            public string                 Name;
+            public int                    UniqueId;
+            public int                    ParentId;
+            public int                    InheritanceFlags;
+            public UnityEngine.Quaternion Rotation;
+            public UnityEngine.Vector3    Position;
+            public float                  Scale;
+            public UnityEngine.Quaternion PivotRotation;
+            public UnityEngine.Vector3    PivotPosition;
+            public float                  PivotScale;
         }
     }
 }
