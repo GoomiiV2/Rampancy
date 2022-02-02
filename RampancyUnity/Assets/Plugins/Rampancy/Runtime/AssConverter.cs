@@ -32,35 +32,51 @@ namespace Plugins.Rampancy.Runtime
                     instanceGo.transform.parent = rootGo.transform;
                 }
             }
+            
+            rootGo.transform.rotation   = Quaternion.Euler(-90, 0, 0);
+            rootGo.transform.localScale = new Vector3(-1, 1, 1);
         }
 
         public static GameObject CreateInstanceMesh(Ass.Instance instance, Dictionary<int, MeshAndMatIndexes> meshLookup)
         {
-            var go = new GameObject($"Instance: {instance.Name}");
+            var go     = new GameObject($"Instance: {instance.Name}");
+            var meshGo = new GameObject($"Mesh");
 
-            var rot   = Quaternion.Euler(new Vector3(-90, 0, 0));
+            var rot   = Quaternion.Euler(new Vector3(0, 0, 0));
             var scale = new Vector3(Statics.ExportScale, Statics.ExportScale, Statics.ExportScale);
 
-            var localPosScaled = Vector3.Scale(scale, instance.Position).ToYUp();
-            var pivotPosScaled = Vector3.Scale(scale, instance.PivotPosition).ToYUp();
+            var localPosScaled = Vector3.Scale(scale, instance.Position);
+            var pivotPosScaled = Vector3.Scale(scale, instance.PivotPosition);
 
-            var localRot     = Quaternion.Euler(instance.Rotation.eulerAngles.y, -instance.Rotation.eulerAngles.z, instance.Rotation.eulerAngles.x);
-            var pivotRot     = Quaternion.Euler(instance.PivotRotation.eulerAngles.y, instance.PivotRotation.eulerAngles.z, instance.PivotRotation.eulerAngles.x);
-            var combinmedRot = (localRot * pivotRot).normalized;
+            var localRot     = Quaternion.Euler(instance.Rotation.eulerAngles);
+            var pivotRot     = Quaternion.Euler(instance.PivotRotation.eulerAngles);
+            /*var combinmedRot = (localRot * pivotRot).normalized;
 
             var pos = (localRot * pivotPosScaled * instance.Scale + localPosScaled);
             
             go.transform.position   = new Vector3(pos.x, pos.y, pos.z);
             go.transform.rotation   = new Quaternion(combinmedRot.x, combinmedRot.y, combinmedRot.z, combinmedRot.w);
+            go.transform.localScale = Vector3.one * instance.Scale;*/
+
+            meshGo.transform.SetParent(go.transform);
+            
+            meshGo.transform.rotation   = pivotRot;
+            meshGo.transform.position   = pivotPosScaled;
+            meshGo.transform.localScale = Vector3.one * instance.PivotScale;
+
+            go.transform.rotation   = localRot;
+            go.transform.position   = localPosScaled;
             go.transform.localScale = Vector3.one * instance.Scale;
+            
+            //meshGo.transform.parent = go.transform;
 
-            var mr = go.AddComponent<MeshRenderer>();
-            var mf = go.AddComponent<MeshFilter>();
+            var mr = meshGo.AddComponent<MeshRenderer>();
+            var mf = meshGo.AddComponent<MeshFilter>();
 
-            var instanceData = go.AddComponent<Ass.Instance>();
+            var instanceData = meshGo.AddComponent<Ass.Instance>();
             instanceData.ObjectIdx = instance.ObjectIdx;
             //instanceData.Name             = instance.Name;
-            instanceData.Name             = $"Rot: {combinmedRot}";
+            //instanceData.Name             = $"Rot: {combinmedRot}";
             instanceData.UniqueId         = instance.UniqueId;
             instanceData.ParentId         = instance.ParentId;
             instanceData.InheritanceFlags = instance.InheritanceFlags;
@@ -132,8 +148,8 @@ namespace Plugins.Rampancy.Runtime
                 //verts[i]  = rot * Vector3.Scale(scale, assVert.Position.ToUnity());
                 //norms[i]  = rot * assVert.Normal.ToUnity();
 
-                verts[i]  = Vector3.Scale(scale, assVert.Position.ToUnity()).ToYUp();
-                norms[i]  = assVert.Normal.ToUnity().ToYUp();
+                verts[i]  = Vector3.Scale(scale, assVert.Position.ToUnity());
+                norms[i]  = assVert.Normal.ToUnity();
                 colors[i] = assVert.Color.ToUnity();
 
                 //verts[i] = new Vector3(-verts[i].x, verts[i].y, verts[i].z);
@@ -148,7 +164,8 @@ namespace Plugins.Rampancy.Runtime
                 var tri = assMesh.Tris[i];
 
                 if (!subMeshes.ContainsKey(tri.MatIndex)) subMeshes.Add(tri.MatIndex, new List<int>(50 * 3));
-                subMeshes[tri.MatIndex].AddRange(new[] {tri.Vert3Idx, tri.Vert2Idx, tri.Vert1Idx});
+                //subMeshes[tri.MatIndex].AddRange(new[] {tri.Vert3Idx, tri.Vert2Idx, tri.Vert1Idx});
+                subMeshes[tri.MatIndex].AddRange(new[] {tri.Vert1Idx, tri.Vert2Idx, tri.Vert3Idx});
             }
 
             mesh.SetVertices(verts);

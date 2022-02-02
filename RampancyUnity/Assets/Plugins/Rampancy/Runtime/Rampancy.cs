@@ -143,5 +143,22 @@ namespace Rampancy
                 return null;
             }
         }
+
+        // Run a tool and capture the output to std out as a string
+        public static string GetToolOutput(string toolPath, string args)
+        {
+            Process process = new Process();
+            process.StartInfo.FileName               = toolPath;
+            process.StartInfo.Arguments              = args;
+            process.StartInfo.UseShellExecute        = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError  = true;
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            string err    = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            return output;
+        }
     }
 }
