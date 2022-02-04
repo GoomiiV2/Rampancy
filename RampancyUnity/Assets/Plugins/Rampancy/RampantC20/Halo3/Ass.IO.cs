@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
-using Newtonsoft.Json.Serialization;
 
 namespace RampantC20.Halo3
 {
@@ -14,7 +13,7 @@ namespace RampantC20.Halo3
             var ass = new Ass();
             var sr  = new StreamReader(filePath);
 
-            try {
+            //try {
                 ass.Head = ParseHeader(sr);
 
                 // Materials
@@ -39,11 +38,11 @@ namespace RampantC20.Halo3
                 }
 
                 return ass;
-            }
+            /*}
             catch (Exception e) {
                 Console.WriteLine(e);
                 return null;
-            }
+            }*/
         }
 
         protected static Header ParseHeader(StreamReader sr)
@@ -159,6 +158,8 @@ namespace RampantC20.Halo3
                         return ParseMeshObject(sr);
                     case ObjectType.GENERIC_LIGHT:
                         return ParseLightObject(sr);
+                    case ObjectType.SPHERE:
+                        return ParseSphereObject(sr);
                     default:
                         Debug.WriteLine($"Unsupported type: {objType}");
                         return null;
@@ -194,6 +195,20 @@ namespace RampantC20.Halo3
             }
 
             return mesh;
+        }
+
+        protected static SphereObject ParseSphereObject(StreamReader sr)
+        {
+            var sphere = new SphereObject
+            {
+                Type = ObjectType.SPHERE,
+                Filepath = sr.ReadValidLine(),
+                Name = sr.ReadValidLine(),
+                MatIdx = int.Parse(sr.ReadValidLine()),
+                Radius = float.Parse(sr.ReadValidLine())
+            };
+
+            return sphere;
         }
 
         protected static LightObject ParseLightObject(StreamReader sr)
@@ -283,11 +298,11 @@ namespace RampantC20.Halo3
                 UniqueId         = int.Parse(sr.ReadValidLine()),
                 ParentId         = int.Parse(sr.ReadValidLine()),
                 InheritanceFlags = int.Parse(sr.ReadValidLine()),
-                Rotation         = ParseQuaternionUnity(sr),
-                Position         = ParseVector3Unity(sr),
+                Rotation         = ParseQuaternion(sr),
+                Position         = ParseVector3(sr),
                 Scale            = float.Parse(sr.ReadValidLine()),
-                PivotRotation    = ParseQuaternionUnity(sr),
-                PivotPosition    = ParseVector3Unity(sr),
+                PivotRotation    = ParseQuaternion(sr),
+                PivotPosition    = ParseVector3(sr),
                 PivotScale       = float.Parse(sr.ReadValidLine())
             };
 
@@ -301,7 +316,8 @@ namespace RampantC20.Halo3
             var vec3 = new Vector3(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]));
             return vec3;
         }
-        
+
+#if UNITY_5
         protected static UnityEngine.Vector3 ParseVector3Unity(StreamReader sr)
         {
             var line = sr.ReadValidLine();
@@ -309,6 +325,7 @@ namespace RampantC20.Halo3
             var vec3 = new UnityEngine.Vector3(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]));
             return vec3;
         }
+#endif
 
         protected static Quaternion ParseQuaternion(StreamReader sr)
         {
@@ -317,7 +334,8 @@ namespace RampantC20.Halo3
             var quat = new Quaternion(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]), float.Parse(nums[3]));
             return quat;
         }
-        
+
+#if UNITY_5
         protected static UnityEngine.Quaternion ParseQuaternionUnity(StreamReader sr)
         {
             var line = sr.ReadValidLine();
@@ -325,5 +343,6 @@ namespace RampantC20.Halo3
             var quat = new UnityEngine.Quaternion(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]), float.Parse(nums[3]));
             return quat;
         }
+#endif
     }
 }

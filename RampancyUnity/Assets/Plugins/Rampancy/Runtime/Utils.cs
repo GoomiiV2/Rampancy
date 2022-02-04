@@ -50,6 +50,24 @@ namespace RampantC20
             return assetBasePath;
         }
 
+        public static string GetProjectRelPath(string tagPath, GameVersions? version = null, string unityBaseDir = "")
+        {
+            var ver = version ?? RampancyInst.Cfg.GameVersion;
+            var gameCfg = RampancyInst.Cfg.GetGameConfig(ver);
+
+            var tagBaseDir = $"Assets/{ver}/TagData";
+            var assetBasePath = Path.Combine(unityBaseDir, tagBaseDir, GetTagRelPath(tagPath, gameCfg.TagsPath));
+            assetBasePath = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
+            return assetBasePath;
+        }
+
+        public static string GetTagRelPath(string tagPath, string tagBaseDir)
+        {
+            var subCount = tagBaseDir.Length + 1;
+            var relPath = tagPath.Substring(subCount);
+            return relPath;
+        }
+
         public static Texture2D BitMapToTex2D(int width, int height, byte[] pixels)
         {
             var tex = new Texture2D(width, height, TextureFormat.BGRA32, true);

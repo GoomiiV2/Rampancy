@@ -48,7 +48,7 @@ namespace Rampancy.UI
                 SyncMats();
 
             if (Sentinel == null) return;
-            
+
             foreach (var matInfo in Sentinel.MatIdToPathLookup_Paths) {
             }
         }
@@ -62,7 +62,8 @@ namespace Rampancy.UI
             Action func = Rampancy.Cfg.GameVersion switch
             {
                 GameVersions.Halo1Mcc => Actions.H1_SyncMaterials,
-                _ => null
+                GameVersions.Halo3    => Actions.H3_ImportShaders,
+                _                     => null
             };
 
             func?.Invoke();

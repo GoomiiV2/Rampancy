@@ -62,5 +62,7 @@ namespace Rampancy
     public class H3GameConfig : GameConfig
     {
         public override string TagTestPath => Path.Combine(ToolBasePath, "halo3_tag_test.exe");
+        
+        [JsonIgnore] public string ToolFastPath => Path.Combine(ToolBasePath, "tool_fast.exe");
     }
 }

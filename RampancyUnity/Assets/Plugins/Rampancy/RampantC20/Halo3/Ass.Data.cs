@@ -43,6 +43,7 @@ namespace RampantC20.Halo3
         [Flags]
         public enum BmFlags : int
         {
+            None,
             TwoSided,
             TransparentOneSided,
             TransparentTwoSided,
@@ -131,6 +132,12 @@ namespace RampantC20.Halo3
             public List<Triangle> Tris;
         }
 
+        public class SphereObject : AssObject
+        {
+            public int MatIdx;
+            public float Radius;
+        }
+
         public enum ObjectType
         {
             GENERIC_LIGHT,
@@ -172,18 +179,18 @@ namespace RampantC20.Halo3
             public int Vert3Idx;
         }
 
-        public class Instance : MonoBehaviour
+        public class Instance
         {
             public int                    ObjectIdx;
             public string                 Name;
             public int                    UniqueId;
             public int                    ParentId;
             public int                    InheritanceFlags;
-            public UnityEngine.Quaternion Rotation;
-            public UnityEngine.Vector3    Position;
+            public Quaternion Rotation;
+            public Vector3    Position;
             public float                  Scale;
-            public UnityEngine.Quaternion PivotRotation;
-            public UnityEngine.Vector3    PivotPosition;
+            public Quaternion PivotRotation;
+            public Vector3    PivotPosition;
             public float                  PivotScale;
         }
     }

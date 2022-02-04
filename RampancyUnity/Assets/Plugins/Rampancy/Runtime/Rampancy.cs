@@ -67,7 +67,7 @@ namespace Rampancy
         public static void RunToolCommand(string cmdStr) => RunProgram(Cfg.ActiveGameConfig.ToolPath, cmdStr);
 
         // Run a program like tool hidden and log the output
-        public static void RunProgram(string program, string cmd)
+        public static void RunProgram(string program, string cmd, bool dontLog = false, bool hideWidnow = false)
         {
             try {
                 ToolOutput.LogInfo($"Running command: {Path.GetFileName(program)} {cmd}");
@@ -76,17 +76,20 @@ namespace Rampancy
                 ps.WorkingDirectory       = Cfg.ActiveGameConfig.ToolBasePath;
                 ps.FileName               = program;
                 ps.Arguments              = cmd;
-                ps.RedirectStandardOutput = true;
-                ps.RedirectStandardError  = true;
+                ps.RedirectStandardOutput = !dontLog;
+                ps.RedirectStandardError  = !dontLog;
                 ps.UseShellExecute        = false;
+                ps.CreateNoWindow = hideWidnow;
                 ps.WindowStyle            = ProcessWindowStyle.Hidden;
                 var process = Process.Start(ps);
 
-                process.OutputDataReceived += (_, args) => ToolOutput.LogInfo(args.Data);  //Debug.Log(args.Data);
-                process.ErrorDataReceived  += (_, args) => ToolOutput.LogError(args.Data); //Debug.LogError(args.Data);
+                if (!dontLog) {
+                    process.OutputDataReceived += (_, args) => ToolOutput.LogInfo(args.Data);  //Debug.Log(args.Data);
+                    process.ErrorDataReceived  += (_, args) => ToolOutput.LogError(args.Data); //Debug.LogError(args.Data);
 
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                }
 
                 process.WaitForExit();
             }

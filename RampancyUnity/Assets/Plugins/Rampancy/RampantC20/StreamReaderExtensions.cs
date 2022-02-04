@@ -9,9 +9,9 @@ namespace RampantC20
             string line;
             do {
                 line = sr.ReadLine();
-            } while (line.StartsWith(";") || line == "");
+            } while (line != null && line.StartsWith(";") || line == "");
 
-            if (trimQuotes) {
+            if (trimQuotes && line != null) {
                 line = line.Trim('"');
             }
 
