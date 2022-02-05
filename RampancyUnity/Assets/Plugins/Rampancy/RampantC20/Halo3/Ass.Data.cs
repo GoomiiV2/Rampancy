@@ -186,11 +186,11 @@ namespace RampantC20.Halo3
             public int                    UniqueId;
             public int                    ParentId;
             public int                    InheritanceFlags;
-            public Quaternion Rotation;
-            public Vector3    Position;
+            public Quaternion             Rotation;
+            public Vector3                Position;
             public float                  Scale;
-            public Quaternion PivotRotation;
-            public Vector3    PivotPosition;
+            public Quaternion             PivotRotation;
+            public Vector3                PivotPosition;
             public float                  PivotScale;
         }
     }

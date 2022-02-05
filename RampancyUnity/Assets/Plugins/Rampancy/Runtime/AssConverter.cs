@@ -24,12 +24,40 @@ namespace Plugins.Rampancy.Runtime
                 }
             }
 
+            var scale = new Vector3(Statics.ExportScale, Statics.ExportScale, Statics.ExportScale);
             for (int i = 0; i < ass.Instances.Count; i++) {
                 var inst = ass.Instances[i];
 
-                if (inst.ObjectIdx != -1 && ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.MESH) {
-                    var instanceGo = CreateInstanceMesh(inst, meshes, ass);
-                    instanceGo.transform.parent = rootGo.transform;
+                if (inst.ObjectIdx != -1) {
+                    if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.MESH)
+                    {
+                        var instanceGo = CreateInstanceMesh(inst, meshes, ass);
+                        instanceGo.transform.parent = rootGo.transform;
+                    }
+                    else if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.GENERIC_LIGHT)
+                    {
+                        var light = new GameObject("Light");
+                        light.transform.position = Vector3.Scale(scale, inst.Position.ToUnity());
+                        light.transform.rotation = inst.Rotation.ToUnity();
+                        light.transform.parent = rootGo.transform;
+                    }
+                    else if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.SPHERE)
+                    {
+                        var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                        sphere.name = "Sphere";
+                        sphere.transform.position = Vector3.Scale(scale, inst.Position.ToUnity());
+                        sphere.transform.rotation = inst.Rotation.ToUnity();
+                        sphere.transform.localScale = Vector3.one * inst.Scale;
+                        sphere.transform.parent = rootGo.transform;
+                    }
+                    else if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.BOX)
+                    {
+                        var box = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        box.transform.position = Vector3.Scale(scale, inst.Position.ToUnity());
+                        box.transform.rotation = inst.Rotation.ToUnity();
+                        box.transform.localScale = Vector3.one * inst.Scale;
+                        box.transform.parent = rootGo.transform;
+                    }
                 }
             }
             
