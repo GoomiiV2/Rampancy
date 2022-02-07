@@ -50,22 +50,51 @@ namespace RampantC20
             return assetBasePath;
         }
 
-        public static string GetProjectRelPath(string tagPath, GameVersions? version = null, string unityBaseDir = "")
+        public static string GetProjectRelPath(string tagPath, GameVersions? version = null, string unityBaseDir = null)
         {
             var ver = version ?? RampancyInst.Cfg.GameVersion;
             var gameCfg = RampancyInst.Cfg.GetGameConfig(ver);
 
-            var tagBaseDir = $"Assets/{ver}/TagData";
-            var assetBasePath = Path.Combine(unityBaseDir, tagBaseDir, GetTagRelPath(tagPath, gameCfg.TagsPath));
-            assetBasePath = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
+            var tagBaseDir    = $"Assets/{ver}/TagData";
+            var assetBasePath = unityBaseDir == null ? Path.Combine(tagBaseDir, GetTagRelPath(tagPath, gameCfg.TagsPath)) : Path.Combine(unityBaseDir, tagBaseDir, GetTagRelPath(tagPath, gameCfg.TagsPath));
+            assetBasePath     = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
             return assetBasePath;
         }
 
         public static string GetTagRelPath(string tagPath, string tagBaseDir)
         {
-            var subCount = tagBaseDir.Length + 1;
-            var relPath = tagPath.Substring(subCount);
+            var tagBase = tagBaseDir.Replace("/", "\\");
+            var relPath = tagPath.Replace(tagBase, "");
             return relPath;
+        }
+
+        public static string GetDataRelPath(string dataPath, string dataBaseDir)
+        {
+            var tagBase = dataBaseDir.Replace("/", "\\");
+            var relPath = dataPath.Replace(tagBase, "");
+            return relPath;
+        }
+
+        public static string GetDataToTagPath(string dataPath)
+        {
+            if (dataPath.StartsWith("data"))
+            {
+                var path = Path.Combine("tags", dataPath.Substring(4));
+                return path;
+            }
+
+            return dataPath;
+        }
+
+        public static string GetTagToDataPath(string tagPath)
+        {
+            if (tagPath.StartsWith("tags"))
+            {
+                var path = Path.Combine("data", tagPath.Substring(4));
+                return path;
+            }
+
+            return tagPath;
         }
 
         public static Texture2D BitMapToTex2D(int width, int height, byte[] pixels)

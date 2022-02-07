@@ -18,7 +18,7 @@ namespace Rampancy.AssetProcessors
 
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
-            foreach (var imported in importedAssets)
+            /*foreach (var imported in importedAssets)
             {
                 if (imported.Contains("Halo3/TagData") && !imported.EndsWith("_mat"))
                 {
@@ -46,7 +46,7 @@ namespace Rampancy.AssetProcessors
                         Actions.CreateBasicMat(texture, path);
                     }
                 }
-            }
+            }*/
         }
     }
 }

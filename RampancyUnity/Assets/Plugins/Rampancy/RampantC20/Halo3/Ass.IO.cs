@@ -61,10 +61,15 @@ namespace RampantC20.Halo3
 
         protected static Material ParseMaterial(StreamReader sr)
         {
-            var mat = new Material
+            var name          = sr.ReadValidLine();
+            var hasCollection = name.Contains(' ');
+            var nameSplit     = hasCollection ? name.Split(' ') : null; // Skip properies for now
+            var matName       = hasCollection ? nameSplit[1] : name;
+            var mat           = new Material
             {
-                Name  = sr.ReadValidLine(),
-                Group = sr.ReadValidLine()
+                Collection = hasCollection ? nameSplit[0] : null,
+                Name       = matName.Trim(MaterialSymbols.Symbols), // the flags should already be set
+                Group      = sr.ReadValidLine()
             };
 
             var numExtras = int.Parse(sr.ReadValidLine());

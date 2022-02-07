@@ -8,7 +8,7 @@ namespace RampantC20.Halo3
     public class ShaderCollection
     {
         public         Dictionary<string, string> Mapping = new();
-        private static Regex                      Reggor  = new (@"(\w+)\t+([\w\\]+)");
+        private static Regex                      Reggor  = new (@"(\w+)\s+([\w\\]+)");
 
         public ShaderCollection(string path, bool onlyLevelShaders = false)
         {

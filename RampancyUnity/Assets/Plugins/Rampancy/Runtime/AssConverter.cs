@@ -1,71 +1,108 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Rampancy;
 using RampantC20;
 using RampantC20.Halo3;
 using UnityEditor;
 using UnityEngine;
 using MeshAndMatIndexes = System.Tuple<UnityEngine.Mesh, int[]>;
 
-namespace Plugins.Rampancy.Runtime
+namespace Rampancy
 {
-    public static class AssConverter
+    public class AssConverter
     {
-        public static void ImportToScene(Ass ass, string name)
+        public Ass AssFile;
+        public string Name;
+        public GameObject Root;
+
+        private Dictionary<int, MeshData> MeshLookup = new Dictionary<int, MeshData>();
+        private List<Material> MatLookup             = new List<Material>();
+        private Material MissingMatMat               = null;
+        private Vector3 Scale                        = new Vector3(Statics.ExportScale, Statics.ExportScale, Statics.ExportScale);
+
+        public void ImportToScene(Ass ass, string name, string assPath)
         {
-            var rootGo = new GameObject(name);
+            AssFile = ass;
+            Name    = name;
+            Root    = new GameObject(name);
 
             // Convert the meshes
-            var meshes = new Dictionary<int, MeshAndMatIndexes>(ass.Objects.Count);
             for (int i = 0; i < ass.Objects.Count; i++) {
                 var obj = ass.Objects[i];
                 if (obj.Type == Ass.ObjectType.MESH) {
                     var mesh = AssMeshToMesh(obj as Ass.MeshObject);
-                    meshes.Add(i, mesh);
+                    MeshLookup.Add(i, mesh);
                 }
             }
 
-            var scale = new Vector3(Statics.ExportScale, Statics.ExportScale, Statics.ExportScale);
+            // Get the materials
+            MissingMatMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/BaseData/uv Grid.mat");
+            var shaderCol = Actions.H3_GetShaderCollection();
+            for (int i = 0; i < ass.Materials.Count; i++)
+            {
+                var matData = ass.Materials[i];
+                if (matData.Collection != null) // Has a collection
+                {
+                    if (shaderCol.Mapping.TryGetValue(matData.Collection, out var basePath))
+                    {
+                        var shaderName  = $"{matData.Name}_mat";
+                        var shaderPath  = Path.Combine("Assets", $"{GameVersions.Halo3}", "TagData", basePath, "shaders");
+                        var foundAssets = AssetDatabase.FindAssets(shaderName, new string[] { shaderPath }).Select(x => AssetDatabase.GUIDToAssetPath(x));
+
+                        var mat = AssetDatabase.LoadAssetAtPath<Material>(foundAssets.FirstOrDefault());
+                        if (mat == null)
+                        {
+                            Debug.LogWarning($"Couldn't find shader \"{matData.Name}\" in collection {matData.Collection}, tried looking for: {shaderPath}, {shaderName} ({string.Join(",", foundAssets)})");
+                        }
+
+                        MatLookup.Add(mat ?? MissingMatMat);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Couldn't find shader \"{matData.Name}\" in collection {matData.Collection}, collection wasn't foudn in the shader_collection.txt :<");
+                        MatLookup.Add(MissingMatMat);
+                    }
+                }
+                else // no collection so look in the same dir as the ass
+                {
+                    var relPath       = Utils.GetDataRelPath(Path.GetDirectoryName(assPath), Rampancy.Cfg.Halo3MccGameConfig.DataPath);
+                    var tagRelPath    = Utils.GetDataToTagPath(relPath).Trim('\\').Replace("\\structure", "");
+                    var matName       = $"{matData.Name}_mat";
+                    var shaderDirName = Path.Combine("Assets", $"{GameVersions.Halo3}", "TagData", tagRelPath, "shaders");
+                    var foundAssets   = AssetDatabase.FindAssets(matName, new string[] { shaderDirName }).Select(x => AssetDatabase.GUIDToAssetPath(x));
+
+                    var mat = AssetDatabase.LoadAssetAtPath<Material>(foundAssets.FirstOrDefault());
+                    if (mat == null)
+                    {
+                        Debug.LogWarning($"Couldn't find shader \"{matData.Name}\" in collection {matData.Collection}, tried looking for: {shaderDirName}, ({string.Join(",", foundAssets)})");
+                    }
+
+                    MatLookup.Add(mat ?? MissingMatMat);
+                }
+            }
+
             for (int i = 0; i < ass.Instances.Count; i++) {
                 var inst = ass.Instances[i];
 
                 if (inst.ObjectIdx != -1) {
-                    if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.MESH)
+                    var objType = ass.Objects[inst.ObjectIdx].Type;
+                    var go = objType switch
                     {
-                        var instanceGo = CreateInstanceMesh(inst, meshes, ass);
-                        instanceGo.transform.parent = rootGo.transform;
-                    }
-                    else if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.GENERIC_LIGHT)
-                    {
-                        var light = new GameObject("Light");
-                        light.transform.position = Vector3.Scale(scale, inst.Position.ToUnity());
-                        light.transform.rotation = inst.Rotation.ToUnity();
-                        light.transform.parent = rootGo.transform;
-                    }
-                    else if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.SPHERE)
-                    {
-                        var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                        sphere.name = "Sphere";
-                        sphere.transform.position = Vector3.Scale(scale, inst.Position.ToUnity());
-                        sphere.transform.rotation = inst.Rotation.ToUnity();
-                        sphere.transform.localScale = Vector3.one * inst.Scale;
-                        sphere.transform.parent = rootGo.transform;
-                    }
-                    else if (ass.Objects[inst.ObjectIdx].Type == Ass.ObjectType.BOX)
-                    {
-                        var box = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        box.transform.position = Vector3.Scale(scale, inst.Position.ToUnity());
-                        box.transform.rotation = inst.Rotation.ToUnity();
-                        box.transform.localScale = Vector3.one * inst.Scale;
-                        box.transform.parent = rootGo.transform;
-                    }
+                        Ass.ObjectType.MESH          => CreateInstanceMesh(inst),
+                        Ass.ObjectType.GENERIC_LIGHT => CreateLightObject(inst),
+                        Ass.ObjectType.SPHERE        => CreateSphereObject(inst),
+                        Ass.ObjectType.BOX           => CreateBoxObject(inst),
+                        _                            => new GameObject($"Unknown Object, Type: {objType}")
+                    };
                 }
             }
             
-            rootGo.transform.rotation   = Quaternion.Euler(-90, 0, 0);
-            rootGo.transform.localScale = new Vector3(-1, 1, 1);
+            Root.transform.rotation   = Quaternion.Euler(-90, 0, 0);
+            Root.transform.localScale = new Vector3(-1, 1, 1);
         }
 
-        public static GameObject CreateInstanceMesh(Ass.Instance instance, Dictionary<int, MeshAndMatIndexes> meshLookup, Ass ass)
+        public GameObject CreateInstanceMesh(Ass.Instance instance)
         {
             var go     = new GameObject($"Instance: {instance.Name}");
             var meshGo = new GameObject($"Mesh");
@@ -92,48 +129,85 @@ namespace Plugins.Rampancy.Runtime
             var mr = meshGo.AddComponent<MeshRenderer>();
             var mf = meshGo.AddComponent<MeshFilter>();
 
-            var meshData = meshLookup[instance.ObjectIdx];
-            var matNames = meshData.Item2.Select(x => "").ToArray();
-
-            var missingMatMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/BaseData/uv Grid.mat");
+            var meshData = MeshLookup[instance.ObjectIdx];
 
             // TODO: Redo, temp
-            var newMats = new Material[matNames.Length];
+            var newMats = new Material[meshData.MatIds.Length];
             for (int i = 0; i < newMats.Length; i++)
             {
-                var matIdx = meshData.Item2[i];
+                var matIdx = meshData.MatIds[i];
                 if (matIdx == -1)
                 {
-                    newMats[i] = missingMatMat;
+                    newMats[i] = MissingMatMat;
                     continue;
                 }
 
-                var matName = ass.Materials[matIdx].Name;
+                newMats[i] = MatLookup[matIdx];
+
+                /*var matName   = AssFile.Materials[matIdx].Name;
                 var shortName = matName.Contains(' ') ? matName.Split(' ')[1] : matName;
-                var name = $"{shortName.Trim()}_mat";
-                var mats = AssetDatabase.FindAssets(name);
+                var name      = $"{shortName.Trim()}_mat";
+                var mats      = AssetDatabase.FindAssets(name);
 
                 var mat = mats.FirstOrDefault();
 
 
                 if (mat == null)
                 {
-                    newMats[i] = missingMatMat;
+                    newMats[i] = MissingMatMat;
                     Debug.Log($"Couldn't find mat for: {name} ({matName})");
                 }
                 else
                 {
                     var assetPath = AssetDatabase.GUIDToAssetPath(mat);
-                    var matData = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
-                    newMats[i] = new Material(matData);
-                }
+                    var matData   = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+                    newMats[i]    = new Material(matData);
+                }*/
             }
 
-            mr.materials = newMats;
+            mr.sharedMaterials = newMats;
+            mf.sharedMesh       = meshData.Mesh;
 
-            mf.sharedMesh = meshData.Item1;
+            go.transform.parent = Root.transform;
 
             return go;
+        }
+
+        public GameObject CreateLightObject(Ass.Instance instance)
+        {
+            var objData              = (AssFile.Objects[instance.ObjectIdx] as Ass.LightObject);
+            var light                = new GameObject("Light");
+            light.transform.position = Vector3.Scale(Scale, instance.Position.ToUnity());
+            light.transform.rotation = instance.Rotation.ToUnity();
+            light.transform.parent   = Root.transform;
+
+            return light;
+        }
+
+        public GameObject CreateSphereObject(Ass.Instance instance)
+        {
+            var objData                 = (AssFile.Objects[instance.ObjectIdx] as Ass.SphereObject);
+            var sphere                  = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.name                 = "Sphere";
+            sphere.transform.position   = Vector3.Scale(Scale, instance.Position.ToUnity());
+            sphere.transform.rotation   = instance.Rotation.ToUnity();
+            sphere.transform.localScale = Vector3.one * objData.Radius;
+            sphere.transform.parent     = Root.transform;
+
+            return sphere;
+        }
+
+        public GameObject CreateBoxObject(Ass.Instance instance)
+        {
+            var objData              = (AssFile.Objects[instance.ObjectIdx] as Ass.SphereObject);
+            var box                  = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            box.name                 = "Cube";
+            box.transform.position   = Vector3.Scale(Scale, instance.Position.ToUnity());
+            box.transform.rotation   = instance.Rotation.ToUnity();
+            box.transform.localScale = Vector3.one * instance.Scale;
+            box.transform.parent     = Root.transform;
+
+            return box;
         }
 
         public static GameObject CreateMeshGo(Mesh mesh, string name, string[] matNames)
@@ -157,7 +231,7 @@ namespace Plugins.Rampancy.Runtime
             return go;
         }
 
-        public static MeshAndMatIndexes AssMeshToMesh(Ass.MeshObject assMesh)
+        public static MeshData AssMeshToMesh(Ass.MeshObject assMesh)
         {
             var mesh = new Mesh();
 
@@ -204,7 +278,19 @@ namespace Plugins.Rampancy.Runtime
                 mesh.SetTriangles(submeshKvp.Value.ToArray(), subMeshIdx++);
             }
 
-            return new MeshAndMatIndexes(mesh, subMeshes.Keys.ToArray());
+            var meshData = new MeshData()
+            {
+                Mesh   = mesh,
+                MatIds = subMeshes.Keys.ToArray()
+            };
+
+            return meshData;
+        }
+
+        public class MeshData
+        {
+            public Mesh Mesh;
+            public int[] MatIds;
         }
     }
 }

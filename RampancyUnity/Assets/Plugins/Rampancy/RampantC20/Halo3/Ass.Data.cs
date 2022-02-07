@@ -30,6 +30,7 @@ namespace RampantC20.Halo3
             public const string BM_LIGHTING_ATTEN = "BM_LIGHTING_ATTEN";
             public const string BM_LIGHTING_FRUS  = "BM_LIGHTING_FRUS";
 
+            public string Collection;
             public string Name;
             public string Group;
 
@@ -40,32 +41,54 @@ namespace RampantC20.Halo3
             public LmFrustum     Fustrum     = null;
         }
 
+        public static class MaterialSymbols
+        {
+            public static readonly char[] Symbols = { '%', '#', '?', '!', '@', '*', '$', '^', '-', '&', '=', '.', ';', ')', '>', '<', '|', '~', '(', '{', '}', '[', '\'', '0', ']'  };
+
+            public static char FlagToSymbol(BmFlags flag) => flag == BmFlags.None ? ' ' : Symbols[(int)(Math.Log((double)flag) / Math.Log(2D)) + 1];
+
+            public static BmFlags SymbolToFlag(char symbol)
+            {
+                for (int i = 0; i < Symbols.Length; i++)
+                {
+                    if (Symbols[i] == symbol)
+                    {
+                        var flag = (BmFlags)(1 << i);
+                        return flag;
+                    }
+                }
+
+                return BmFlags.None;
+            }
+        }
+
         [Flags]
         public enum BmFlags : int
         {
-            None,
-            TwoSided,
-            TransparentOneSided,
-            TransparentTwoSided,
-            RenderOnly,
-            CollisionOnly,
-            SphereCollisionOnly,
-            FogPlane,
-            Ladder,
-            Breakable,
-            AiDefeaning,
-            NoShadow,
-            ShadowOnly,
-            LightmapOnly,
-            Precise,
-            Conveyor,
-            PortalOneWay,
-            PortalDoor,
-            PortalVisBlocker,
-            IngoredByLightmaps,
-            BlocksSound,
-            DecalOffset,
-            SlipSurface
+            None                     = 0,
+            TwoSided                 = 1 << 0,
+            TransparentOneSided      = 1 << 1,
+            TransparentTwoSided      = 1 << 2,
+            RenderOnly               = 1 << 3,
+            CollisionOnly            = 1 << 4,
+            SphereCollisionOnly      = 1 << 5,
+            FogPlane                 = 1 << 6,
+            Ladder                   = 1 << 7,
+            Breakable                = 1 << 8,
+            AiDefeaning              = 1 << 9,
+            NoShadow                 = 1 << 10,
+            ShadowOnly               = 1 << 11,
+            LightmapOnly             = 1 << 12,
+            Precise                  = 1 << 13,
+            Conveyor                 = 1 << 14,
+            PortalOneWay             = 1 << 15,
+            PortalDoor               = 1 << 16,
+            PortalVisBlocker         = 1 << 17,
+            IngoredByLightmaps       = 1 << 18,
+            BlocksSound              = 1 << 19,
+            DecalOffset              = 1 << 10,
+            SlipSurface              = 1 << 21,
+            GroupTransparentsbyPlane = 1 << 22
         }
 
         public class LmRes
