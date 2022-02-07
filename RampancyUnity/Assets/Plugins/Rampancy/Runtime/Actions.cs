@@ -129,5 +129,16 @@ namespace Rampancy
 
             return mat;
         }
+
+        public static Material CreateBasicTransparentMat(Texture2D tex, string path)
+        {
+            var mat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
+            mat.mainTexture = tex;
+            mat.name = Path.GetFileNameWithoutExtension(path);
+
+            AssetDatabase.CreateAsset(mat, $"{path}_mat.asset");
+
+            return mat;
+        }
     }
 }

@@ -161,6 +161,12 @@ namespace RampantC20.Halo3
             public float Radius;
         }
 
+        public class BoxObject : AssObject
+        {
+            public int MatIdx;
+            public Vector3 Extents;
+        }
+
         public enum ObjectType
         {
             GENERIC_LIGHT,

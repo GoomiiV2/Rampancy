@@ -14,18 +14,21 @@ namespace Rampancy
     {
         public Ass AssFile;
         public string Name;
+        public string AssFilePath;
         public GameObject Root;
 
         private Dictionary<int, MeshData> MeshLookup = new Dictionary<int, MeshData>();
         private List<Material> MatLookup             = new List<Material>();
         private Material MissingMatMat               = null;
         private Vector3 Scale                        = new Vector3(Statics.ExportScale, Statics.ExportScale, Statics.ExportScale);
+        private ShaderCollection ShaderCollection    = null;
 
         public void ImportToScene(Ass ass, string name, string assPath)
         {
-            AssFile = ass;
-            Name    = name;
-            Root    = new GameObject(name);
+            AssFile     = ass;
+            Name        = name;
+            AssFilePath = assPath;
+            Root        = new GameObject(name);
 
             // Convert the meshes
             for (int i = 0; i < ass.Objects.Count; i++) {
@@ -37,49 +40,13 @@ namespace Rampancy
             }
 
             // Get the materials
-            MissingMatMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/BaseData/uv Grid.mat");
-            var shaderCol = Actions.H3_GetShaderCollection();
+            MissingMatMat    = AssetDatabase.LoadAssetAtPath<Material>("Assets/BaseData/uv Grid.mat");
+            ShaderCollection = Actions.H3_GetShaderCollection();
             for (int i = 0; i < ass.Materials.Count; i++)
             {
                 var matData = ass.Materials[i];
-                if (matData.Collection != null) // Has a collection
-                {
-                    if (shaderCol.Mapping.TryGetValue(matData.Collection, out var basePath))
-                    {
-                        var shaderName  = $"{matData.Name}_mat";
-                        var shaderPath  = Path.Combine("Assets", $"{GameVersions.Halo3}", "TagData", basePath, "shaders");
-                        var foundAssets = AssetDatabase.FindAssets(shaderName, new string[] { shaderPath }).Select(x => AssetDatabase.GUIDToAssetPath(x));
-
-                        var mat = AssetDatabase.LoadAssetAtPath<Material>(foundAssets.FirstOrDefault());
-                        if (mat == null)
-                        {
-                            Debug.LogWarning($"Couldn't find shader \"{matData.Name}\" in collection {matData.Collection}, tried looking for: {shaderPath}, {shaderName} ({string.Join(",", foundAssets)})");
-                        }
-
-                        MatLookup.Add(mat ?? MissingMatMat);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Couldn't find shader \"{matData.Name}\" in collection {matData.Collection}, collection wasn't foudn in the shader_collection.txt :<");
-                        MatLookup.Add(MissingMatMat);
-                    }
-                }
-                else // no collection so look in the same dir as the ass
-                {
-                    var relPath       = Utils.GetDataRelPath(Path.GetDirectoryName(assPath), Rampancy.Cfg.Halo3MccGameConfig.DataPath);
-                    var tagRelPath    = Utils.GetDataToTagPath(relPath).Trim('\\').Replace("\\structure", "");
-                    var matName       = $"{matData.Name}_mat";
-                    var shaderDirName = Path.Combine("Assets", $"{GameVersions.Halo3}", "TagData", tagRelPath, "shaders");
-                    var foundAssets   = AssetDatabase.FindAssets(matName, new string[] { shaderDirName }).Select(x => AssetDatabase.GUIDToAssetPath(x));
-
-                    var mat = AssetDatabase.LoadAssetAtPath<Material>(foundAssets.FirstOrDefault());
-                    if (mat == null)
-                    {
-                        Debug.LogWarning($"Couldn't find shader \"{matData.Name}\" in collection {matData.Collection}, tried looking for: {shaderDirName}, ({string.Join(",", foundAssets)})");
-                    }
-
-                    MatLookup.Add(mat ?? MissingMatMat);
-                }
+                var mat     = GetMat(matData);
+                MatLookup.Add(mat);
             }
 
             for (int i = 0; i < ass.Instances.Count; i++) {
@@ -100,6 +67,42 @@ namespace Rampancy
             
             Root.transform.rotation   = Quaternion.Euler(-90, 0, 0);
             Root.transform.localScale = new Vector3(-1, 1, 1);
+        }
+
+        public Material GetMat(Ass.Material matData)
+        {
+            // Specail materials
+            if (matData.Name.StartsWith("+portal"))
+            {
+                return AssetDatabase.LoadAssetAtPath<Material>("Assets/BaseData/+portal.mat");
+            }
+
+            var relPath             = Utils.GetDataRelPath(Path.GetDirectoryName(AssFilePath), Rampancy.Cfg.Halo3MccGameConfig.DataPath);
+            var tagRelPath          = Utils.GetDataToTagPath(relPath).Trim('\\').Replace("\\structure", "");
+            var halo3TagDataPath    = Path.Combine("Assets", $"{GameVersions.Halo3}", "TagData");
+
+            string assBasePath            = Path.Combine(halo3TagDataPath, tagRelPath, "shaders");
+            string collectionBasePath     = null;
+            if (matData.Collection != null) // Has a collection
+            {
+                if (ShaderCollection.Mapping.TryGetValue(matData.Collection, out var cBasePath))
+                {
+                    collectionBasePath = Path.Combine(halo3TagDataPath, cBasePath, "shaders");
+                }
+            }
+
+            var shaderName    = $"{matData.Name}_mat";
+            var foundAssets   = AssetDatabase.FindAssets(shaderName, new string[] { collectionBasePath ?? assBasePath, assBasePath, halo3TagDataPath })
+                    .Select(x => AssetDatabase.GUIDToAssetPath(x));
+
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(foundAssets.FirstOrDefault());
+
+            if (mat == null)
+            {
+                Debug.LogWarning($"Couldn't find shader \"{matData.Name}\" {(matData.Collection != null ? $"in collection {matData.Collection}" : "")}, tried looking in: {collectionBasePath}, {assBasePath}, {halo3TagDataPath}, ({string.Join(",", foundAssets)})");
+            }
+
+            return mat ?? MissingMatMat;
         }
 
         public GameObject CreateInstanceMesh(Ass.Instance instance)

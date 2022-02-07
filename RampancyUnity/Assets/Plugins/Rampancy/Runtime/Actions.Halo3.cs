@@ -43,25 +43,28 @@ namespace Rampancy
         }
 
         // Read the  shader_collections.txt and get all the .shaders paths in those dirs
-        public static List<string> H3_GetLevelShaders()
+        public static Dictionary<string, List<string>> H3_GetLevelShaders()
         {
-            var shaderPaths      = new List<string>();
+            var shaderGroupings  = new Dictionary<string, List<string>>();
             var shaderCollection = H3_GetShaderCollection(); ;
 
-            foreach (var dirPath in shaderCollection.Mapping.Values) {
+            foreach (var (key, dirPath) in shaderCollection.Mapping) {
                 var diFullPath = Path.Combine(Rampancy.Cfg.Halo3MccGameConfig.TagsPath, dirPath);
                 if (!Directory.Exists(diFullPath)) continue;
 
                 var shaderTypes = new string[] { "*.shader", "*.shader_terrain" };
+                var shaderPaths = new List<string>();
                 foreach (var shaderType in shaderTypes)
                 {
                     var sPaths = Directory.GetFiles(diFullPath, shaderType, SearchOption.AllDirectories);
-                    shaderPaths.AddRange(sPaths);
+                    var fixedPaths = sPaths.Select(x => x.Replace("/", "\\"));
+                    shaderPaths.AddRange(fixedPaths);
                 }
+
+                shaderGroupings.Add(key, shaderPaths);
             }
 
-            var distinct = shaderPaths.Distinct();
-            return distinct.ToList();
+            return shaderGroupings;
         }
 
         public static List<string> H3_GetLevelBitmaps()
@@ -89,31 +92,32 @@ namespace Rampancy
             Progress.ShowDetails(false);
             int currentIdx = 0;
 
-            var shaderPaths = H3_GetLevelShaders();
-            var shaderDatas = new Dictionary<string, Halo3.ShaderData>(shaderPaths.Count);
-            var tasksCount  = (shaderPaths.Count * 2) + 1;
-            var task = Task.Factory.StartNew(() =>
+            var shaderPaths         = H3_GetLevelShaders();
+            var flattendShaderPaths = shaderPaths.SelectMany(x => x.Value.Select(y => (x.Key, y))).ToArray();
+            var shaderDatas         = new Dictionary<string, Halo3.ShaderData>(shaderPaths.Count);
+            var tasksCount          = (flattendShaderPaths.Count()) + 1;
+            var task                = Task.Factory.StartNew(() =>
             {
-                Parallel.ForEach(shaderPaths, (string path) =>
+                // Import the textures
+                Parallel.ForEach(flattendShaderPaths, (collectionAndPath) =>
                 {
                     Progress.Report(progressId, currentIdx++, tasksCount);
-                    Progress.SetDescription(progressId, path);
+                    Progress.SetDescription(progressId, collectionAndPath.y);
 
-                    var bytes = File.ReadAllBytes(path);
-                    var shaderData = Halo3.ShaderData.GetBasicShaderDataFromScan(bytes);
+                    var path              = collectionAndPath.y;
+                    var shaderData        = Halo3.ShaderData.GetDataFromScan(path);
+                    shaderData.Collection = collectionAndPath.Key;
 
+                    bool doImport = false;
                     lock (shaderDatas)
                     {
                         if (shaderDatas.TryAdd(path, shaderData))
-                        {
+                            doImport = true;
+                        else
                             Debug.LogWarning($"Duplicate sahder, not importing copy: {path}");
-                        }
                     }
 
-                    // Export the diffuse just for now
-                    if (shaderData.DiffuseTex != null) H3_ExportBitmapToTga(shaderData.DiffuseTex);
-
-                    //Debug.Log($"{path}\n{shaderData.ToString()}");
+                    if (doImport) H3_ImportShaderTextures(shaderData);
                 });
 
                 EditorApplication.delayCall += () =>
@@ -123,27 +127,16 @@ namespace Rampancy
                     Progress.SetDescription(progressId, "Waiting for Unity to import the textures");
                     AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
 
-                    for (int i = 0; i < shaderPaths.Count; i++)
+                    for (int i = 0; i < flattendShaderPaths.Length; i++)
                     {
-                        string path    = shaderPaths[i];
+                        string path       = flattendShaderPaths[i].y;
+                        string collection = flattendShaderPaths[i].Key;
                         if (shaderDatas.TryGetValue(path, out var shaderData))
                         {
                             Progress.Report(progressId, currentIdx++, tasksCount);
                             Progress.SetDescription(progressId, path);
 
-                            if (shaderData.DiffuseTex != null)
-                            {
-                                var diffuseTexPath    = $"{Utils.GetProjectRelPath(shaderData.DiffuseTex, GameVersions.Halo3)}_00.tga";
-                                var diffuseTex        = AssetDatabase.LoadAssetAtPath<Texture2D>(diffuseTexPath);
-                                var shaderTagRelPath  = path.Replace("/", "\\").Replace(Rampancy.Cfg.Halo3MccGameConfig.TagsPath.Replace("/", "\\"), "");
-                                var shaderProjectPath = Utils.GetProjectRelPath(shaderTagRelPath.Substring(1), GameVersions.Halo3);
-                                var shaderDirPath     = Path.GetDirectoryName(shaderProjectPath);
-                                var shaderPath        = Path.Combine(shaderDirPath, Path.GetFileNameWithoutExtension(shaderProjectPath));
-                                Directory.CreateDirectory(shaderDirPath);
-
-                                var mat = CreateBasicMat(diffuseTex, shaderPath);
-                                AssetDatabase.SetLabels(mat, new string[] { "mat", $"{GameVersions.Halo3}", "shader" });
-                            }
+                            H3_CreateMaterialForShader(shaderData);
                         }
                         else
                         {
@@ -154,6 +147,58 @@ namespace Rampancy
 
                 Progress.Remove(progressId);
             });
+        }
+
+        // Import the textures referanced by this shader
+        public static void H3_ImportShaderTextures(Halo3.ShaderData shaderData)
+        {
+            // Export the diffuse just for now
+            if (shaderData is Halo3.BasicShaderData basicShader)
+            {
+                if (basicShader.DiffuseTex    != null) H3_ExportBitmapToTga(basicShader.DiffuseTex);
+                /*if (basicShader.DetailTex     != null) H3_ExportBitmapToTga(basicShader.DetailTex);
+                if (basicShader.BumpTex       != null) H3_ExportBitmapToTga(basicShader.BumpTex);
+                if (basicShader.BumpDetailTex != null) H3_ExportBitmapToTga(basicShader.BumpDetailTex);
+                if (basicShader.AlphaTestMap  != null) H3_ExportBitmapToTga(basicShader.AlphaTestMap);*/
+            }
+            else if (shaderData is Halo3.TerrainShaderData terrainShader)
+            {
+
+            }
+        }
+
+        // Create a material to repsrent this shader
+        public static void H3_CreateMaterialForShader(Halo3.ShaderData shaderData)
+        {
+            if (shaderData is Halo3.BasicShaderData basicShader)
+            {
+                if (basicShader.DiffuseTex != null)
+                {
+                    var diffuseTexPath    = $"{Utils.GetProjectRelPath(basicShader.DiffuseTex, GameVersions.Halo3)}_00.tga";
+                    var diffuseTex        = AssetDatabase.LoadAssetAtPath<Texture2D>(diffuseTexPath);
+                    var shaderTagRelPath  = basicShader.TagPath.Replace("/", "\\").Replace(Rampancy.Cfg.Halo3MccGameConfig.TagsPath.Replace("/", "\\"), "");
+                    var shaderProjectPath = Utils.GetProjectRelPath(shaderTagRelPath.Substring(1), GameVersions.Halo3);
+                    var shaderDirPath     = Path.GetDirectoryName(shaderProjectPath);
+                    var shaderPath        = Path.Combine(shaderDirPath, Path.GetFileNameWithoutExtension(shaderProjectPath));
+                    Directory.CreateDirectory(shaderDirPath);
+
+                    Material mat = null;
+                    if (basicShader.IsAlphaTested)
+                    {
+                        mat = CreateBasicTransparentMat(diffuseTex, shaderPath);
+                    }
+                    else
+                    {
+                        mat = CreateBasicMat(diffuseTex, shaderPath);
+                    }
+
+                    AssetDatabase.SetLabels(mat, new string[] { "mat", $"{GameVersions.Halo3}", Path.GetExtension(basicShader.TagPath).Substring(1), basicShader.Collection });
+                }
+            }
+            else if (shaderData is Halo3.TerrainShaderData terrainShader)
+            {
+
+            }
         }
 
         public static void H3_ImportBitmaps()
@@ -264,12 +309,16 @@ namespace Rampancy
             if (outPath == null)
             {
                 var destPath = Utils.GetProjectRelPath(tagPath, GameVersions.Halo3, Environment.CurrentDirectory);
-                var dirPath = Path.GetDirectoryName(destPath);
+                var dirPath  = Path.GetDirectoryName(destPath);
                 Directory.CreateDirectory(dirPath);
                 outPath = $"{dirPath}/";
             }
 
-            Rampancy.RunProgram(Rampancy.Cfg.Halo3MccGameConfig.ToolFastPath, $"export-bitmap-tga \"{tagPath}\" \"{outPath}\"", true, true);
+            var fullPath = outPath + $"{Path.GetFileName(tagPath)}_00.tga";
+            if (!File.Exists(fullPath))
+            {
+                Rampancy.RunProgram(Rampancy.Cfg.Halo3MccGameConfig.ToolFastPath, $"export-bitmap-tga \"{tagPath}\" \"{outPath}\"", true, true);
+            }
         }
     }
 }

@@ -165,6 +165,8 @@ namespace RampantC20.Halo3
                         return ParseLightObject(sr);
                     case ObjectType.SPHERE:
                         return ParseSphereObject(sr);
+                    case ObjectType.BOX:
+                        return ParseBoxObject(sr);
                     default:
                         Debug.WriteLine($"Unsupported type: {objType}");
                         return null;
@@ -206,14 +208,28 @@ namespace RampantC20.Halo3
         {
             var sphere = new SphereObject
             {
-                Type = ObjectType.SPHERE,
+                Type     = ObjectType.SPHERE,
                 Filepath = sr.ReadValidLine(),
-                Name = sr.ReadValidLine(),
-                MatIdx = int.Parse(sr.ReadValidLine()),
-                Radius = float.Parse(sr.ReadValidLine())
+                Name     = sr.ReadValidLine(),
+                MatIdx   = int.Parse(sr.ReadValidLine()),
+                Radius   = float.Parse(sr.ReadValidLine())
             };
 
             return sphere;
+        }
+
+        protected static BoxObject ParseBoxObject(StreamReader sr)
+        {
+            var box = new BoxObject
+            {
+                Type     = ObjectType.BOX,
+                Filepath = sr.ReadValidLine(),
+                Name     = sr.ReadValidLine(),
+                MatIdx   = int.Parse(sr.ReadValidLine()),
+                Extents  = ParseVector3(sr)
+            };
+
+            return box;
         }
 
         protected static LightObject ParseLightObject(StreamReader sr)
@@ -318,7 +334,11 @@ namespace RampantC20.Halo3
         {
             var line = sr.ReadValidLine();
             var nums = line.Split('\t');
-            var vec3 = new Vector3(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]));
+            var vec3 = new Vector3(
+                    float.TryParse(nums[0], out var x) ? x : 0,
+                    float.TryParse(nums[1], out var y) ? y : 0,
+                    float.TryParse(nums[2], out var z) ? z : 0
+                );
             return vec3;
         }
 
