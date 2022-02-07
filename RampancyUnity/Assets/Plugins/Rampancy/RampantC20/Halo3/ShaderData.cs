@@ -116,11 +116,12 @@ namespace Rampancy.Halo3
             if (template != null)
             {
                 var templateName = Path.GetFileName(template);
-                if (templateName.Count(x => x == '_') >= 4)
+                if (templateName.Count(x => x == '_') >= 7)
                 {
                     var cats = templateName.Split('_', options: StringSplitOptions.RemoveEmptyEntries);
 
-                    shaderData.IsAlphaTested = cats[2] == "1";
+                    // Alpha test or blend mode set
+                    shaderData.IsAlphaTested = (cats[2] == "1") || (cats[7] == "3");
                 }
             }
 
