@@ -95,7 +95,7 @@ namespace Rampancy
             var shaderPaths         = H3_GetLevelShaders();
             var flattendShaderPaths = shaderPaths.SelectMany(x => x.Value.Select(y => (x.Key, y))).ToArray();
             var shaderDatas         = new Dictionary<string, Halo3.ShaderData>(shaderPaths.Count);
-            var tasksCount          = (flattendShaderPaths.Count()) + 1;
+            var tasksCount          = (flattendShaderPaths.Count() * 2) + 1;
             var task                = Task.Factory.StartNew(() =>
             {
                 // Import the textures
@@ -131,6 +131,10 @@ namespace Rampancy
                     {
                         string path       = flattendShaderPaths[i].y;
                         string collection = flattendShaderPaths[i].Key;
+
+                        Progress.Report(progressId, currentIdx++, tasksCount);
+                        Progress.SetDescription(progressId, path);
+
                         if (shaderDatas.TryGetValue(path, out var shaderData))
                         {
                             Progress.Report(progressId, currentIdx++, tasksCount);
@@ -143,9 +147,10 @@ namespace Rampancy
                             Debug.LogWarning($"Couldn't create mat for shader: {path}");
                         }
                     }
-                };
 
-                Progress.Remove(progressId);
+                    AssetDatabase.Refresh();
+                    Progress.Remove(progressId);
+                };
             });
         }
 
@@ -175,24 +180,14 @@ namespace Rampancy
                 if (basicShader.DiffuseTex != null)
                 {
                     var diffuseTexPath    = $"{Utils.GetProjectRelPath(basicShader.DiffuseTex, GameVersions.Halo3)}_00.tga";
-                    var diffuseTex        = AssetDatabase.LoadAssetAtPath<Texture2D>(diffuseTexPath);
                     var shaderTagRelPath  = basicShader.TagPath.Replace("/", "\\").Replace(Rampancy.Cfg.Halo3MccGameConfig.TagsPath.Replace("/", "\\"), "");
                     var shaderProjectPath = Utils.GetProjectRelPath(shaderTagRelPath.Substring(1), GameVersions.Halo3);
                     var shaderDirPath     = Path.GetDirectoryName(shaderProjectPath);
-                    var shaderPath        = Path.Combine(shaderDirPath, Path.GetFileNameWithoutExtension(shaderProjectPath));
+                    var shaderPath        = Path.Combine(shaderDirPath, $"{Path.GetFileNameWithoutExtension(shaderProjectPath)}_mat.asset");
                     Directory.CreateDirectory(shaderDirPath);
 
-                    Material mat = null;
-                    if (basicShader.IsAlphaTested)
-                    {
-                        mat = CreateBasicTransparentMat(diffuseTex, shaderPath);
-                    }
-                    else
-                    {
-                        mat = CreateBasicMat(diffuseTex, shaderPath);
-                    }
-
-                    AssetDatabase.SetLabels(mat, new string[] { "mat", $"{GameVersions.Halo3}", Path.GetExtension(basicShader.TagPath).Substring(1), basicShader.Collection });
+                    var tags = new string[] { "mat", $"{GameVersions.Halo3}", Path.GetExtension(basicShader.TagPath).Substring(1), basicShader.Collection };
+                    FastMatCreate.CreateBasicMat($"{AssetDatabase.GUIDFromAssetPath(diffuseTexPath)}", shaderPath, tags, basicShader.IsAlphaTested, basicShader.BaseMapScale);
                 }
             }
             else if (shaderData is Halo3.TerrainShaderData terrainShader)

@@ -22,7 +22,6 @@ namespace Rampancy.Halo3
             var shaderType = Path.GetExtension(tagPath).Substring(1);
             var bytes      = File.ReadAllBytes(tagPath);
 
-            Debug.Log(tagPath);
             ShaderData data = shaderType switch
             {
                 "shader"         => BasicShaderData.GetDataFromScan(bytes),
@@ -84,6 +83,7 @@ namespace Rampancy.Halo3
         public string AlphaTestMap;
 
         public bool IsAlphaTested = false;
+        public float BaseMapScale = 1f;
 
         public override string ToString()
         {
@@ -122,6 +122,23 @@ namespace Rampancy.Halo3
 
                     // Alpha test or blend mode set
                     shaderData.IsAlphaTested = (cats[2] == "1") || (cats[7] == "3");
+                }
+            }
+
+            // Try get the base map scale, this is hacky :D
+            var baseMapStart = bytes.IndexOf(TR_BASE_MAP_START);
+            if (baseMapStart > -1)
+            {
+                var searchSpan  = bytes.Slice(baseMapStart, 200);
+                var scaleOffset = searchSpan.IndexOf(new byte[] { 0x61, 0x64, 0x67, 0x74, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x24, 0x00, 0x00 });
+                if (scaleOffset > -1)
+                {
+                    var startIdx      = baseMapStart + scaleOffset + 16;
+                    var detailOffset  = bytes.IndexOf(TR_DETAIL_MAP_START);
+                    if (detailOffset == -1 || detailOffset != -1 && startIdx < detailOffset)
+                    {
+                        shaderData.BaseMapScale = BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32LittleEndian(bytes.Slice(startIdx, 4)));
+                    }
                 }
             }
 
