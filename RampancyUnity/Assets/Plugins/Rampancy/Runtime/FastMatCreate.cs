@@ -10,17 +10,16 @@ namespace Rampancy
     // A hack to create a mat asset fast, just wite the text to disk
     public static class FastMatCreate
     {
-        public static void CreateBasicMat(string texId, string matPath, string[] tags = null, bool transparent = false, float tiling = 1f)
+        public static void CreateBasicMat(string texId, string matPath, string shaderGuid, string[] tags = null, bool transparent = false, float tiling = 1f)
         {
             tags        = tags ?? new string[] { };
             var matName = Path.GetFileName(matPath).Replace(".asset", "");
-            var guid    = Guid.NewGuid().ToString();
 
             var shaderId = transparent ? "30" : "7";
             var matStr = GetMatText(matName, texId, shaderId, tiling);
 
             var matMetaStr = $@"fileFormatVersion: 2
-guid: {guid.Replace("-", "")}
+guid: {shaderGuid}
 labels:
 {string.Join("\n", tags.Select(x => $"- {x}"))}
 NativeFormatImporter:

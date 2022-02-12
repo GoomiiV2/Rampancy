@@ -186,8 +186,11 @@ namespace Rampancy
                     var shaderPath        = Path.Combine(shaderDirPath, $"{Path.GetFileNameWithoutExtension(shaderProjectPath)}_mat.asset");
                     Directory.CreateDirectory(shaderDirPath);
 
-                    var tags = new string[] { "mat", $"{GameVersions.Halo3}", Path.GetExtension(basicShader.TagPath).Substring(1), basicShader.Collection };
-                    FastMatCreate.CreateBasicMat($"{AssetDatabase.GUIDFromAssetPath(diffuseTexPath)}", shaderPath, tags, basicShader.IsAlphaTested, basicShader.BaseMapScale);
+                    var tags       = new string[] { "mat", $"{GameVersions.Halo3}", Path.GetExtension(basicShader.TagPath).Substring(1), basicShader.Collection };
+                    var guidPath   = basicShader.DiffuseTex.Replace("/", "\\");
+                    var guid       = TagPathHash.H3MccPathHash(guidPath);
+                    var shaderGuid = TagPathHash.H3MccPathHash(basicShader.TagPath.Replace("/", "\\"));
+                    FastMatCreate.CreateBasicMat(guid, shaderPath, shaderGuid, tags, basicShader.IsAlphaTested, basicShader.BaseMapScale);
                 }
             }
             else if (shaderData is Halo3.TerrainShaderData terrainShader)
