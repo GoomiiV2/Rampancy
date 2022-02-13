@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Rampancy.AssetProcessors
 {
-    public class Halo3MatCreator : AssetPostprocessor
+    public class TextureGuidSetter : AssetPostprocessor
     {
         void OnPostprocessTexture(Texture2D texture)
         {
@@ -50,36 +50,6 @@ namespace Rampancy.AssetProcessors
                     }
                 }
             }
-
-                /*foreach (var imported in importedAssets)
-                {
-                    if (imported.Contains("Halo3/TagData") && !imported.EndsWith("_mat"))
-                    {
-                        var matName = Path.GetFileNameWithoutExtension(imported);
-                        if (matName.EndsWith("_00"))
-                        {
-                            matName = matName.Replace("_00", "");
-                        }
-
-                        if (matName.EndsWith("_diff"))
-                        {
-                            matName = matName.Replace("_diff", "");
-                        }
-
-                        if (matName.EndsWith("_diffuse"))
-                        {
-                            matName = matName.Replace("_diffuse", "");
-                        }
-
-                        var path = Path.Combine(Path.GetDirectoryName(imported), matName);
-
-                        var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(imported);
-                        if (texture != null)
-                        {
-                            Actions.CreateBasicMat(texture, path);
-                        }
-                    }
-                }*/
-            }
+        }
     }
 }
