@@ -15,20 +15,21 @@ namespace Rampancy
 
         //public string ToolBasePath = "";
 
-        public GameConfig GetGameConfig(GameVersions version) => version switch
+        public GameConfig GetGameConfig(GameVersions version)
         {
-            GameVersions.Halo1Mcc => Halo1MccGameConfig,
-            GameVersions.Halo3    => Halo3MccGameConfig,
-            _                     => Halo1MccGameConfig
-        };
+            return version switch
+            {
+                GameVersions.Halo1Mcc => Halo1MccGameConfig,
+                GameVersions.Halo3    => Halo3MccGameConfig,
+                _                     => Halo1MccGameConfig
+            };
+        }
 
         [JsonIgnore] public GameConfig ActiveGameConfig => GetGameConfig(GameVersion);
 
         public static Config Load()
         {
-            if (!File.Exists(FileName)) {
-                File.WriteAllText(FileName, "");
-            }
+            if (!File.Exists(FileName)) File.WriteAllText(FileName, "");
 
             var json   = File.ReadAllText(FileName);
             var config = JsonConvert.DeserializeObject<Config>(json);
@@ -62,7 +63,7 @@ namespace Rampancy
     public class H3GameConfig : GameConfig
     {
         public override string TagTestPath => Path.Combine(ToolBasePath, "halo3_tag_test.exe");
-        
+
         [JsonIgnore] public string ToolFastPath => Path.Combine(ToolBasePath, "tool_fast.exe");
     }
 }

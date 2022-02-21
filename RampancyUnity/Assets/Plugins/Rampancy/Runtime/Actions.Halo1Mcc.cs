@@ -20,7 +20,7 @@ namespace Rampancy
 
             var cmd = $"structure {rs.DataDir} {rs.LevelName}";
             Rampancy.RunToolCommand(cmd);
-            
+
             Debug.Log("Compiled Halo 1 structure");
         }
 
@@ -30,7 +30,7 @@ namespace Rampancy
             var path = rs.DataDir.Replace("/", "\\");
             var cmd  = $@"lightmaps ""{path}\{rs.LevelName}"" {rs.LevelName} {(preview ? 0 : 1)} {quality}";
             Rampancy.RunToolCommand(cmd);
-            
+
             Debug.Log("Compiled Halo 1 lightmap");
         }
 
@@ -55,7 +55,7 @@ namespace Rampancy
                 File.WriteAllText(rampancyInitPath, sb.ToString());
 
                 Rampancy.LaunchProgram(Rampancy.Cfg.Halo1MccGameConfig.TagTestPath, $"-windowed -exec {INIT_FILE_NAME}");
-                
+
                 Debug.Log("Launched Halo 1 Tag Test");
             }
             catch (Exception e) {
@@ -66,13 +66,13 @@ namespace Rampancy
         public static void H1_SyncMaterials()
         {
             H1_ImportShaderEnvironments();
-            
+
             Debug.Log("Synced Halo 1 shaders from tags");
         }
 
         public static Texture2D H1_ImportBitmap(AssetDb.TagInfo tagInfo, bool createBasicMat = false, bool convertToNormal = false)
         {
-            var (width, height, pixels) = global::RampantC20.Utils.GetColorPlateFromBitMap(tagInfo).Value;
+            var (width, height, pixels) = Utils.GetColorPlateFromBitMap(tagInfo).Value;
 
             if (convertToNormal)
                 pixels = Utils.HeightmapToNormal(width, height, pixels, 1.0f);
@@ -100,9 +100,7 @@ namespace Rampancy
         public static void H1_ImportShaderEnvironments()
         {
             var shaderInfos = Rampancy.AssetDB.TagsOfType("shader_environment");
-            foreach (var tagInfo in shaderInfos) {
-                H1_ImportShaderEnvironment(tagInfo);
-            }
+            foreach (var tagInfo in shaderInfos) H1_ImportShaderEnvironment(tagInfo);
         }
 
         public static void H1_ImportShaderEnvironment(AssetDb.TagInfo tagInfo)
@@ -118,31 +116,29 @@ namespace Rampancy
                 var tex = H1_ImportBitmapFromTagRef(shader.BaseMap.Path);
                 mat.SetTexture("_MainTex", tex);
             }
-            
+
             // The extra maps, can add support to the shader proper for these later
             if (!string.IsNullOrEmpty(shader.BumpMap.Path)) {
                 var tex = H1_ImportBitmapFromTagRef(shader.BumpMap.Path);
                 mat.SetTexture("_BumpMap", tex);
             }
-            
+
             if (!string.IsNullOrEmpty(shader.MicroDetailMap.Path)) {
                 var tex = H1_ImportBitmapFromTagRef(shader.MicroDetailMap.Path);
                 mat.SetTexture("_MicroDetailMap", tex);
             }
-            
+
             if (!string.IsNullOrEmpty(shader.PrimaryDetailMap.Path)) {
                 var tex = H1_ImportBitmapFromTagRef(shader.PrimaryDetailMap.Path);
                 mat.SetTexture("_PrimaryDetailMap", tex);
             }
-            
+
             if (!string.IsNullOrEmpty(shader.SecondaryDetailMap.Path)) {
                 var tex = H1_ImportBitmapFromTagRef(shader.SecondaryDetailMap.Path);
                 mat.SetTexture("_SecondaryDetailMap", tex);
             }
 
-            if ((shader.ShaderFlags & 0x1) == 1) {
-                mat.SetFloat("_UseBumpAlpha", -1);
-            }
+            if ((shader.ShaderFlags & 0x1) == 1) mat.SetFloat("_UseBumpAlpha", -1);
 
             var path = Utils.GetProjectRelPath(tagInfo, Rampancy.AssetDB);
             Directory.CreateDirectory(Path.GetDirectoryName(path));

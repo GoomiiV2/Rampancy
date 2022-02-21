@@ -13,9 +13,7 @@
 
         public int Add(T item)
         {
-            if (Count == Array.Length) {
-                System.Array.Resize(ref Array, Array.Length * 2);
-            }
+            if (Count == Array.Length) System.Array.Resize(ref Array, Array.Length * 2);
 
             Array[Count++] = item;
 

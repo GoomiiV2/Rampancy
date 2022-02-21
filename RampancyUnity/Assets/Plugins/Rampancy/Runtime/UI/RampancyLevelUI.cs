@@ -15,9 +15,7 @@ namespace Rampancy.UI
         {
             get
             {
-                if (_Sentinel == null) {
-                    _Sentinel = GameObject.Find(RampancySentinel.NAME)?.GetComponent<RampancySentinel>();
-                }
+                if (_Sentinel == null) _Sentinel = GameObject.Find(RampancySentinel.NAME)?.GetComponent<RampancySentinel>();
 
                 return _Sentinel;
             }
@@ -26,11 +24,11 @@ namespace Rampancy.UI
         [MenuItem("Rampancy/Open Level UI")]
         public static void ShowWindow()
         {
-            EditorWindow window = GetWindow(typeof(RampancyLevelUI), false, "Rampancy Level UI");
+            var window = GetWindow(typeof(RampancyLevelUI), false, "Rampancy Level UI");
             window.Show();
         }
 
-        void OnGUI()
+        private void OnGUI()
         {
             ActiveTab = GUILayout.Toolbar(ActiveTab, new[] {"Materials", "Debug"});
             switch (ActiveTab) {

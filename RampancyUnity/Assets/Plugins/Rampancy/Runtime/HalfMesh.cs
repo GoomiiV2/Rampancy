@@ -22,7 +22,7 @@ namespace Rampancy
         public void FromUnityMesh(Mesh mesh)
         {
             Verts = new List<Vert>(mesh.vertexCount);
-            for (int i = 0; i < mesh.vertexCount; i++) {
+            for (var i = 0; i < mesh.vertexCount; i++) {
                 var vert = new Vert
                 {
                     Pos    = mesh.vertices[i],
@@ -35,7 +35,7 @@ namespace Rampancy
 
             var edgeMapping = new Dictionary<long, int>(mesh.triangles.Length);
 
-            for (int i = 0; i < mesh.subMeshCount; i++) {
+            for (var i = 0; i < mesh.subMeshCount; i++) {
                 var subMesh = mesh.GetSubMesh(i);
                 for (var eye = subMesh.indexStart; eye < subMesh.indexStart + subMesh.indexCount; eye += 3) {
                     var idx1 = mesh.triangles[eye];
@@ -136,7 +136,7 @@ namespace Rampancy
             var norms = new Vector3[Verts.Count];
             var uvs   = new Vector2[Verts.Count];
 
-            for (int i = 0; i < Verts.Count; i++) {
+            for (var i = 0; i < Verts.Count; i++) {
                 var vert = Verts[i];
                 verts[i] = vert.Pos;
                 norms[i] = vert.Normal;
@@ -149,7 +149,7 @@ namespace Rampancy
 
             // Eh, will do for now
             var subMeshes = new Dictionary<int, List<int>>();
-            for (int i = 0; i < Faces.Count; i++) {
+            for (var i = 0; i < Faces.Count; i++) {
                 var face    = Faces[i];
                 var edgeIdx = face.EdgeStartIdx;
                 do {
@@ -163,9 +163,7 @@ namespace Rampancy
             }
 
             mesh.subMeshCount = subMeshes.Keys.Count;
-            foreach (var subMesh in subMeshes) {
-                mesh.SetTriangles(subMesh.Value.ToArray(), subMesh.Key);
-            }
+            foreach (var subMesh in subMeshes) mesh.SetTriangles(subMesh.Value.ToArray(), subMesh.Key);
 
             return mesh;
         }
@@ -177,8 +175,8 @@ namespace Rampancy
 
         public string EdgeIdToStr(long id)
         {
-            int id1 = (int) (id & uint.MaxValue);
-            int id2 = (int) (id >> 32);
+            var id1 = (int) (id & uint.MaxValue);
+            var id2 = (int) (id >> 32);
             var str = $"{id1} -> {id2}";
 
             return str;
@@ -190,26 +188,24 @@ namespace Rampancy
             var tJunctions = new List<(int, int)>();
             Parallel.ForEach(Edges, (edge) =>
             {
-                for (int i = 0; i < Verts.Count; i++) {
+                for (var i = 0; i < Verts.Count; i++) {
                     var vert       = Verts[i];
                     var vert1      = Verts[edge.StartVertIdx].Pos;
                     var vert2      = Verts[Edges[edge.NextEdgeIdx].StartVertIdx].Pos;
                     var distToLine = HandleUtility.DistancePointLine(vert.Pos, vert1, vert2);
                     distToLine = Math.Abs(distToLine);
-                    if (distToLine < tolerance && vert1 != vert.Pos && vert2 != vert.Pos) {
+                    if (distToLine < tolerance && vert1 != vert.Pos && vert2 != vert.Pos)
                         lock (tJunctions) {
                             var alreadyAdded = false;
-                            for (int j = 0; j < tJunctions.Count; j++) {
+                            for (var j = 0; j < tJunctions.Count; j++)
                                 if (tJunctions[j].Item1 == edge.Idx && Verts[tJunctions[j].Item2].Pos == vert.Pos) {
                                     alreadyAdded = true;
                                     break;
                                 }
-                            }
 
                             if (!alreadyAdded)
                                 tJunctions.Add((edge.Idx, i));
                         }
-                    }
                 }
             });
 
@@ -231,7 +227,7 @@ namespace Rampancy
             var edgeLength  = (Verts[e3.StartVertIdx].Pos - sourceVert.Pos).sqrMagnitude;
             var dist        = distToPoint / edgeLength;
             var uvDir       = (Verts[edge.StartVertIdx].Uv - sourceVert.Uv).normalized;
-            var newUv       = Verts[e3.StartVertIdx].Uv + (uvDir * dist);
+            var newUv       = Verts[e3.StartVertIdx].Uv + uvDir * dist;
 
             // Add new vert
             var newVertIdx = Verts.Count;

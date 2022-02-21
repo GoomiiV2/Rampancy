@@ -12,10 +12,7 @@ namespace Rampancy
 
         static DoMain()
         {
-            EditorApplication.update += () =>
-            {
-                Process();
-            };
+            EditorApplication.update += () => { Process(); };
         }
 
         public static void Queue(Action action)
@@ -30,7 +27,8 @@ namespace Rampancy
             }
 
             // Block untill done
-            while (!act.IsDone) { }
+            while (!act.IsDone) {
+            }
         }
 
         public static void Process()

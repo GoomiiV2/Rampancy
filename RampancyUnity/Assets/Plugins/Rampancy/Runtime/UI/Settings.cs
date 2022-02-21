@@ -10,11 +10,11 @@ namespace Rampancy.UI
         [MenuItem("Rampancy/Settings")]
         public static void ShowWindow()
         {
-            EditorWindow window = GetWindow(typeof(Settings), false, "Settings");
+            var window = GetWindow(typeof(Settings), false, "Settings");
             window.Show();
         }
-        
-        void OnGUI()
+
+        private void OnGUI()
         {
             Rampancy.Cfg ??= Config.Load();
 
@@ -25,7 +25,7 @@ namespace Rampancy.UI
                 Rampancy.Cfg.GameVersion = (GameVersions) EditorGUILayout.EnumPopup("", Rampancy.Cfg.GameVersion, GUILayout.Width(150));
             }
             EditorGUILayout.EndHorizontal();
-            
+
             // Game configs
             DrawGameConfig("Halo 1 MCC", Rampancy.Cfg.Halo1MccGameConfig);
             DrawGameConfig("Halo 3 MCC", Rampancy.Cfg.Halo3MccGameConfig);
@@ -33,7 +33,7 @@ namespace Rampancy.UI
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             if (GUILayout.Button("Save")) {
                 Rampancy.Cfg.Save();
-                
+
                 // TODO: only do this is the path of a game changed or the game version
                 Rampancy.AssetDB.ScanTags(Rampancy.Cfg.ActiveGameConfig.TagsPath);
             }
@@ -61,7 +61,7 @@ namespace Rampancy.UI
                 EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             }
             EditorGUILayout.EndHorizontal();
-            
+
             // Base dir 
 
             GUILayout.Label("Base Tools dir: ");
@@ -70,10 +70,8 @@ namespace Rampancy.UI
                 config.ToolBasePath = GUILayout.TextField(config.ToolBasePath ?? "");
 
                 if (GUILayout.Button("...", GUILayout.Width(40))) {
-                    var path = EditorUtility.OpenFolderPanel("Base dir", "", "");
-                    if (path != "") {
-                        config.ToolBasePath = path;
-                    }
+                    var path                            = EditorUtility.OpenFolderPanel("Base dir", "", "");
+                    if (path != "") config.ToolBasePath = path;
                 }
             }
             EditorGUILayout.EndHorizontal();

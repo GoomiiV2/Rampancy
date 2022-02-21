@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace Rampancy.Tests
 {
-    [RequireComponent(typeof(MeshCollider))]
-    [RequireComponent(typeof(MeshRenderer))]
-    [RequireComponent(typeof(MeshFilter))]
-    [ExecuteInEditMode]
+    [RequireComponent(typeof(MeshCollider)), RequireComponent(typeof(MeshRenderer)), RequireComponent(typeof(MeshFilter)), ExecuteInEditMode]
     public class WingedMeshTester : MonoBehaviour
     {
         public Mesh       SourceMesh;
@@ -44,9 +41,7 @@ namespace Rampancy.Tests
                 ProcessMesh();
             }
 
-            if (ShowFaceHandles) {
-                DrawFaceHandles(ShowFaceCenters);
-            }
+            if (ShowFaceHandles) DrawFaceHandles(ShowFaceCenters);
         }
 
         private unsafe void ProcessMesh()
@@ -55,13 +50,11 @@ namespace Rampancy.Tests
             WingedMesh.FromUnityMesh(SourceMesh);
 
             // Add a tri
-            if (AddTestTriToMesh) {
-                AddTestTri();
-            }
-            
+            if (AddTestTriToMesh) AddTestTri();
+
             OpenEdges  = WingedMesh.FindOpenTris();
             TJunctions = WingedMesh.FindTJunctions();
-            
+
             if (FixTJunctions) WingedMesh.FixTJunctions(TJunctions);
 
             var mf = GetComponent<MeshFilter>();
@@ -75,14 +68,12 @@ namespace Rampancy.Tests
                 var tri = WingedMesh.Triangles.Array[OpenEdges[i].FaceIdx];
                 Debug.Log($"Edge: Face: {OpenEdges[i].FaceIdx}, Vert1: {tri.VertIdx[OpenEdges[i].Vert1Idx]}, Vert2: {tri.VertIdx[OpenEdges[i].Vert2Idx]}");
             }*/
-            
+
             Debug.Log($"Mesh: {name}");
-            foreach (var kvp in TJunctions) {
-                foreach (var tj in kvp.Value) {
-                    Debug.Log($"TJunction: Face: {tj.FaceIdx}, Edge: {tj.Edge.Vert1Idx} {tj.Edge.Vert2Idx}, Spliting Vert: {tj.SplitingVertIdx}");
-                }
-            }
-            
+            foreach (var kvp in TJunctions)
+            foreach (var tj in kvp.Value)
+                Debug.Log($"TJunction: Face: {tj.FaceIdx}, Edge: {tj.Edge.Vert1Idx} {tj.Edge.Vert2Idx}, Spliting Vert: {tj.SplitingVertIdx}");
+
             /*for (int i = 0; i < TJunctions.Count; i++) {
                 var tj = TJunctions[i];
                 Debug.Log($"TJunction: Face: {tj.FaceIdx}, Edge: {tj.Edge.Vert1Idx} {tj.Edge.Vert2Idx}, Spliting Vert: {tj.SplitingVertIdx}");
@@ -102,13 +93,11 @@ namespace Rampancy.Tests
             if (WingedMesh == null) return;
 
             if (ShowFaceHandles) {
-                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
                 if (Physics.Raycast(ray, out var hit)) {
                     FaceIdxToDrawInfo = hit.triangleIndex;
 
-                    if (hit.transform != transform) {
-                        FaceIdxToDrawInfo = -1;
-                    }
+                    if (hit.transform != transform) FaceIdxToDrawInfo = -1;
                 }
 
                 if (FaceIdxToDrawInfo != -1 && FaceIdxToDrawInfo < WingedMesh.Triangles.Count) {
@@ -120,9 +109,7 @@ namespace Rampancy.Tests
                     if (tri.NextTriIdx[1] != -1) DrawFaceLink(tri.Id, tri.NextTriIdx[1], Color.yellow, height);
                     if (tri.NextTriIdx[2] != -1) DrawFaceLink(tri.Id, tri.NextTriIdx[2], Color.green, height);
 
-                    for (int i = 0; i < 3; i++) {
-                        Handles.Label(WingedMesh.Vert_Positions[tri.VertIdx[i]], $"{tri.VertIdx[i]}");
-                    }
+                    for (var i = 0; i < 3; i++) Handles.Label(WingedMesh.Vert_Positions[tri.VertIdx[i]], $"{tri.VertIdx[i]}");
 
                     var screenPos = HandleUtility.WorldToGUIPoint(center);
 
@@ -141,7 +128,7 @@ namespace Rampancy.Tests
                 }
             }
 
-            if (showFaceCenters) {
+            if (showFaceCenters)
                 for (var index = 0; index < WingedMesh.Triangles.Count; index++) {
                     var tri    = WingedMesh.Triangles.Array[index];
                     var center = transform.position + tri.GetCenter(WingedMesh);
@@ -149,21 +136,15 @@ namespace Rampancy.Tests
                     Handles.color = index == FaceIdxToDrawInfo ? Color.blue : Color.white;
                     Handles.DrawWireCube(center, Vector3.one * 0.005f);
                 }
-            }
 
-            if (ShowOpenEdges) {
-                for (int i = 0; i < OpenEdges.Count; i++) {
+            if (ShowOpenEdges)
+                for (var i = 0; i < OpenEdges.Count; i++)
                     DrawEdge(OpenEdges[i]);
-                }
-            }
 
-            if (ShowTJunctions) {
-                foreach (var kvp in TJunctions) {
-                    foreach (var tj in kvp.Value) {
-                        DrawTJunction(tj);
-                    }
-                }
-            }
+            if (ShowTJunctions)
+                foreach (var kvp in TJunctions)
+                foreach (var tj in kvp.Value)
+                    DrawTJunction(tj);
         }
 
         private void DrawFaceLink(int face1Idx, int face2Idx, Color color, float height)
@@ -174,7 +155,7 @@ namespace Rampancy.Tests
             var center1 = transform.position + tri1.GetCenter(WingedMesh);
             var center2 = transform.position + tri2.GetCenter(WingedMesh);
 
-            Handles.DrawBezier(center1, center2, center1 + (tri1.GetNormal(WingedMesh) * height), center2 + (tri2.GetNormal(WingedMesh) * height), color, Texture2D.grayTexture, 4);
+            Handles.DrawBezier(center1, center2, center1 + tri1.GetNormal(WingedMesh) * height, center2 + tri2.GetNormal(WingedMesh) * height, color, Texture2D.grayTexture, 4);
         }
 
         private unsafe void DrawEdge(WingedMesh.EdgeRef edgeRef)
@@ -183,14 +164,14 @@ namespace Rampancy.Tests
             var (v1, v2) = WingedMesh.GetFullEdgePositions(edgeRef);
             Gizmos.DrawSphere(transform.position + v1, 0.02f);
             Gizmos.DrawSphere(transform.position + v2, 0.02f);
-            Gizmos.DrawLine(transform.position  + v1, transform.position + v2);
+            Gizmos.DrawLine(transform.position   + v1, transform.position + v2);
         }
 
         private void DrawTJunction(WingedMesh.TJunctionInfo tJunctionInfo)
         {
             Gizmos.color = Color.green;
             DrawEdge(tJunctionInfo.Edge);
-            
+
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(transform.position + WingedMesh.Vert_Positions[tJunctionInfo.SplitingVertIdx], 0.02f);
         }

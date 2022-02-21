@@ -11,8 +11,8 @@ namespace Rampancy.UI
     {
         public string LevelName;
         public bool   IsSP = true;
-        
-        void OnGUI()
+
+        private void OnGUI()
         {
             LevelName = EditorGUILayout.TextField("Level Name", LevelName);
             IsSP      = EditorGUILayout.Toggle("Single Player", IsSP);
@@ -30,21 +30,21 @@ namespace Rampancy.UI
                 var frame    = new GameObject("Frame");
                 var levelGeo = new GameObject("LevelGeo");
                 levelGeo.transform.parent = frame.transform;
-                
+
                 var debugGeo = new GameObject("DebugGeo");
                 debugGeo.transform.parent = frame.transform;
 
                 var csgModel = levelGeo.AddComponent<CSGModel>();
                 csgModel.Settings = ModelSettingsFlags.InvertedWorld | ModelSettingsFlags.NoCollider;
-                
+
                 var scenePath = $"{Rampancy.SceneDir}/{LevelName}.unity";
                 Directory.CreateDirectory(Path.GetDirectoryName(scenePath));
                 EditorSceneManager.SaveScene(scene, scenePath);
                 SceneManager.SetActiveScene(currentScene);
-                
+
                 Close();
             }
- 
+
             if (GUILayout.Button("Cancel"))
                 Close();
         }

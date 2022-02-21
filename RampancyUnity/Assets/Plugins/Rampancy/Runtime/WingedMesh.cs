@@ -31,13 +31,13 @@ namespace Rampancy
             Profiler.BeginSample("Winged Mesh From Unity Mesh");
             var timer = Stopwatch.StartNew();
 
-            ConnectivityMap = new(mesh.triangles.Length);
+            ConnectivityMap = new Dictionary<Edge, int>(mesh.triangles.Length);
 
             // Verts
             Profiler.BeginSample("Winged Mesh From Unity Mesh, Verts");
-            Vert_Positions = new(mesh.vertices);
-            Vert_Normals   = new(mesh.normals);
-            Vert_Uvs       = new(mesh.uv);
+            Vert_Positions = new List<Vector3>(mesh.vertices);
+            Vert_Normals   = new List<Vector3>(mesh.normals);
+            Vert_Uvs       = new List<Vector2>(mesh.uv);
 
             Profiler.EndSample();
             Debug.Log($"Converting mesh verts: {timer.Elapsed}");
@@ -45,10 +45,10 @@ namespace Rampancy
             // Tris
             Profiler.BeginSample("Winged Mesh From Unity Mesh, Triangles");
             var triIdxs = mesh.triangles;
-            Triangles = new(triIdxs.Length / 3);
+            Triangles = new ResizeableArray<Triangle>(triIdxs.Length / 3);
             var numSubMeshes = mesh.subMeshCount;
-            int faceIdx      = 0;
-            for (int subMeshIdx = 0; subMeshIdx < numSubMeshes; subMeshIdx++) {
+            var faceIdx      = 0;
+            for (var subMeshIdx = 0; subMeshIdx < numSubMeshes; subMeshIdx++) {
                 var subMesh = mesh.GetSubMesh(subMeshIdx);
                 for (var triIdx = subMesh.indexStart; triIdx < subMesh.indexStart + subMesh.indexCount; triIdx += 3) {
                     var idx1 = triIdxs[triIdx];
@@ -70,16 +70,13 @@ namespace Rampancy
                         Triangles.Array[faceIdx].NextTriIdx[1] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx2], Vert_Positions[idx3]), out var connectedTri2) ? connectedTri2 : -1;
                         Triangles.Array[faceIdx].NextTriIdx[2] = ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[idx3], Vert_Positions[idx1]), out var connectedTri3) ? connectedTri3 : -1;
 
-                        for (int i = 0; i < 3; i++) {
-                            if (Triangles.Array[faceIdx].NextTriIdx[i] != -1) { // This face was connected
-                                for (int j = 0; j < 3; j++) {
+                        for (var i = 0; i < 3; i++)
+                            if (Triangles.Array[faceIdx].NextTriIdx[i] != -1) // This face was connected
+                                for (var j = 0; j < 3; j++)
                                     if (Triangles.Array[Triangles.Array[faceIdx].NextTriIdx[i]].NextTriIdx[j] == -1) {
                                         Triangles.Array[Triangles.Array[faceIdx].NextTriIdx[i]].NextTriIdx[j] = Triangles.Array[faceIdx].Id;
                                         break;
                                     }
-                                }
-                            }
-                        }
 
                         faceIdx++;
                     }
@@ -114,13 +111,12 @@ namespace Rampancy
 
                 var indices    = new int[subMesh.Count() * 3];
                 var indicesIdx = 0;
-                foreach (var tri in subMesh) {
+                foreach (var tri in subMesh)
                     if (tri.Id != -1 && !Utils.IsDegenerateTri(Vert_Positions[tri.VertIdx[0]], Vert_Positions[tri.VertIdx[1]], Vert_Positions[tri.VertIdx[2]])) {
                         indices[indicesIdx++] = tri.VertIdx[0];
                         indices[indicesIdx++] = tri.VertIdx[1];
                         indices[indicesIdx++] = tri.VertIdx[2];
                     }
-                }
 
                 mesh.SetTriangles(indices.Take(indicesIdx).ToArray(), subMesh.Key);
             }
@@ -159,20 +155,17 @@ namespace Rampancy
             tri.VertIdx[1] = v2;
             tri.VertIdx[2] = v3;
 
-            tri.NextTriIdx[0] = nextTri1 == -1 ? (ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[v1], Vert_Positions[v2]), out var connectedTri1) ? connectedTri1 : -1) : nextTri1;
-            tri.NextTriIdx[1] = nextTri2 == -1 ? (ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[v2], Vert_Positions[v3]), out var connectedTri2) ? connectedTri2 : -1) : nextTri2;
-            tri.NextTriIdx[2] = nextTri3 == -1 ? (ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[v3], Vert_Positions[v1]), out var connectedTri3) ? connectedTri3 : -1) : nextTri3;
+            tri.NextTriIdx[0] = nextTri1 == -1 ? ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[v1], Vert_Positions[v2]), out var connectedTri1) ? connectedTri1 : -1 : nextTri1;
+            tri.NextTriIdx[1] = nextTri2 == -1 ? ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[v2], Vert_Positions[v3]), out var connectedTri2) ? connectedTri2 : -1 : nextTri2;
+            tri.NextTriIdx[2] = nextTri3 == -1 ? ConnectivityMap.TryGetValue(Edge.Create(Vert_Positions[v3], Vert_Positions[v1]), out var connectedTri3) ? connectedTri3 : -1 : nextTri3;
 
-            for (int i = 0; i < 3; i++) {
-                if (tri.NextTriIdx[i] != -1) {
-                    for (int j = 0; j < 3; j++) {
+            for (var i = 0; i < 3; i++)
+                if (tri.NextTriIdx[i] != -1)
+                    for (var j = 0; j < 3; j++)
                         if (Triangles.Array[tri.NextTriIdx[i]].NextTriIdx[j] == -1) {
                             Triangles.Array[tri.NextTriIdx[i]].NextTriIdx[j] = tri.Id;
                             break;
                         }
-                    }
-                }
-            }
 
             Triangles.Add(tri);
             return tri.Id;
@@ -188,28 +181,24 @@ namespace Rampancy
         public unsafe List<EdgeRef> FindOpenTris()
         {
             var openEdges = new List<EdgeRef>();
-            for (int i = 0; i < Triangles.Count; i++) { // All the tris
-                for (int j = 0; j < 3; j++) {           // Connections
-                    if (Triangles.Array[i].NextTriIdx[j] == -1) {
-                        var edges = new EdgeRef[]
-                        {
-                            new() {FaceIdx = i, Vert1Idx = 0, Vert2Idx = 1},
-                            new() {FaceIdx = i, Vert1Idx = 1, Vert2Idx = 2},
-                            new() {FaceIdx = i, Vert1Idx = 2, Vert2Idx = 0}
-                        };
+            for (var i = 0; i < Triangles.Count; i++) // All the tris
+            for (var j = 0; j < 3; j++)               // Connections
+                if (Triangles.Array[i].NextTriIdx[j] == -1) {
+                    var edges = new EdgeRef[]
+                    {
+                        new() {FaceIdx = i, Vert1Idx = 0, Vert2Idx = 1},
+                        new() {FaceIdx = i, Vert1Idx = 1, Vert2Idx = 2},
+                        new() {FaceIdx = i, Vert1Idx = 2, Vert2Idx = 0}
+                    };
 
-                        for (int k = 0; k < edges.Length; k++) {
-                            var vert1Idx = Triangles.Array[i].VertIdx[edges[k].Vert1Idx];
-                            var vert2Idx = Triangles.Array[i].VertIdx[edges[k].Vert2Idx];
-                            if (!ConnectivityMap.ContainsKey(Edge.Create(Vert_Positions[vert1Idx], Vert_Positions[vert2Idx]))) {
-                                openEdges.Add(edges[k]);
-                            }
-                        }
-
-                        break;
+                    for (var k = 0; k < edges.Length; k++) {
+                        var vert1Idx = Triangles.Array[i].VertIdx[edges[k].Vert1Idx];
+                        var vert2Idx = Triangles.Array[i].VertIdx[edges[k].Vert2Idx];
+                        if (!ConnectivityMap.ContainsKey(Edge.Create(Vert_Positions[vert1Idx], Vert_Positions[vert2Idx]))) openEdges.Add(edges[k]);
                     }
+
+                    break;
                 }
-            }
 
             return openEdges;
         }
@@ -224,9 +213,9 @@ namespace Rampancy
             Parallel.ForEach(openEdges, (edge) =>
             {
                 var edgePositions = GetFullEdgePositions(edge);
-                for (int i = 0; i < Vert_Positions.Count; i++) {
+                for (var i = 0; i < Vert_Positions.Count; i++) {
                     var distToLine = HandleUtility.DistancePointLine(Vert_Positions[i], edgePositions.V1, edgePositions.V2);
-                    if (distToLine < tolerance && (Vert_Positions[i] != edgePositions.V1 && Vert_Positions[i] != edgePositions.V2)) {
+                    if (distToLine < tolerance && Vert_Positions[i] != edgePositions.V1 && Vert_Positions[i] != edgePositions.V2) {
                         var tJunctionInfo = new TJunctionInfo
                         {
                             FaceIdx         = edge.FaceIdx,
@@ -242,19 +231,18 @@ namespace Rampancy
             });
 
             Dictionary<int, List<TJunctionInfo>> groupedTJunctions = new();
-            for (int i = 0; i < tJunctions.Count; i++) {
+            for (var i = 0; i < tJunctions.Count; i++) {
                 if (!groupedTJunctions.ContainsKey(tJunctions[i].FaceIdx)) groupedTJunctions.Add(tJunctions[i].FaceIdx, new List<TJunctionInfo>());
 
                 groupedTJunctions[tJunctions[i].FaceIdx].Add(tJunctions[i]);
             }
 
             var keys = groupedTJunctions.Keys.ToArray();
-            for (int i = 0; i < keys.Length; i++) {
+            for (var i = 0; i < keys.Length; i++)
                 groupedTJunctions[keys[i]] = groupedTJunctions[keys[i]].DistinctBy(x => Vert_Positions[x.SplitingVertIdx])
                                                                        .OrderBy(x => x.Edge.Vert1Idx)
                                                                        .ThenBy(x => Vector3.Distance(Vert_Positions[Triangles.Array[x.FaceIdx].VertIdx[x.Edge.Vert1Idx]], Vert_Positions[x.SplitingVertIdx]))
                                                                        .ToList();
-            }
 
             return groupedTJunctions;
         }
@@ -271,9 +259,7 @@ namespace Rampancy
                 foreach (var edgeGroup in perEdge) {
                     var tjs = edgeGroup;
 
-                    if (edgeNum == 2) {
-                        faceIdx = faceTJs.Key;
-                    }
+                    if (edgeNum == 2) faceIdx = faceTJs.Key;
 
                     foreach (var tj in tjs) {
                         if (lastSplittingVertPos != Vert_Positions[tj.SplitingVertIdx]) {
@@ -311,18 +297,16 @@ namespace Rampancy
             Triangles.Array[face].VertIdx[edge.Vert2Idx] = newVertIdx;
 
             // Add the new face to fill in the hole
-            int[] indices = rootVertIdx switch
+            var indices = rootVertIdx switch
             {
                 0 => new[] {Triangles.Array[face].VertIdx[rootVertIdx], newVertIdx, oldVertIdx},
                 1 => new[] {newVertIdx, Triangles.Array[face].VertIdx[rootVertIdx], oldVertIdx},
                 2 => new[] {newVertIdx, oldVertIdx, Triangles.Array[face].VertIdx[rootVertIdx]}
             };
 
-            var newFaceN    = GetTriNormal(indices[0], indices[1], indices[2]);
-            var normsDiffer = Math.Abs(Vector3.Distance(originalFaceNorm, newFaceN)) > 0.1f;
-            if (normsDiffer) {
-                (indices[0], indices[2]) = (indices[2], indices[0]);
-            }
+            var newFaceN                              = GetTriNormal(indices[0], indices[1], indices[2]);
+            var normsDiffer                           = Math.Abs(Vector3.Distance(originalFaceNorm, newFaceN)) > 0.1f;
+            if (normsDiffer) (indices[0], indices[2]) = (indices[2], indices[0]);
 
             var newFaceIdx = AddTri(indices[0], indices[1], indices[2], Triangles.Array[face].SubMeshId, addEdgesToConnectivityMap: false);
 
@@ -330,7 +314,10 @@ namespace Rampancy
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector3 GetTriNormal(int vi1, int vi2, int vi3) => Utils.GetTriNormal(Vert_Positions[vi1], Vert_Positions[vi2], Vert_Positions[vi3]);
+        public Vector3 GetTriNormal(int vi1, int vi2, int vi3)
+        {
+            return Utils.GetTriNormal(Vert_Positions[vi1], Vert_Positions[vi2], Vert_Positions[vi3]);
+        }
 
         public (Vector2 uvs, Vector3 norms) GetUvsAndNormsForPointOnEdge(int v1, int v2, int splittingVert)
         {
@@ -354,7 +341,10 @@ namespace Rampancy
 
             // Get the center point of the tri
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Vector3 GetCenter(WingedMesh mesh) => (mesh.Vert_Positions[VertIdx[0]] + mesh.Vert_Positions[VertIdx[1]] + mesh.Vert_Positions[VertIdx[2]]) / 3;
+            public Vector3 GetCenter(WingedMesh mesh)
+            {
+                return (mesh.Vert_Positions[VertIdx[0]] + mesh.Vert_Positions[VertIdx[1]] + mesh.Vert_Positions[VertIdx[2]]) / 3;
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Vector3 GetNormal(WingedMesh mesh)
@@ -367,7 +357,10 @@ namespace Rampancy
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public float GetArea(WingedMesh mesh) => Utils.CalcAreaOfTri(mesh.Vert_Positions[VertIdx[0]], mesh.Vert_Positions[VertIdx[1]], mesh.Vert_Positions[VertIdx[2]]);
+            public float GetArea(WingedMesh mesh)
+            {
+                return Utils.CalcAreaOfTri(mesh.Vert_Positions[VertIdx[0]], mesh.Vert_Positions[VertIdx[1]], mesh.Vert_Positions[VertIdx[2]]);
+            }
         }
 
         public struct Edge

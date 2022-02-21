@@ -8,18 +8,19 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace Rampancy
 {
     [InitializeOnLoad]
     public class Rampancy
     {
-        public static Config  Cfg  = new();
+        public static Config  Cfg     = new();
         public static AssetDb AssetDB = new();
 
         public static string BaseUnityDir => Path.Combine("Assets", $"{Cfg.GameVersion}");
         public static string SceneDir     => Path.Combine(BaseUnityDir, Statics.SrcLevelsName);
-        
+
         static Rampancy()
         {
             Init();
@@ -51,20 +52,18 @@ namespace Rampancy
                     var rampancySentinel = rampancySentinelGO.GetComponent<RampancySentinel>();
                     rampancySentinel.BuildMatIdToPathList();
                 }
-                
-                var meshes = GameObject.FindObjectsOfType<GameObject>().Where(x => x.name == "[generated-meshes]");
-                foreach (var mesh in meshes) {
-                    mesh.hideFlags = HideFlags.DontSaveInEditor;
-                }
+
+                var meshes                                  = Object.FindObjectsOfType<GameObject>().Where(x => x.name == "[generated-meshes]");
+                foreach (var mesh in meshes) mesh.hideFlags = HideFlags.DontSaveInEditor;
             };
 
-            EditorSceneManager.sceneOpened += (scene, mode) =>
-            {
-                Actions.UpdateSceneMatRefs();
-            };
+            EditorSceneManager.sceneOpened += (scene, mode) => { Actions.UpdateSceneMatRefs(); };
         }
 
-        public static void RunToolCommand(string cmdStr) => RunProgram(Cfg.ActiveGameConfig.ToolPath, cmdStr);
+        public static void RunToolCommand(string cmdStr)
+        {
+            RunProgram(Cfg.ActiveGameConfig.ToolPath, cmdStr);
+        }
 
         // Run a program like tool hidden and log the output
         public static void RunProgram(string program, string cmd, bool dontLog = false, bool hideWidnow = false)
@@ -79,7 +78,7 @@ namespace Rampancy
                 ps.RedirectStandardOutput = !dontLog;
                 ps.RedirectStandardError  = !dontLog;
                 ps.UseShellExecute        = false;
-                ps.CreateNoWindow = hideWidnow;
+                ps.CreateNoWindow         = hideWidnow;
                 ps.WindowStyle            = ProcessWindowStyle.Hidden;
                 var process = Process.Start(ps);
 
@@ -127,7 +126,7 @@ namespace Rampancy
                 return null;
             }
         }
-        
+
         public static Process LaunchCMD(string cmd)
         {
             try {
@@ -150,15 +149,15 @@ namespace Rampancy
         // Run a tool and capture the output to std out as a string
         public static string GetToolOutput(string toolPath, string args)
         {
-            Process process = new Process();
+            var process = new Process();
             process.StartInfo.FileName               = toolPath;
             process.StartInfo.Arguments              = args;
             process.StartInfo.UseShellExecute        = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError  = true;
             process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            string err    = process.StandardError.ReadToEnd();
+            var output = process.StandardOutput.ReadToEnd();
+            var err    = process.StandardError.ReadToEnd();
             process.WaitForExit();
 
             return output;

@@ -26,7 +26,10 @@ namespace Rampancy
         [SerializeField] public string[] MatIdToPathLookup_Guids;
         [SerializeField] public string[] MatIdToPathLookup_Paths;
 
-        public string GetWrlPath() => Path.Combine(Rampancy.Cfg.ActiveGameConfig.DataPath, DataDir ?? "", "models", $"{LevelName}_errors.wrl");
+        public string GetWrlPath()
+        {
+            return Path.Combine(Rampancy.Cfg.ActiveGameConfig.DataPath, DataDir ?? "", "models", $"{LevelName}_errors.wrl");
+        }
 
         public static RampancySentinel GetOrCreateInScene()
         {
@@ -50,9 +53,7 @@ namespace Rampancy
         public void WatchForWrlFile()
         {
             var dirPath = Path.GetDirectoryName(GetWrlPath());
-            if (!Directory.Exists(dirPath)) {
-                Directory.CreateDirectory(dirPath);
-            }
+            if (!Directory.Exists(dirPath)) Directory.CreateDirectory(dirPath);
 
             DebugWrlWatcher = new FileSystemWatcher(dirPath);
 
@@ -96,9 +97,9 @@ namespace Rampancy
         {
             var debugGeoRoot = GameObject.Find("Frame/DebugGeo");
             DestroyImmediate(debugGeoRoot);
-            
+
             if (File.Exists(GetWrlPath())) {
-                DebugGeo = new();
+                DebugGeo = new DebugGeoData();
                 DebugGeo.LoadFromWrl(GetWrlPath());
 
                 foreach (var item in DebugGeo.Items) {
@@ -117,14 +118,14 @@ namespace Rampancy
             }
         }
 
-        static Material lineMaterial;
+        private static Material lineMaterial;
 
-        static void CreateLineMaterial()
+        private static void CreateLineMaterial()
         {
             if (!lineMaterial) {
                 // Unity has a built-in shader that is useful for drawing
                 // simple colored things.
-                Shader shader = Shader.Find("Hidden/Internal-Colored");
+                var shader = Shader.Find("Hidden/Internal-Colored");
                 lineMaterial           = new Material(shader);
                 lineMaterial.hideFlags = HideFlags.HideAndDontSave;
                 // Turn on alpha blending
@@ -144,11 +145,11 @@ namespace Rampancy
             var scale = new Vector3(Statics.ExportScale, -Statics.ExportScale, Statics.ExportScale);
             var rot   = Quaternion.Euler(new Vector3(-90, 0, 0));
 
-            if (DebugGeo != null) {
+            if (DebugGeo != null)
                 foreach (var debugItem in DebugGeo.Items) {
                     if (DebugGeoMarker.ItemFlags.Line.HasFlag(debugItem.Flags)) {
                         var startPoint = rot * Vector3.Scale(scale, debugItem.Verts[debugItem.Indices[0]]);
-                        for (int i = 1; i < debugItem.Indices.Count; i++) {
+                        for (var i = 1; i < debugItem.Indices.Count; i++) {
                             var point = rot * Vector3.Scale(scale, debugItem.Verts[debugItem.Indices[i]]);
                             Debug.DrawLine(startPoint, point, debugItem.Color);
                         }
@@ -161,7 +162,7 @@ namespace Rampancy
                         GL.Begin(GL.TRIANGLES);
                         GL.Color(debugItem.Color);
 
-                        for (int i = 0; i < debugItem.Indices.Count; i++) {
+                        for (var i = 0; i < debugItem.Indices.Count; i++) {
                             var vert = rot * Vector3.Scale(scale, debugItem.Verts[debugItem.Indices[i]]);
                             GL.Vertex(vert);
                         }
@@ -177,7 +178,6 @@ namespace Rampancy
                         Gizmos.DrawSphere(pos, 0.02f);
                     }
                 }
-            }
         }
 
     #endregion
@@ -188,18 +188,14 @@ namespace Rampancy
         {
             var matIdLookup = new Dictionary<string, string>();
             var allBrushes  = FindObjectsOfType<CSGBrush>();
-            foreach (var brush in allBrushes) {
-                foreach (var texGen in brush.Shape.TexGens) {
-                    if (texGen.RenderMaterial != null) {
-                        var path = AssetDatabase.GetAssetPath(texGen.RenderMaterial);
-                        if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(texGen.RenderMaterial, out string guid, out long localId)) {
-                            if (!matIdLookup.ContainsKey(guid)) {
-                                matIdLookup.Add(guid, path);
-                            }
-                        }
-                    }
+            foreach (var brush in allBrushes)
+            foreach (var texGen in brush.Shape.TexGens)
+                if (texGen.RenderMaterial != null) {
+                    var path = AssetDatabase.GetAssetPath(texGen.RenderMaterial);
+                    if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(texGen.RenderMaterial, out var guid, out long localId))
+                        if (!matIdLookup.ContainsKey(guid))
+                            matIdLookup.Add(guid, path);
                 }
-            }
 
             MatIdToPathLookup_Guids = matIdLookup.Keys.ToArray();
             MatIdToPathLookup_Paths = matIdLookup.Values.ToArray();
@@ -209,7 +205,7 @@ namespace Rampancy
         {
             var matIdToPathLookup = new Dictionary<string, string>();
 
-            for (int i = 0; i < MatIdToPathLookup_Guids.Length; i++) {
+            for (var i = 0; i < MatIdToPathLookup_Guids.Length; i++) {
                 var guid = MatIdToPathLookup_Guids[i];
                 var path = MatIdToPathLookup_Paths[i];
                 matIdToPathLookup.Add(guid, path);

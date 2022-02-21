@@ -9,12 +9,10 @@ namespace Rampancy
         {
             var bitmapTagsInfos = Rampancy.AssetDB.TagsOfType("bitmap");
             Texture.allowThreadedTextureCreation = true;
-            
+
             // Unitys texture creation is from the main thread only, so this is slow, for now
             // TODO: look into batching the texture creating and uploads
-            foreach (var tagInfo in bitmapTagsInfos) {
-                Actions.H1_ImportBitmap(tagInfo);
-            }
+            foreach (var tagInfo in bitmapTagsInfos) Actions.H1_ImportBitmap(tagInfo);
         }
 
         public static void ImportShaders()

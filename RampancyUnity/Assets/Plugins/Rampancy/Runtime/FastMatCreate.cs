@@ -12,11 +12,11 @@ namespace Rampancy
     {
         public static void CreateBasicMat(string texId, string matPath, string shaderGuid, string[] tags = null, bool transparent = false, float tiling = 1f)
         {
-            tags        = tags ?? new string[] { };
+            tags = tags ?? new string[] { };
             var matName = Path.GetFileName(matPath).Replace(".asset", "");
 
             var shaderId = transparent ? "30" : "7";
-            var matStr = GetMatText(matName, texId, shaderId, tiling);
+            var matStr   = GetMatText(matName, texId, shaderId, tiling);
 
             var matMetaStr = $@"fileFormatVersion: 2
 guid: {shaderGuid}

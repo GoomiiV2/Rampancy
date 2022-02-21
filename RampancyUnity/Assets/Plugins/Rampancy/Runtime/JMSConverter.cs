@@ -21,7 +21,7 @@ namespace Rampancy
             var verts = new Vector3[jms.Verts.Count];
             var norms = new Vector3[jms.Verts.Count];
             var uvs   = new Vector2[jms.Verts.Count];
-            for (int i = 0; i < jms.Verts.Count; i++) {
+            for (var i = 0; i < jms.Verts.Count; i++) {
                 var jmsVert = jms.Verts[i];
                 verts[i] = rot * Vector3.Scale(scale, jmsVert.Position);
                 norms[i] = rot * jmsVert.Normal;
@@ -29,12 +29,10 @@ namespace Rampancy
             }
 
             // A submesh per mat
-            var subMeshes = new List<int>[jms.Materials.Count];
-            for (int i = 0; i < jms.Materials.Count; i++) {
-                subMeshes[i] = new List<int>();
-            }
+            var subMeshes                                              = new List<int>[jms.Materials.Count];
+            for (var i = 0; i < jms.Materials.Count; i++) subMeshes[i] = new List<int>();
 
-            for (int i = 0; i < jms.Tris.Count(); i++) {
+            for (var i = 0; i < jms.Tris.Count(); i++) {
                 var tri = jms.Tris[i];
                 subMeshes[tri.MaterialIdx].AddRange(new[] {tri.VertIdx2, tri.VertIdx1, tri.VertIdx0});
             }
@@ -44,9 +42,7 @@ namespace Rampancy
             mesh.SetUVs(0, uvs);
             mesh.subMeshCount = subMeshes.Length;
 
-            for (int i = 0; i < subMeshes.Length; i++) {
-                mesh.SetTriangles(subMeshes[i].ToArray(), i);
-            }
+            for (var i = 0; i < subMeshes.Length; i++) mesh.SetTriangles(subMeshes[i].ToArray(), i);
 
             return mesh;
         }
@@ -61,7 +57,7 @@ namespace Rampancy
         {
             var indices = new int[mesh.subMeshCount][];
 
-            for (int i = 0; i < mesh.subMeshCount; i++) {
+            for (var i = 0; i < mesh.subMeshCount; i++) {
                 var subMesh = mesh.GetSubMesh(i);
                 indices[i] = new int[subMesh.indexCount];
                 Array.Copy(mesh.triangles, subMesh.indexStart, indices[i], 0, subMesh.indexCount);
@@ -91,17 +87,16 @@ namespace Rampancy
                 Name = "unnamed"
             });
 
-            foreach (var matName in matNames) {
+            foreach (var matName in matNames)
                 jms.Materials.Add(new JMS.Material
                 {
                     Name = matName,
                     Path = "<none>"
                 });
-            }
 
-            bool hasUvs     = uvs     != null && uvs.Length     == positions.Length;
-            bool hasNormals = normals != null && normals.Length == positions.Length;
-            for (int i = 0; i < positions.Length; i++) {
+            var hasUvs     = uvs     != null && uvs.Length     == positions.Length;
+            var hasNormals = normals != null && normals.Length == positions.Length;
+            for (var i = 0; i < positions.Length; i++) {
                 var vert = new JMS.Vert
                 {
                     Position   = rot * Vector3.Scale(scale, positions[i]),
@@ -114,19 +109,18 @@ namespace Rampancy
                 jms.Verts.Add(vert);
             }
 
-            for (int i = 0; i < indices.Length; i++) {
-                for (int idx = 0; idx < indices[i].Length; idx += 3) {
-                    var tri = new JMS.Tri
-                    {
-                        RegionIdx   = 0,
-                        MaterialIdx = i,
-                        VertIdx0    = indices[i][idx + 2],
-                        VertIdx1    = indices[i][idx + 1],
-                        VertIdx2    = indices[i][idx]
-                    };
+            for (var i = 0; i < indices.Length; i++)
+            for (var idx = 0; idx < indices[i].Length; idx += 3) {
+                var tri = new JMS.Tri
+                {
+                    RegionIdx   = 0,
+                    MaterialIdx = i,
+                    VertIdx0    = indices[i][idx + 2],
+                    VertIdx1    = indices[i][idx + 1],
+                    VertIdx2    = indices[i][idx]
+                };
 
-                    jms.Tris.Add(tri);
-                }
+                jms.Tris.Add(tri);
             }
 
             return jms;

@@ -12,7 +12,7 @@ namespace RampantC20
     {
         public static Mesh TrisToMesh(List<DebugGeoMarker> items)
         {
-            Mesh          mesh    = new Mesh();
+            var           mesh    = new Mesh();
             List<Vector3> verts   = new();
             List<int>     indices = new();
             List<Color32> colors  = new();
@@ -21,15 +21,13 @@ namespace RampantC20
                 foreach (var vert in item.Verts) {
                     var scale = new Vector3(Statics.ExportScale, -Statics.ExportScale, Statics.ExportScale);
                     var rot   = Quaternion.Euler(new Vector3(-90, 0, 0));
-                    verts.Add(rot * Vector3.Scale(scale,vert));
+                    verts.Add(rot * Vector3.Scale(scale, vert));
                 }
-                
+
                 var nubIndices = indices.Count;
                 var newIndices = item.Indices.Select(x => nubIndices + x).ToList();
                 indices.AddRange(newIndices);
-                for (int i = 0; i < item.Verts.Count; i++) {
-                    colors.Add(item.Color);
-                }
+                for (var i = 0; i < item.Verts.Count; i++) colors.Add(item.Color);
             }
 
             mesh.subMeshCount = 1;
@@ -41,23 +39,24 @@ namespace RampantC20
 
             return mesh;
         }
-        
+
         public static string GetProjectRelPath(AssetDb.TagInfo tagInfo, AssetDb assetDb)
         {
             var tagBaseDir    = $"Assets/{RampancyInst.Cfg.GameVersion}/TagData";
-            var assetBasePath = tagBaseDir + tagInfo.Path.Replace(Path.GetFullPath(RampancyInst.Cfg.ActiveGameConfig.TagsPath), "").TrimEnd('/', '\\');;
+            var assetBasePath = tagBaseDir + tagInfo.Path.Replace(Path.GetFullPath(RampancyInst.Cfg.ActiveGameConfig.TagsPath), "").TrimEnd('/', '\\');
+            ;
             assetBasePath = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
             return assetBasePath;
         }
 
         public static string GetProjectRelPath(string tagPath, GameVersions? version = null, string unityBaseDir = null)
         {
-            var ver = version ?? RampancyInst.Cfg.GameVersion;
+            var ver     = version ?? RampancyInst.Cfg.GameVersion;
             var gameCfg = RampancyInst.Cfg.GetGameConfig(ver);
 
             var tagBaseDir    = $"Assets/{ver}/TagData";
             var assetBasePath = unityBaseDir == null ? Path.Combine(tagBaseDir, GetTagRelPath(tagPath, gameCfg.TagsPath)) : Path.Combine(unityBaseDir, tagBaseDir, GetTagRelPath(tagPath, gameCfg.TagsPath));
-            assetBasePath     = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
+            assetBasePath = Path.Combine(Path.GetDirectoryName(assetBasePath), Path.GetFileNameWithoutExtension(assetBasePath));
             return assetBasePath;
         }
 
@@ -77,8 +76,7 @@ namespace RampantC20
 
         public static string GetDataToTagPath(string dataPath)
         {
-            if (dataPath.StartsWith("data"))
-            {
+            if (dataPath.StartsWith("data")) {
                 var path = Path.Combine("tags", dataPath.Substring(4));
                 return path;
             }
@@ -88,8 +86,7 @@ namespace RampantC20
 
         public static string GetTagToDataPath(string tagPath)
         {
-            if (tagPath.StartsWith("tags"))
-            {
+            if (tagPath.StartsWith("tags")) {
                 var path = Path.Combine("data", tagPath.Substring(4));
                 return path;
             }
@@ -110,7 +107,7 @@ namespace RampantC20
 
         public static int GetHashCodeForVector3(Vector3 vector3)
         {
-            int hash = vector3.x.GetHashCode();
+            var hash = vector3.x.GetHashCode();
             hash = CombineHashCodes(hash, vector3.y.GetHashCode());
             hash = CombineHashCodes(hash, vector3.z.GetHashCode());
             return hash;
@@ -118,9 +115,9 @@ namespace RampantC20
 
         public static int CombineHashCodes(int h1, int h2)
         {
-            return (((h1 << 5) + h1) ^ h2);
+            return ((h1 << 5) + h1) ^ h2;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 GetTriNormal(Vector3 vi1, Vector3 vi2, Vector3 vi3)
         {
@@ -148,14 +145,13 @@ namespace RampantC20
         public static bool IsDegenerateTri(Vector3 v1, Vector3 v2, Vector3 v3)
         {
             const float TOLERANCE = 0.0001f;
-            var         area     = CalcAreaOfTri(v1, v2, v3);
+            var         area      = CalcAreaOfTri(v1, v2, v3);
 
-            if (area <= TOLERANCE ||
+            if (area                               <= TOLERANCE ||
                 Math.Abs(Vector3.Distance(v1, v2)) <= TOLERANCE ||
                 Math.Abs(Vector3.Distance(v1, v3)) <= TOLERANCE ||
-                Math.Abs(Vector3.Distance(v2, v3)) <= TOLERANCE) {
+                Math.Abs(Vector3.Distance(v2, v3)) <= TOLERANCE)
                 return true;
-            }
 
             return false;
         }

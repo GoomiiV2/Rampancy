@@ -62,12 +62,12 @@ namespace Rampancy.Tests
 
             if (DrawNextEdge && EdgeToDraw != -1) {
                 //StartCoroutine(DrawFaceEdges());
-                
+
                 var edge = HalfEdgeMesh.Edges[EdgeToDraw];
                 EdgeToDraw   = edge.NextEdgeIdx;
                 DrawNextEdge = false;
             }
-            
+
             if (DrawPrevEdge && EdgeToDraw != -1) {
                 var edge = HalfEdgeMesh.Edges[EdgeToDraw];
                 EdgeToDraw   = edge.PrevEdgeIdx;
@@ -81,33 +81,30 @@ namespace Rampancy.Tests
 
             if (RefreshTJunctionFinder) {
                 TJunctonsList.Clear();
-                
+
                 var tJunctionTime = Stopwatch.StartNew();
-                TJunctonsList          = HalfEdgeMesh.FindTJunctions();
+                TJunctonsList = HalfEdgeMesh.FindTJunctions();
                 tJunctionTime.Stop();
                 Debug.Log($"Finding T-Junctions took: {tJunctionTime.Elapsed}");
-                
+
                 RefreshTJunctionFinder = false;
 
                 foreach (var tJunction in TJunctonsList) {
                     Debug.Log($"E: {tJunction.Item1}, V: {tJunction.Item2}");
-                    
+
                     HalfEdgeMesh.SplitEdge(tJunction.Item1, HalfEdgeMesh.Verts[tJunction.Item2].Pos);
                 }
             }
 
-            if (DrawTJunctions) {
+            if (DrawTJunctions)
                 foreach (var tJunction in TJunctonsList) {
                     var tVert = HalfEdgeMesh.Verts[tJunction.Item2];
                     var tEdge = HalfEdgeMesh.Edges[tJunction.Item1];
                     Gizmos.DrawSphere(tVert.Pos, 0.01f);
                     DrawEdge(tEdge, false);
                     var camPos = SceneView.currentDrawingSceneView.camera.transform.position;
-                    if (Vector3.Distance(camPos, tVert.Pos) < LabelDrawDist) {
-                        Handles.Label(tVert.Pos, $"E: {tJunction.Item1}, v: {tJunction.Item2}\nPos: {tVert.Pos}\nNorm: {tVert.Normal}\nUv: {tVert.Uv}\nEdgeIdx: {tVert.EdgeIdx}");
-                    }
+                    if (Vector3.Distance(camPos, tVert.Pos) < LabelDrawDist) Handles.Label(tVert.Pos, $"E: {tJunction.Item1}, v: {tJunction.Item2}\nPos: {tVert.Pos}\nNorm: {tVert.Normal}\nUv: {tVert.Uv}\nEdgeIdx: {tVert.EdgeIdx}");
                 }
-            }
         }
 
         public void DrawFace(int faceIdx)
@@ -128,9 +125,7 @@ namespace Rampancy.Tests
             faceCenter = faceCenter / numEdges;
 
             var camPos = SceneView.currentDrawingSceneView.camera.transform.position;
-            if (Vector3.Distance(camPos, faceCenter) < LabelDrawDist) {
-                Handles.Label(faceCenter, $"F: {faceIdx}\nEidx: {edgeIdx}\nVidx: {face.VertIdx}");
-            }
+            if (Vector3.Distance(camPos, faceCenter) < LabelDrawDist) Handles.Label(faceCenter, $"F: {faceIdx}\nEidx: {edgeIdx}\nVidx: {face.VertIdx}");
         }
 
         public void DrawEdge(HalfMesh.Edge edge, bool drawLabel = true)
@@ -142,9 +137,7 @@ namespace Rampancy.Tests
 
             var center = (fromVert.Pos + toVert.Pos) / 2;
             var camPos = SceneView.currentDrawingSceneView.camera.transform.position;
-            if (drawLabel && Vector3.Distance(camPos, center) < LabelDrawDist) {
-                Handles.Label(center, $"E: {nextEdge.PrevEdgeIdx}");   
-            }
+            if (drawLabel && Vector3.Distance(camPos, center) < LabelDrawDist) Handles.Label(center, $"E: {nextEdge.PrevEdgeIdx}");
         }
     }
 }
