@@ -33,6 +33,11 @@ namespace Rampancy
             converter.ImportToScene(ass, name, path);
         }
 
+        public static void H3_ExportAss()
+        {
+            Halo3LevelExporter.Export("");
+        }
+
         public static ShaderCollection H3_GetShaderCollection(bool onlyLevelShaders = true)
         {
             var shaderCollectionPath = Path.Combine(Rampancy.Cfg.Halo3MccGameConfig.TagsPath, "levels/shader_collections.txt");

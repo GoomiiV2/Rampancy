@@ -74,6 +74,9 @@ namespace Rampancy.UI
         
         [MenuItem("Rampancy/Import-Export/Import Ass", false, 3)]
         public static void ImportAss() => Actions.H3_ImportAssDialog();
+        
+        [MenuItem("Rampancy/Import-Export/Export Ass", false, 3)]
+        public static void ExportAss() => Actions.H3_ExportAss();
 
         [MenuItem("Rampancy/Import-Export/Export Jms", false, 3)]
         public static void ExportJms() => Actions.ExportLevelJmsDialog();

@@ -2,8 +2,10 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Rampancy.Halo3;
 using Rampancy.UI;
 using RampantC20;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -58,6 +60,24 @@ namespace Rampancy
             };
 
             EditorSceneManager.sceneOpened += (scene, mode) => { Actions.UpdateSceneMatRefs(); };
+
+            Selection.selectionChanged += SelectionChanged;
+        }
+
+        private static Transform LastSelectedTransform = null;
+
+        private static void SelectionChanged()
+        {
+            // If its a prefab, and the parent is an instance, select the instance object
+            // Don't select the instance if the instance was the last thing selected, the user really wanted the prefab then
+            if (Selection.activeGameObject != null
+             && PrefabUtility.IsPartOfAnyPrefab(Selection.activeGameObject)
+             && Selection.activeTransform.parent.GetComponent<Instance>() != null
+             && Selection.activeTransform.parent                          != LastSelectedTransform) {
+                EditorApplication.delayCall += () => Selection.activeTransform = Selection.activeTransform.parent;
+            }
+
+            LastSelectedTransform = Selection.activeTransform;
         }
 
         public static void RunToolCommand(string cmdStr)
