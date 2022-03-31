@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Quaternion = System.Numerics.Quaternion;
 using Vector3 = System.Numerics.Vector3;
@@ -43,17 +44,29 @@ namespace RampantC20.Halo3
 
         public static class MaterialSymbols
         {
-            public static readonly char[] Symbols = { '%', '#', '?', '!', '@', '*', '$', '^', '-', '&', '=', '.', ';', ')', '>', '<', '|', '~', '(', '{', '}', '[', '\'', '0', ']'  };
+            public static readonly char[] Symbols = {'%', '#', '?', '!', '@', '*', '$', '^', '-', '&', '=', '.', ';', ')', '>', '<', '|', '~', '(', '{', '}', '[', '\'', '0', ']'};
 
-            public static char FlagToSymbol(BmFlags flag) => flag == BmFlags.None ? ' ' : Symbols[(int)(Math.Log((double)flag) / Math.Log(2D)) + 1];
+            public static char FlagToSymbol(BmFlags flag) => flag == BmFlags.None ? ' ' : Symbols[(int) (Math.Log((double) flag) / Math.Log(2D)) + 1];
+
+            public static string FlagToSymbols(BmFlags flags)
+            {
+                var sb = new StringBuilder();
+
+                for (int i = 0; i < 32; i++) {
+                    var isSet = (((int)flags >> i) & 1) != 0;
+                    if (isSet) {
+                        sb.Append(Symbols[i]);
+                    }
+                }
+                
+                return sb.ToString();
+            }
 
             public static BmFlags SymbolToFlag(char symbol)
             {
-                for (int i = 0; i < Symbols.Length; i++)
-                {
-                    if (Symbols[i] == symbol)
-                    {
-                        var flag = (BmFlags)(1 << i);
+                for (int i = 0; i < Symbols.Length; i++) {
+                    if (Symbols[i] == symbol) {
+                        var flag = (BmFlags) (1 << i);
                         return flag;
                     }
                 }
@@ -91,6 +104,7 @@ namespace RampantC20.Halo3
             GroupTransparentsbyPlane = 1 << 22
         }
 
+        [Serializable]
         public class LmRes
         {
             public float   Res;
@@ -102,6 +116,7 @@ namespace RampantC20.Halo3
             public bool    IngoreDefaultResScale;
         }
 
+        [Serializable]
         public class LmBasic
         {
             public float   Power;
@@ -111,6 +126,7 @@ namespace RampantC20.Halo3
             public float   EmissiveFocus;
         }
 
+        [Serializable]
         public class LmAttenuation
         {
             public bool  Enabled;
@@ -118,6 +134,7 @@ namespace RampantC20.Halo3
             public float Cutoff;
         }
 
+        [Serializable]
         public class LmFrustum
         {
             public float Blend;
@@ -157,14 +174,19 @@ namespace RampantC20.Halo3
 
         public class SphereObject : AssObject
         {
-            public int MatIdx;
+            public int   MatIdx;
             public float Radius;
         }
 
         public class BoxObject : AssObject
         {
-            public int MatIdx;
+            public int     MatIdx;
             public Vector3 Extents;
+        }
+        
+        public class PillObject : AssObject
+        {
+            public int     MatIdx;
         }
 
         public enum ObjectType
@@ -210,17 +232,17 @@ namespace RampantC20.Halo3
 
         public class Instance
         {
-            public int                    ObjectIdx;
-            public string                 Name;
-            public int                    UniqueId;
-            public int                    ParentId;
-            public int                    InheritanceFlags;
-            public Quaternion             Rotation;
-            public Vector3                Position;
-            public float                  Scale;
-            public Quaternion             PivotRotation;
-            public Vector3                PivotPosition;
-            public float                  PivotScale;
+            public int        ObjectIdx;
+            public string     Name;
+            public int        UniqueId;
+            public int        ParentId;
+            public int        InheritanceFlags;
+            public Quaternion Rotation;
+            public Vector3    Position;
+            public float      Scale;
+            public Quaternion PivotRotation;
+            public Vector3    PivotPosition;
+            public float      PivotScale;
         }
     }
 }

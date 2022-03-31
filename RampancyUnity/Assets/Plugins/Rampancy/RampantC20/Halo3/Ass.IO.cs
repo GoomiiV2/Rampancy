@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
+using System.Text;
 
 namespace RampantC20.Halo3
 {
@@ -14,36 +15,83 @@ namespace RampantC20.Halo3
             var sr  = new StreamReader(filePath);
 
             //try {
-                ass.Head = ParseHeader(sr);
+            ass.Head = ParseHeader(sr);
 
-                // Materials
-                var numMats = int.Parse(sr.ReadValidLine());
-                for (int i = 0; i < numMats; i++) {
-                    var mat = ParseMaterial(sr);
-                    ass.Materials.Add(mat);
-                }
+            // Materials
+            var numMats = int.Parse(sr.ReadValidLine());
+            for (int i = 0; i < numMats; i++) {
+                var mat = ParseMaterial(sr);
+                ass.Materials.Add(mat);
+            }
 
-                // Objects
-                var numObjects = int.Parse(sr.ReadValidLine());
-                for (int i = 0; i < numObjects; i++) {
-                    var obj = ParseObject(sr);
-                    ass.Objects.Add(obj);
-                }
+            // Objects
+            var numObjects = int.Parse(sr.ReadValidLine());
+            for (int i = 0; i < numObjects; i++) {
+                var obj = ParseObject(sr);
+                ass.Objects.Add(obj);
+            }
 
-                // Instances
-                var numInstances = int.Parse(sr.ReadValidLine());
-                for (int i = 0; i < numInstances; i++) {
-                    var inst = ParseInstance(sr);
-                    ass.Instances.Add(inst);
-                }
+            // Instances
+            var numInstances = int.Parse(sr.ReadValidLine());
+            for (int i = 0; i < numInstances; i++) {
+                var inst = ParseInstance(sr);
+                ass.Instances.Add(inst);
+            }
 
-                return ass;
+            return ass;
             /*}
             catch (Exception e) {
                 Console.WriteLine(e);
                 return null;
             }*/
         }
+
+        public void Save(string filepath)
+        {
+            var data = ToString();
+            File.WriteAllText(filepath, data);
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"; Exported from Rampancy");
+            sb.AppendLine();
+
+            FormatHeader(sb, Head);
+            sb.AppendLine();
+
+            // Mats
+            sb.AppendLine(";### MATERIALS ###");
+            sb.AppendLine($"{Materials.Count}");
+            sb.AppendLine();
+            
+            for (int i = 0; i < Materials.Count; i++) {
+                FormatMaterial(sb, Materials[i], i);
+            }
+
+            // Objects, Meshes etc
+            sb.AppendLine(";### OBJECTS ###");
+            sb.AppendLine($"{Objects.Count}");
+            sb.AppendLine();
+            
+            for (int i = 0; i < Objects.Count; i++) {
+                FormatObject(sb, Objects[i], i);
+            }
+            
+            // Instances
+            sb.AppendLine(";### INSTANCES ###");
+            sb.AppendLine($"{Instances.Count}");
+            sb.AppendLine();
+            
+            for (int i = 0; i < Instances.Count; i++) {
+                FormatInstance(sb, Instances[i], i);
+            }
+
+            return sb.ToString();
+        }
+
+    #region Import
 
         protected static Header ParseHeader(StreamReader sr)
         {
@@ -65,7 +113,7 @@ namespace RampantC20.Halo3
             var hasCollection = name.Contains(' ');
             var nameSplit     = hasCollection ? name.Split(' ') : null; // Skip properies for now
             var matName       = hasCollection ? nameSplit[1] : name;
-            var mat           = new Material
+            var mat = new Material
             {
                 Collection = hasCollection ? nameSplit[0] : null,
                 Name       = matName.Trim(MaterialSymbols.Symbols), // the flags should already be set
@@ -261,9 +309,9 @@ namespace RampantC20.Halo3
         {
             var vert = new Vertex
             {
-                Position  = ParseVector3(sr),
-                Normal  = ParseVector3(sr),
-                Color = ParseVector3(sr)
+                Position = ParseVector3(sr),
+                Normal   = ParseVector3(sr),
+                Color    = ParseVector3(sr)
             };
 
             var numVertWeight = int.Parse(sr.ReadValidLine());
@@ -335,14 +383,14 @@ namespace RampantC20.Halo3
             var line = sr.ReadValidLine();
             var nums = line.Split('\t');
             var vec3 = new Vector3(
-                    float.TryParse(nums[0], out var x) ? x : 0,
-                    float.TryParse(nums[1], out var y) ? y : 0,
-                    float.TryParse(nums[2], out var z) ? z : 0
-                );
+                float.TryParse(nums[0], out var x) ? x : 0,
+                float.TryParse(nums[1], out var y) ? y : 0,
+                float.TryParse(nums[2], out var z) ? z : 0
+            );
             return vec3;
         }
 
-#if UNITY_5
+    #if UNITY_5
         protected static UnityEngine.Vector3 ParseVector3Unity(StreamReader sr)
         {
             var line = sr.ReadValidLine();
@@ -350,7 +398,7 @@ namespace RampantC20.Halo3
             var vec3 = new UnityEngine.Vector3(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]));
             return vec3;
         }
-#endif
+    #endif
 
         protected static Quaternion ParseQuaternion(StreamReader sr)
         {
@@ -360,7 +408,7 @@ namespace RampantC20.Halo3
             return quat;
         }
 
-#if UNITY_5
+    #if UNITY_5
         protected static UnityEngine.Quaternion ParseQuaternionUnity(StreamReader sr)
         {
             var line = sr.ReadValidLine();
@@ -368,6 +416,203 @@ namespace RampantC20.Halo3
             var quat = new UnityEngine.Quaternion(float.Parse(nums[0]), float.Parse(nums[1]), float.Parse(nums[2]), float.Parse(nums[3]));
             return quat;
         }
-#endif
+    #endif
+
+    #endregion
+
+    #region Export
+
+        private static void FormatHeader(StringBuilder sb, Header head)
+        {
+            sb.AppendLine($";### HEADER ###");
+            sb.AppendLine($"{head.Version}");
+            sb.AppendLine($"\"{head.ToolName}\"");
+            sb.AppendLine($"\"{head.ToolVersion}\"");
+            sb.AppendLine($"\"{head.ExportUsername}\"");
+            sb.AppendLine($"\"{head.ExportMachineName}\"");
+        }
+
+        private static string Vec3ToStr(Vector3 vec) => $"{vec.X:F10} {vec.Y:F10} {vec.Z:F10}";
+        private static string BoolToStr(bool val) => val ? "1" : "0";
+
+        private static void FormatVector3(StringBuilder sb, Vector3 vec) => sb.AppendLine($"{vec.X:F10}\t{vec.Y:F10}\t{vec.Z:F10}");
+        private static void FormatQuat(StringBuilder sb, Quaternion quat) => sb.AppendLine($"{quat.X:F10}\t{quat.Y:F10}\t{quat.Z:F10}\t{quat.W:F10}");
+
+        private static void FormatMaterial(StringBuilder sb, Material mat, int idx)
+        {
+            sb.AppendLine($";MATERIAL {idx}");
+            sb.AppendLine($"\"{mat.Collection} {mat.Name}\"".Trim(' ')); // TODO: add symbols {(mat.Flags.HasValue ? MaterialSymbols.FlagToSymbols(mat.Flags.Value) : "")}
+            sb.AppendLine($"\"{mat.Group}\"");
+            
+            sb.AppendLine($"{GetNumExtraLinesInMat(mat)}");
+            if (mat.Flags       != null) sb.AppendLine($"\"{Material.BM_FLAGS} {Convert.ToString((uint)mat.Flags, 2).PadLeft(22, '0')}\"");
+            if (mat.LmRes       != null) sb.AppendLine($"\"{Material.BM_LMRES} {FormatLmRes(mat.LmRes)}\"");
+            if (mat.Basic       != null) sb.AppendLine($"\"{Material.BM_LIGHTING_BASIC} {FormatLmBasic(mat.Basic)}\"");
+            if (mat.Attenuation != null) sb.AppendLine($"\"{Material.BM_LIGHTING_ATTEN} {FormatLmAttenuation(mat.Attenuation)}\"");
+            if (mat.Fustrum     != null) sb.AppendLine($"\"{Material.BM_LIGHTING_FRUS} {FormatLmFrustum(mat.Fustrum)}\"");
+
+            //sb.AppendLine($"; {mat.Flags}");
+            
+            sb.AppendLine();
+        }
+
+        private static int GetNumExtraLinesInMat(Material mat)
+        {
+            var numLines = 0;
+            
+            if (mat.Flags       != null) numLines++;
+            if (mat.LmRes       != null) numLines++;
+            if (mat.Basic       != null) numLines++;
+            if (mat.Attenuation != null) numLines++;
+            if (mat.Fustrum     != null) numLines++;
+
+            return numLines;
+        }
+
+        private static string FormatLmRes(LmRes lmRes)
+        {
+            var str = $"{lmRes.Res:F10} {lmRes.PhotonFidelity} {Vec3ToStr(lmRes.TransparentTint)} {lmRes.LightmapTransparency} {Vec3ToStr(lmRes.AdditiveTint)} {BoolToStr(lmRes.UseShaderGel)} {BoolToStr(lmRes.IngoreDefaultResScale)}";
+            return str;
+        }
+        
+        private static string FormatLmBasic(LmBasic lmBasic)
+        {
+            var str = $"{lmBasic.Power:F10} {Vec3ToStr(lmBasic.Color)} {lmBasic.Quality:F10} {lmBasic.PowerPerArea} {lmBasic.EmissiveFocus:F10}";
+            return str;
+        }
+        
+        private static string FormatLmAttenuation(LmAttenuation lmAtten)
+        {
+            var str = $"{BoolToStr(lmAtten.Enabled)} {lmAtten.Falloff:F10} {lmAtten.Cutoff:F10}";
+            return str;
+        }
+        
+        private static string FormatLmFrustum(LmFrustum lmFust)
+        {
+            var str = $"{lmFust.Blend:F10} {lmFust.Falloff:F10} {lmFust.Cutoff:F10}";
+            return str;
+        }
+
+        private static void FormatObject(StringBuilder sb, AssObject obj, int objIdx)
+        {
+            sb.AppendLine($";OBJECT {objIdx}");
+            sb.AppendLine($"\"{obj.Type}\"");
+            sb.AppendLine($"\"{obj.Filepath}\"");
+            sb.AppendLine($"\"{obj.Name}\"");
+            
+            switch (obj.Type) {
+                case ObjectType.MESH:
+                    FormatObjectMesh(sb, obj as MeshObject);
+                    break;
+                case ObjectType.SPHERE:
+                    FormatObjectSphere(sb, obj as SphereObject);
+                    break;
+                case ObjectType.BOX:
+                    FormatObjectBox(sb, obj as BoxObject);
+                    break;
+                case ObjectType.PILL:
+                    FormatObjectPill(sb, obj as PillObject);
+                    break;
+                case ObjectType.GENERIC_LIGHT:
+                    FormatObjectLight(sb, obj as LightObject);
+                    break;
+            }
+        }
+
+        private static void FormatObjectMesh(StringBuilder sb, MeshObject obj)
+        {
+            sb.AppendLine($"{obj.Verts.Count}");
+            foreach (var vert in obj.Verts) {
+                FormatVert(sb, vert);
+            }
+            
+            sb.AppendLine($"{obj.Tris.Count}");
+            foreach (var tri in obj.Tris) {
+                FormatTri(sb, tri);
+            }
+
+            sb.AppendLine();
+        }
+        
+        private static void FormatVert(StringBuilder sb, Vertex vert)
+        {
+            FormatVector3(sb, vert.Position);
+            FormatVector3(sb, vert.Normal);
+            FormatVector3(sb, vert.Color);
+
+            sb.AppendLine($"{vert.Weights.Count}");
+            foreach (var weight in vert.Weights) {
+                sb.AppendLine($"{weight.Index}");
+                sb.AppendLine($"{weight.Weight:F10}");
+            }
+            
+            sb.AppendLine($"{vert.Uvws.Count}");
+            foreach (var uvw in vert.Uvws) {
+                FormatVector3(sb, uvw);
+            }
+
+            sb.AppendLine();
+        }
+        
+        private static void FormatTri(StringBuilder sb, Triangle tri)
+        {
+            sb.AppendLine($"{tri.MatIndex}\t\t{tri.Vert1Idx}\t{tri.Vert2Idx}\t{tri.Vert3Idx}");
+        }
+        
+        private static void FormatObjectSphere(StringBuilder sb, SphereObject obj)
+        {
+            sb.AppendLine($"{obj.MatIdx}");
+            sb.AppendLine($"{obj.Radius:F10}");
+        }
+
+        private static void FormatObjectPill(StringBuilder sb, PillObject obj)
+        {
+            sb.AppendLine($"{obj.MatIdx}");
+        }
+
+        private static void FormatObjectBox(StringBuilder sb, BoxObject obj)
+        {
+            sb.AppendLine($"{obj.MatIdx}");
+            FormatVector3(sb, obj.Extents);
+        }
+        
+        private static void FormatObjectLight(StringBuilder sb, LightObject obj)
+        {
+            sb.AppendLine($"\"{obj.LightType}\"");
+            FormatVector3(sb, obj.Color);
+            sb.AppendLine($"{obj.Intensity:F10}");
+            sb.AppendLine($"{obj.HotspotSize:F10}");
+            sb.AppendLine($"{obj.HotspotFalloff:F10}");
+            sb.AppendLine($"{BoolToStr(obj.UseNearAttenuation)}");
+            sb.AppendLine($"{obj.NearAttenuationStart:F10}");
+            sb.AppendLine($"{obj.NearAttenuationEnd:F10}");
+            sb.AppendLine($"{BoolToStr(obj.UseFarAttenuation)}");
+            sb.AppendLine($"{obj.FarAttenuationStart:F10}");
+            sb.AppendLine($"{obj.FarAttenuationEnd:F10}");
+            sb.AppendLine($"{obj.LightShape}");
+            sb.AppendLine($"{obj.AspectRatio:F10}");
+
+            sb.AppendLine();
+        }
+        
+        private void FormatInstance(StringBuilder sb, Instance inst, int idx)
+        {
+            sb.AppendLine($";INSTANCE {idx}");
+            sb.AppendLine($"{inst.ObjectIdx}");
+            sb.AppendLine($"\"{inst.Name}\"");
+            sb.AppendLine($"{inst.UniqueId}");
+            sb.AppendLine($"{inst.ParentId}");
+            sb.AppendLine($"{inst.InheritanceFlags}");
+            FormatQuat(sb, inst.Rotation);
+            FormatVector3(sb, inst.Position);
+            sb.AppendLine($"{inst.Scale:F10}");
+            FormatQuat(sb, inst.PivotRotation);
+            FormatVector3(sb, inst.PivotPosition);
+            sb.AppendLine($"{inst.PivotScale:F10}");
+
+            sb.AppendLine();
+        }
+
+    #endregion
     }
 }

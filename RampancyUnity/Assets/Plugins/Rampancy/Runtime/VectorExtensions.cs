@@ -27,5 +27,8 @@ namespace Rampancy
         public static Quaternion                 ToUnity(this    System.Numerics.Quaternion quat) => new(quat.X, quat.Y, quat.Z, quat.W);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static System.Numerics.Quaternion ToNumerics(this Quaternion                 quat) => new(quat.x, quat.y, quat.z, quat.w);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static System.Numerics.Quaternion ToNumericsYUpToZUp(this Quaternion quat) => new System.Numerics.Quaternion(-quat.x, -quat.z, quat.y, quat.w);
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Plugins.Rampancy.Runtime;
+using Rampancy.Halo3;
 using RampantC20;
 using RampantC20.Halo3;
 using UnityEditor;
@@ -35,7 +36,8 @@ namespace Rampancy
 
         public static void H3_ExportAss()
         {
-            Halo3LevelExporter.Export("");
+            var exporter = new Halo3LevelExporter();
+            exporter.Export("");
         }
 
         public static ShaderCollection H3_GetShaderCollection(bool onlyLevelShaders = true)
@@ -98,6 +100,8 @@ namespace Rampancy
             var flattendShaderPaths = shaderPaths.SelectMany(x => x.Value.Select(y => (x.Key, y))).ToArray();
             var shaderDatas         = new Dictionary<string, Halo3.ShaderData>(shaderPaths.Count);
             var tasksCount          = flattendShaderPaths.Count() + 1;
+            var matDataList         = new List<(string, string, string)>();
+
             var task = Task.Factory.StartNew(() =>
             {
                 // Import the textures
@@ -119,7 +123,9 @@ namespace Rampancy
                     }
 
                     if (doImport) H3_ImportShaderTextures(shaderData);
-                    H3_CreateMaterialForShader(shaderData);
+                    var shaderGuid = H3_CreateMaterialForShader(shaderData);
+
+                    matDataList.Add((shaderGuid, shaderData.Collection, shaderData.TagPath));
                 });
 
                 EditorApplication.delayCall += () =>
@@ -128,6 +134,25 @@ namespace Rampancy
                     Progress.Report(progressId, currentIdx++, tasksCount);
                     Progress.SetDescription(progressId, "Waiting for Unity to import the textures");
                     AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+
+                    Progress.Report(progressId, currentIdx++, tasksCount);
+                    Progress.SetDescription(progressId, "Adding data to materials");
+                    foreach (var matData in matDataList) {
+                        var assetPath = AssetDatabase.GUIDToAssetPath(matData.Item1);
+                        var matAsset  = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+
+                        if (matAsset != null) {
+                            var matInfo = ScriptableObject.CreateInstance<MatInfo>();
+                            matInfo.Mat        = matAsset;
+                            matInfo.Collection = matData.Item2;
+                            matInfo.Name       = Path.GetFileNameWithoutExtension(matData.Item3);
+                            matInfo.name       = "Info";
+                            AssetDatabase.AddObjectToAsset(matInfo, matAsset);
+                        }
+                    }
+
+                    AssetDatabase.Refresh();
+                    AssetDatabase.SaveAssets();
                     Progress.Remove(progressId);
                 };
             });
@@ -149,7 +174,7 @@ namespace Rampancy
         }
 
         // Create a material to repsrent this shader
-        public static void H3_CreateMaterialForShader(Halo3.ShaderData shaderData)
+        public static string H3_CreateMaterialForShader(Halo3.ShaderData shaderData)
         {
             var shaderTagRelPath  = shaderData.TagPath.Replace("/", "\\").Replace(Rampancy.Cfg.Halo3MccGameConfig.TagsPath.Replace("/", "\\"), "");
             var shaderProjectPath = Utils.GetProjectRelPath(shaderTagRelPath.Substring(1), GameVersions.Halo3);
@@ -167,10 +192,14 @@ namespace Rampancy
                     var guid       = TagPathHash.H3MccPathHash(basicShader.DiffuseTex);
                     var shaderGuid = TagPathHash.H3MccPathHash(basicShader.TagPath.Replace("/", "\\"));
                     FastMatCreate.CreateBasicMat(guid, shaderPath, shaderGuid, tags.ToArray(), basicShader.IsAlphaTested, basicShader.BaseMapScale);
+
+                    return shaderGuid;
                 }
             }
             else if (shaderData is Halo3.TerrainShaderData terrainShader) {
             }
+
+            return null;
         }
 
         public static void H3_ImportBitmaps()
