@@ -6,6 +6,7 @@ using InternalRealtimeCSG;
 using Rampancy.Halo3;
 using RampantC20;
 using RampantC20.Halo3;
+using RealtimeCSG.Components;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -17,52 +18,108 @@ namespace Rampancy
 {
     public class Halo3LevelExporter
     {
-        private int                                MatIdx  = 0;
-        private Dictionary<string, (int, MatInfo)> MatList = new();
+        private        int                              MatIdx           = 0;
+        private static int                              InstanceUniqueId = 0;
+        private        Dictionary<string, MatInfoAndId> MatList          = new();
 
         public bool Export(string path)
         {
-            var ass            = new Ass();
-            var rootGo         = GameObject.Find("Frame");
-            var allRcsgModels  = GameObject.FindObjectsOfType<RealtimeCSG.Components.CSGModel>();
-            var rcsgMeshLookup = new Dictionary<string, (RealtimeCSG.Components.CSGModel, List<(Transform, Instance)>)>();
+            var ass = new Ass();
+            // Header
+            ass.Head = new()
+            {
+                Version           = 7,
+                ToolName          = Statics.NAME,
+                ToolVersion       = Statics.Version,
+                ExportUsername    = "",
+                ExportMachineName = ""
+            };
+
+
+            var allRcsgModels  = GameObject.FindObjectsOfType<CSGModel>();
+            var rcsgMeshLookup = new Dictionary<string, MeshReference>();
 
             // Get all the meshes and store with a unique name
             foreach (var model in allRcsgModels.Where(x => x.name != "[default-CSGModel]")) {
-                if (PrefabUtility.IsPartOfPrefabInstance(model)) {
-                    var name         = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(model);
-                    var instanceData = PrefabUtility.GetOutermostPrefabInstanceRoot(model).transform.parent.gameObject.GetComponent<Instance>();
-
-                    if (rcsgMeshLookup.ContainsKey(name)) {
-                        rcsgMeshLookup[name].Item2.Add((instanceData.transform, instanceData));
-                    }
-                    else {
-                        rcsgMeshLookup.Add(name, (model, new List<(Transform, Instance)> {(model.gameObject.transform.parent, instanceData)}));
-                    }
+                if (!PrefabUtility.IsPartOfPrefabInstance(model)) {
+                    rcsgMeshLookup.Add(model.gameObject.name, new MeshReference(model, model.gameObject));
+                    break;
                 }
-                else {
-                    rcsgMeshLookup.Add(model.gameObject.name, (model, new List<(Transform, Instance)> {(model.gameObject.transform, null)}));
-                }
+                
+                // Is a prefab, so likley an instance
+                var name = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(model);
+                var go   = PrefabUtility.GetOutermostPrefabInstanceRoot(model).transform.parent.gameObject;
+                if (rcsgMeshLookup.ContainsKey(name))
+                    rcsgMeshLookup[name].InstanceData.Add(go);
+                else
+                    rcsgMeshLookup.Add(name, new MeshReference(model, go));
             }
 
             // Convert and combine
-            foreach (var meshData in rcsgMeshLookup) {
-                //var mats      = meshData.Value.generatedMeshes.MeshInstances.Select(x => x.RenderMaterial).ToArray();
-                var combined  = GetRcsgCombinedMesh(meshData.Value.Item1.generatedMeshes);
-                var fixedMesh = LevelExporter.FixTJunctionsV2(combined.mesh);
-                var assMesh   = UnityMeshToAssMesh(fixedMesh, combined.mats);
-                ass.Objects.Add(assMesh);
-
-                /*Debug.Log($"Model: {meshData.Key}, {meshData.Value.Item1.name}");
-                foreach (var mat in combined.mats) {
-                    Debug.Log($"    MatName: {mat.name}");
-                }*/
+            foreach (var meshData in rcsgMeshLookup.Values) {
+                if (meshData.Type == MeshReference.RefType.Rcsg) {
+                    var meshAndMats = GetRcsgCombinedMesh(meshData.GetRcsgModel().generatedMeshes);
+                    var fixedMesh   = LevelExporter.FixTJunctionsV2(meshAndMats.Mesh);
+                    var assMesh     = UnityMeshToAssMesh(fixedMesh, meshAndMats.Mats);
+                    ass.Objects.Add(assMesh);
+                }
+                else {
+                    // not supported yet
+                }
             }
 
             // Instances transforms
-            var instIdx      = 0;
-            var instUniqueId = 0;
+            ass.Instances.Add(CreateSceneRoot());
 
+            var instIdx = 0;
+            foreach (var entry in rcsgMeshLookup.Values) {
+                foreach (var go in entry.InstanceData) {
+                    var inst = CreateInstanceRef(go, instIdx);
+                    ass.Instances.Add(inst);
+                }
+
+                instIdx++;
+            }
+
+            // Mats
+            ass.Materials = new(MatList.Count);
+            foreach (var mat in MatList.Values.OrderBy(x => x.Id)) {
+                ass.Materials.Add(new Ass.Material
+                {
+                    Collection = mat.MatInfo?.Collection ?? "",
+                    Name       = mat.GetName()
+                });
+            }
+
+            ass.Save(path);
+
+            return true;
+        }
+
+        private static Ass.Instance CreateInstanceRef(GameObject go, int instIdx)
+        {
+            var instComp   = go.GetComponent<Instance>();
+            var isInstance = instComp != null;
+
+            var inst = new Ass.Instance
+            {
+                ObjectIdx        = instIdx,
+                Name             = isInstance ? instComp.GetName() : go.name,
+                UniqueId         = InstanceUniqueId++,
+                ParentId         = -1,
+                InheritanceFlags = 0,
+                Rotation         = go.transform.rotation.ToNumericsYUpToZUp(),
+                Position         = ScalePos(go.transform.position).ToNumerics(),
+                Scale            = go.transform.localScale.x, // Assume all are uniform
+                PivotRotation    = new System.Numerics.Quaternion(0, 0, 0, 1),
+                PivotScale       = 1
+            };
+
+            return inst;
+        }
+
+        private static Ass.Instance CreateSceneRoot()
+        {
             var sceneRootInst = new Ass.Instance
             {
                 ObjectIdx        = -1,
@@ -76,95 +133,13 @@ namespace Rampancy
                 PivotScale       = 1,
                 PivotRotation    = new System.Numerics.Quaternion(0, 0, 0, 1)
             };
-            ass.Instances.Add(sceneRootInst);
-
-            foreach (var entry in rcsgMeshLookup.Values) {
-                foreach (var instance in entry.Item2) {
-                    var rot = instance.Item1.rotation * Statics.ExportRotation;
-
-                    var inst = new Ass.Instance
-                    {
-                        ObjectIdx        = instIdx,
-                        Name             = instance.Item2?.name ?? instance.Item1.gameObject.name,
-                        UniqueId         = instUniqueId++,
-                        ParentId         = -1,
-                        InheritanceFlags = 0,
-                        Rotation         = instance.Item1.rotation.ToNumericsYUpToZUp(),
-                        Position         = ScalePos(instance.Item1.position).ToNumerics(),
-                        Scale            = instance.Item1.localScale.x, // Assume all are uniform
-                        PivotRotation    = new System.Numerics.Quaternion(0, 0, 0, 1),
-                        PivotScale       = 1
-                    };
-
-                    ass.Instances.Add(inst);
-                }
-
-                instIdx++;
-            }
-
-            // Header
-            ass.Head = new()
-            {
-                Version           = 7,
-                ToolName          = Statics.NAME,
-                ToolVersion       = Statics.Version,
-                ExportUsername    = "",
-                ExportMachineName = ""
-            };
-
-            // Mats
-            ass.Materials = new(MatList.Count);
-            foreach (var mat in MatList.Values.OrderBy(x => x.Item1)) {
-                ass.Materials.Add(new Ass.Material
-                {
-                    Collection = mat.Item2.Collection ?? "",
-                    Name       = mat.Item2.Name
-                });
-            }
-
-            // log debugs
-            var matIdx = 0;
-            foreach (var mat in ass.Materials) {
-                Debug.Log($"Mat: {matIdx++} {mat.Collection} {mat.Name}");
-            }
-
-            var objectIdx = 0;
-            foreach (var obj in ass.Objects) {
-                Debug.Log($"Model: {objectIdx++} {obj.Type} {obj.Name}");
-            }
-
-            var instanceIdx = 0;
-            foreach (var inst in ass.Instances) {
-                // Obj: {ass.Objects[inst.ObjectIdx].Name}
-                Debug.Log($"Instance: {instanceIdx++} {inst.Name}");
-            }
-            
-
-            // Find unique meshes
-            // Find instances
-            // write unique meshes
-            // write instances with references to meshes
-
-            return true;
+            return sceneRootInst;
         }
 
-        private static Int64 GetUniqueMeshHash(GeneratedMeshes meshes)
-        {
-            unchecked {
-                int hash = 17;
-                foreach (var mesh in meshes.MeshInstances) {
-                    hash = hash * 23 + mesh.MeshDescription.geometryHashValue.GetHashCode();
-                    hash = hash * 23 + mesh.MeshDescription.surfaceHashValue.GetHashCode();
-                }
-
-                return hash;
-            }
-        }
-
-        private static (Mesh mesh, Material[] mats) GetRcsgCombinedMesh(GeneratedMeshes meshes)
+        private static MeshAndMats GetRcsgCombinedMesh(GeneratedMeshes meshes)
         {
             var combines = new List<CombineInstance>(meshes.MeshInstances.Length);
-            var matNames = new List<Material>(meshes.MeshInstances.Length);
+            var mats     = new List<Material>(meshes.MeshInstances.Length);
 
             foreach (var mesh in meshes.MeshInstances.Where(x => x.name == "[generated-render-mesh]")) {
                 var combineData = new CombineInstance
@@ -174,7 +149,7 @@ namespace Rampancy
                 };
 
                 combines.Add(combineData);
-                matNames.Add(mesh.RenderMaterial);
+                mats.Add(mesh.RenderMaterial);
             }
 
             var combinedMesh = new Mesh();
@@ -183,20 +158,10 @@ namespace Rampancy
             combinedMesh.CombineMeshes(combines.ToArray(), false);
             combinedMesh.Optimize();
 
-            return (combinedMesh, matNames.ToArray());
+            return new MeshAndMats(combinedMesh, mats.ToArray());
         }
 
-        private static UnityEngine.Vector3 ScalePos(UnityEngine.Vector3 vec, bool scale = true)
-        {
-            var pos = scale ? (vec * Statics.ImportScale) : (vec);
-            return new UnityEngine.Vector3(pos.x, pos.z, pos.y);
-        }
-
-        private static UnityEngine.Vector3 ScalePosRot(UnityEngine.Vector3 vec, bool scale = true)
-        {
-            var pos = scale ? (Statics.ExportRotation * vec * Statics.ImportScale) : (Statics.ExportRotation * vec);
-            return new UnityEngine.Vector3(pos.x * -1, pos.y, pos.z);
-        }
+        private static UnityEngine.Vector3 ScalePos(UnityEngine.Vector3 vec) => new UnityEngine.Vector3(vec.x, vec.z, vec.y) * Statics.ImportScale;
 
         private Ass.MeshObject UnityMeshToAssMesh(Mesh mesh, Material[] meshMats)
         {
@@ -253,22 +218,69 @@ namespace Rampancy
             var path = AssetDatabase.GetAssetPath(mat);
             if (!MatList.ContainsKey(path)) {
                 var info = AssetDatabase.LoadAssetAtPath<MatInfo>(path);
-
-                if (info != null) {
-                    MatList.Add(path, (MatIdx++, info));
-                }
-                else {
-                    MatList.Add(path, (MatIdx++, new MatInfo
-                    {
-                        Name = mat.name
-                    }));
-                }
-
+                MatList.Add(path, new MatInfoAndId(MatIdx++, info, mat.name));
                 return MatIdx - 1;
             }
 
-            var matId = MatList[path].Item1;
+            var matId = MatList[path].Id;
             return matId;
+        }
+
+        public class MeshReference
+        {
+            public RefType          Type;
+            public object           Ref;
+            public List<GameObject> InstanceData;
+
+            public MeshReference(object @ref, GameObject go)
+            {
+                Ref          = @ref;
+                InstanceData = new List<GameObject> {go};
+
+                Type = Ref switch
+                {
+                    CSGModel => RefType.Rcsg,
+                    Mesh     => RefType.UnityMesh,
+                    _        => Type
+                };
+            }
+
+            public CSGModel GetRcsgModel()  => Ref as CSGModel;
+            public Mesh     GetUnityModel() => Ref as Mesh;
+
+            public enum RefType
+            {
+                Rcsg,
+                UnityMesh
+            }
+        }
+
+        public class MeshAndMats
+        {
+            public Mesh       Mesh;
+            public Material[] Mats;
+
+            public MeshAndMats(Mesh mesh, Material[] mats)
+            {
+                Mesh = mesh;
+                Mats = mats;
+            }
+        }
+
+        public class MatInfoAndId
+        {
+            public int     Id;
+            public MatInfo MatInfo;
+            public string  Name;
+
+            public string GetName() => MatInfo?.Name ?? Name;
+
+            public MatInfoAndId(int id, MatInfo matInfo, string name)
+            {
+                Id      = id;
+                MatInfo = matInfo;
+                Name    = name;
+            }
         }
     }
 }

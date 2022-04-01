@@ -36,8 +36,11 @@ namespace Rampancy
 
         public static void H3_ExportAss()
         {
+            var filePath = EditorUtility.OpenFilePanel("Import ASS file", "", "ass");
+            if (filePath == null) return;
+            
             var exporter = new Halo3LevelExporter();
-            exporter.Export("");
+            exporter.Export(filePath);
         }
 
         public static ShaderCollection H3_GetShaderCollection(bool onlyLevelShaders = true)
