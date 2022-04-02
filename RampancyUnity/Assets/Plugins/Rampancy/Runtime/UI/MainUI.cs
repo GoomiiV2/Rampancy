@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using RampantC20;
 using UnityEditor;
 using UnityEngine;
 
@@ -51,7 +53,14 @@ namespace Rampancy.UI
         [MenuItem("Rampancy/Compile/Structure", false, 2)]
         public static void CompileStructure()
         {
-            Actions.H1_CompileStructure();
+            switch (Rampancy.Cfg.GameVersion) {
+                case GameVersions.Halo1Mcc:
+                    Actions.H1_CompileStructure();
+                    break;
+                case GameVersions.Halo3:
+                    Actions.H3_CompileStructure();
+                    break;
+            }
         }
 
         [MenuItem("Rampancy/Compile/Preview lightmaps", false, 2)]

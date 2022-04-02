@@ -43,6 +43,20 @@ namespace Rampancy
             exporter.Export(filePath);
         }
 
+        public static void H3_CompileStructure()
+        {
+            var rs = RampancySentinel.GetOrCreateInScene();
+
+            var exportPath = $"{Rampancy.Cfg.ActiveGameConfig.DataPath}/{rs.DataDir}/structure/{rs.LevelName}.ass";
+            var exporter      = new Halo3LevelExporter();
+            exporter.Export(exportPath);
+
+            var cmd = $"structure {rs.DataDir}\\structure\\{rs.LevelName}.ass";
+            Rampancy.RunToolCommand(cmd);
+
+            Debug.Log("Compiled Halo 3 structure");
+        }
+
         public static ShaderCollection H3_GetShaderCollection(bool onlyLevelShaders = true)
         {
             var shaderCollectionPath = Path.Combine(Rampancy.Cfg.Halo3MccGameConfig.TagsPath, "levels/shader_collections.txt");
