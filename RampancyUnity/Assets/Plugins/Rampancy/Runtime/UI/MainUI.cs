@@ -50,7 +50,7 @@ namespace Rampancy.UI
     #region Compile
 
         // Export the jms and compile to a bsp
-        [MenuItem("Rampancy/Compile/Structure", false, 2)]
+        [MenuItem("Rampancy/Compile/Structure _F4", false, 2)]
         public static void CompileStructure()
         {
             switch (Rampancy.Cfg.GameVersion) {

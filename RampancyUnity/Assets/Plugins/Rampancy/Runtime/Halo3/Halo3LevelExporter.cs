@@ -43,12 +43,12 @@ namespace Rampancy
             foreach (var model in allRcsgModels.Where(x => x.name != "[default-CSGModel]")) {
                 if (!PrefabUtility.IsPartOfPrefabInstance(model)) {
                     rcsgMeshLookup.Add(model.gameObject.name, new MeshReference(model, model.gameObject));
-                    break;
+                    continue;
                 }
                 
                 // Is a prefab, so likley an instance
                 var name = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(model);
-                var go   = PrefabUtility.GetOutermostPrefabInstanceRoot(model).transform.parent.gameObject;
+                var go   = PrefabUtility.GetNearestPrefabInstanceRoot(model).transform.parent.gameObject;
                 if (rcsgMeshLookup.ContainsKey(name))
                     rcsgMeshLookup[name].InstanceData.Add(go);
                 else
@@ -58,7 +58,7 @@ namespace Rampancy
             // Convert and combine
             foreach (var meshData in rcsgMeshLookup.Values) {
                 if (meshData.Type == MeshReference.RefType.Rcsg) {
-                    var meshAndMats = GetRcsgCombinedMesh(meshData.GetRcsgModel().generatedMeshes);
+                    var meshAndMats = GetRcsgCombinedMesh(meshData.GetRcsgModel().generatedMeshes, meshData.InstanceData.FirstOrDefault().transform.position);
                     var fixedMesh   = LevelExporter.FixTJunctionsV2(meshAndMats.Mesh);
                     var assMesh     = UnityMeshToAssMesh(fixedMesh, meshAndMats.Mats);
                     ass.Objects.Add(assMesh);
@@ -136,7 +136,7 @@ namespace Rampancy
             return sceneRootInst;
         }
 
-        private static MeshAndMats GetRcsgCombinedMesh(GeneratedMeshes meshes)
+        private static MeshAndMats GetRcsgCombinedMesh(GeneratedMeshes meshes, UnityEngine.Vector3 offset)
         {
             var combines = new List<CombineInstance>(meshes.MeshInstances.Length);
             var mats     = new List<Material>(meshes.MeshInstances.Length);
@@ -145,7 +145,7 @@ namespace Rampancy
                 var combineData = new CombineInstance
                 {
                     mesh      = mesh.SharedMesh,
-                    transform = Matrix4x4.identity
+                    transform = Matrix4x4.Translate(-offset)
                 };
 
                 combines.Add(combineData);
@@ -181,7 +181,7 @@ namespace Rampancy
                 var vert = new Ass.Vertex
                 {
                     Position = ScalePos(srcVertsPos[i]).ToNumerics(),
-                    Normal   = new Vector3(srcVertsNorm[i].x, srcVertsNorm[i].z, srcVertsNorm[i].y),
+                    Normal   = Vector3.Normalize(new Vector3(srcVertsNorm[i].x, srcVertsNorm[i].z, srcVertsNorm[i].y)),
                     Color    = srcVertsColor.Length > 0 ? new Vector3(srcVertsColor[i].r, srcVertsColor[i].g, srcVertsColor[i].b) : Vector3.Zero,
                     Uvws     = new(1),
                     Weights  = new()
@@ -200,13 +200,20 @@ namespace Rampancy
                     var mat   = meshMats[i];
                     var matId = GetMatId(mat);
 
-                    assMesh.Tris.Add(new Ass.Triangle
+                    var tri = new Ass.Triangle
                     {
                         MatIndex = matId,
                         Vert1Idx = mesh.triangles[j + 2],
                         Vert2Idx = mesh.triangles[j + 1],
                         Vert3Idx = mesh.triangles[j]
-                    });
+                    };
+                    assMesh.Tris.Add(tri);
+                    
+                    // scale the uvs
+                    /*var matTiling = meshMats[i].mainTextureScale;
+                    assMesh.Verts[tri.Vert1Idx].Uvws[0] = new(assMesh.Verts[tri.Vert1Idx].Uvws[0].X / matTiling.x, assMesh.Verts[tri.Vert1Idx].Uvws[0].Y / matTiling.y, 1);
+                    assMesh.Verts[tri.Vert2Idx].Uvws[0] = new(assMesh.Verts[tri.Vert2Idx].Uvws[0].X / matTiling.x, assMesh.Verts[tri.Vert2Idx].Uvws[0].Y / matTiling.y, 1);
+                    assMesh.Verts[tri.Vert3Idx].Uvws[0] = new(assMesh.Verts[tri.Vert3Idx].Uvws[0].X / matTiling.x, assMesh.Verts[tri.Vert3Idx].Uvws[0].Y / matTiling.y, 1);*/
                 }
             }
 
