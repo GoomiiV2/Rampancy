@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UnityEditor;
 using UnityEngine;
 using RampancyInst = Rampancy.Rampancy;
 
@@ -154,6 +155,22 @@ namespace RampantC20
                 return true;
 
             return false;
+        }
+
+        public static string OpenFileDialog(string message, string fileExt, string startDir = "")
+        {
+            var path = EditorUtility.OpenFilePanel(message, startDir, fileExt);
+            if (string.IsNullOrEmpty(path)) {
+                Debug.LogWarning("Please give a path to load :>");
+                return null;
+            }
+
+            return path;
+        }
+
+        public static void RunExeIfExists(string exePath)
+        {
+            if (File.Exists(exePath)) Rampancy.Rampancy.LaunchProgram(exePath, "");
         }
     }
 }

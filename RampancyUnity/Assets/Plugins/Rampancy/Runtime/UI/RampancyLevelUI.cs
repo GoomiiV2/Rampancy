@@ -1,5 +1,7 @@
 ﻿using System;
+using Rampancy.Halo3;
 using RampantC20;
+using RampantC20.Halo3;
 using UnityEditor;
 using UnityEngine;
 
@@ -35,6 +37,34 @@ namespace Rampancy.UI
                 case 0:
                     MaterialsTab();
                     break;
+                case 1:
+                    switch (Rampancy.Cfg.GameVersion) {
+                        case GameVersions.Halo3:
+                            Halo3Debug();
+                            break;
+                    }
+
+                    break;
+            }
+        }
+
+        private void Halo3Debug()
+        {
+            if (GUILayout.Button($"Test ASS export")) {
+                var loadedAss = Ass.Load("E:/Games/Steam/steamapps/common/H3EK/data/levels/dlc/warehouse/structure/warehouse.ass");
+                loadedAss.Save("E:/Games/Steam/steamapps/common/H3EK/data/levels/dlc/warehouse/structure/warehouse_out.ass");
+            }
+
+            if (GUILayout.Button($"Test Material data")) {
+                var testPath = "Assets/Halo3/TagData/levels/multi/construct/shaders/panel_080_floor_mat.asset";
+                var asset    = AssetDatabase.LoadMainAssetAtPath(testPath);
+
+                //var info = ScriptableObject.CreateInstance<MatInfo>();
+                //AssetDatabase.CreateAsset(material, "Assets/MyMateriala.mat");
+
+                //AssetDatabase.AddObjectToAsset(info, asset);
+
+                AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(asset));
             }
         }
 
@@ -57,14 +87,7 @@ namespace Rampancy.UI
 
         private static void SyncMats()
         {
-            Action func = Rampancy.Cfg.GameVersion switch
-            {
-                GameVersions.Halo1Mcc => Actions.H1_SyncMaterials,
-                GameVersions.Halo3    => Actions.H3_ImportShaders,
-                _                     => null
-            };
-
-            func?.Invoke();
+            Rampancy.CurrentGameImplementation.SyncMaterials();
         }
 
     #endregion

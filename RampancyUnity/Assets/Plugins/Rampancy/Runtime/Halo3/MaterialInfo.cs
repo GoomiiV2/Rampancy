@@ -5,9 +5,9 @@ namespace Rampancy.Halo3
 {
     public class MaterialInfo
     {
-        public Int64 MatGUID;
-        public int   MatFlags;
-        public int   Idx;
+        public long MatGUID;
+        public int  MatFlags;
+        public int  Idx;
 
         public override int GetHashCode()
         {

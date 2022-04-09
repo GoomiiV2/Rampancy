@@ -11,6 +11,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using Matrix4x4 = UnityEngine.Matrix4x4;
+using Object = UnityEngine.Object;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = System.Numerics.Vector3;
 
@@ -26,7 +27,7 @@ namespace Rampancy
         {
             var ass = new Ass();
             // Header
-            ass.Head = new()
+            ass.Head = new Ass.Header
             {
                 Version           = 7,
                 ToolName          = Statics.NAME,
@@ -36,7 +37,7 @@ namespace Rampancy
             };
 
 
-            var allRcsgModels  = GameObject.FindObjectsOfType<CSGModel>();
+            var allRcsgModels  = Object.FindObjectsOfType<CSGModel>();
             var rcsgMeshLookup = new Dictionary<string, MeshReference>();
 
             // Get all the meshes and store with a unique name
@@ -45,10 +46,10 @@ namespace Rampancy
                     rcsgMeshLookup.Add(model.gameObject.name, new MeshReference(model, model.gameObject));
                     continue;
                 }
-                
+
                 // Is a prefab, so likley an instance
                 var name = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(model);
-                var go   = PrefabUtility.GetNearestPrefabInstanceRoot(model).transform.parent.gameObject;
+                var go   = model.transform.parent.gameObject;
                 if (rcsgMeshLookup.ContainsKey(name))
                     rcsgMeshLookup[name].InstanceData.Add(go);
                 else
@@ -56,7 +57,7 @@ namespace Rampancy
             }
 
             // Convert and combine
-            foreach (var meshData in rcsgMeshLookup.Values) {
+            foreach (var meshData in rcsgMeshLookup.Values)
                 if (meshData.Type == MeshReference.RefType.Rcsg) {
                     var meshAndMats = GetRcsgCombinedMesh(meshData.GetRcsgModel().generatedMeshes, meshData.InstanceData.FirstOrDefault().transform.position);
                     var fixedMesh   = LevelExporter.FixTJunctionsV2(meshAndMats.Mesh);
@@ -66,7 +67,6 @@ namespace Rampancy
                 else {
                     // not supported yet
                 }
-            }
 
             // Instances transforms
             ass.Instances.Add(CreateSceneRoot());
@@ -82,14 +82,13 @@ namespace Rampancy
             }
 
             // Mats
-            ass.Materials = new(MatList.Count);
-            foreach (var mat in MatList.Values.OrderBy(x => x.Id)) {
+            ass.Materials = new List<Ass.Material>(MatList.Count);
+            foreach (var mat in MatList.Values.OrderBy(x => x.Id))
                 ass.Materials.Add(new Ass.Material
                 {
                     Collection = mat.MatInfo?.Collection ?? "",
                     Name       = mat.GetName()
                 });
-            }
 
             ass.Save(path);
 
@@ -145,7 +144,7 @@ namespace Rampancy
                 var combineData = new CombineInstance
                 {
                     mesh      = mesh.SharedMesh,
-                    transform = Matrix4x4.Translate(-offset)
+                    transform = Matrix4x4.identity //Matrix4x4.Translate(-offset)
                 };
 
                 combines.Add(combineData);
@@ -161,7 +160,10 @@ namespace Rampancy
             return new MeshAndMats(combinedMesh, mats.ToArray());
         }
 
-        private static UnityEngine.Vector3 ScalePos(UnityEngine.Vector3 vec) => new UnityEngine.Vector3(vec.x, vec.z, vec.y) * Statics.ImportScale;
+        private static UnityEngine.Vector3 ScalePos(UnityEngine.Vector3 vec)
+        {
+            return new UnityEngine.Vector3(vec.x, vec.z, vec.y) * Statics.ImportScale;
+        }
 
         private Ass.MeshObject UnityMeshToAssMesh(Mesh mesh, Material[] meshMats)
         {
@@ -169,22 +171,22 @@ namespace Rampancy
             var assMesh = new Ass.MeshObject
             {
                 Type  = Ass.ObjectType.MESH,
-                Verts = new(numVerts),
-                Tris  = new(mesh.triangles.Length / 3)
+                Verts = new List<Ass.Vertex>(numVerts),
+                Tris  = new List<Ass.Triangle>(mesh.triangles.Length / 3)
             };
 
             var srcVertsPos   = mesh.vertices;
             var srcVertsNorm  = mesh.normals;
             var srcVertsColor = mesh.colors;
             var srcVertsUvs1  = mesh.uv;
-            for (int i = 0; i < numVerts; i++) {
+            for (var i = 0; i < numVerts; i++) {
                 var vert = new Ass.Vertex
                 {
                     Position = ScalePos(srcVertsPos[i]).ToNumerics(),
                     Normal   = Vector3.Normalize(new Vector3(srcVertsNorm[i].x, srcVertsNorm[i].z, srcVertsNorm[i].y)),
                     Color    = srcVertsColor.Length > 0 ? new Vector3(srcVertsColor[i].r, srcVertsColor[i].g, srcVertsColor[i].b) : Vector3.Zero,
-                    Uvws     = new(1),
-                    Weights  = new()
+                    Uvws     = new List<Vector3>(1),
+                    Weights  = new List<Ass.VertexWeight>()
                 };
 
                 // TODO: Other uv channels, lightmaps?
@@ -194,9 +196,9 @@ namespace Rampancy
             }
 
             //var mats = mesh.GameObject().GetComponent<MeshRenderer>()?.materials;
-            for (int i = 0; i < mesh.subMeshCount; i++) {
+            for (var i = 0; i < mesh.subMeshCount; i++) {
                 var subMesh = mesh.GetSubMesh(i);
-                for (int j = subMesh.indexStart; j < subMesh.indexStart + subMesh.indexCount; j += 3) {
+                for (var j = subMesh.indexStart; j < subMesh.indexStart + subMesh.indexCount; j += 3) {
                     var mat   = meshMats[i];
                     var matId = GetMatId(mat);
 
@@ -208,7 +210,7 @@ namespace Rampancy
                         Vert3Idx = mesh.triangles[j]
                     };
                     assMesh.Tris.Add(tri);
-                    
+
                     // scale the uvs
                     /*var matTiling = meshMats[i].mainTextureScale;
                     assMesh.Verts[tri.Vert1Idx].Uvws[0] = new(assMesh.Verts[tri.Vert1Idx].Uvws[0].X / matTiling.x, assMesh.Verts[tri.Vert1Idx].Uvws[0].Y / matTiling.y, 1);
@@ -252,8 +254,15 @@ namespace Rampancy
                 };
             }
 
-            public CSGModel GetRcsgModel()  => Ref as CSGModel;
-            public Mesh     GetUnityModel() => Ref as Mesh;
+            public CSGModel GetRcsgModel()
+            {
+                return Ref as CSGModel;
+            }
+
+            public Mesh GetUnityModel()
+            {
+                return Ref as Mesh;
+            }
 
             public enum RefType
             {
@@ -280,7 +289,10 @@ namespace Rampancy
             public MatInfo MatInfo;
             public string  Name;
 
-            public string GetName() => MatInfo?.Name ?? Name;
+            public string GetName()
+            {
+                return MatInfo?.Name ?? Name;
+            }
 
             public MatInfoAndId(int id, MatInfo matInfo, string name)
             {

@@ -28,7 +28,7 @@ namespace Rampancy.UI
                         CreateHalo3Scene();
                         break;
                 }
-                
+
                 Close();
             }
 
@@ -62,7 +62,7 @@ namespace Rampancy.UI
             Directory.CreateDirectory(baseDir);
             Directory.CreateDirectory(Path.Combine(baseDir, "mats"));
             Directory.CreateDirectory(Path.Combine(baseDir, "instances"));
-            
+
             EditorSceneManager.SaveScene(scene, scenePath);
             SceneManager.SetActiveScene(currentScene);
         }
@@ -93,7 +93,7 @@ namespace Rampancy.UI
             Directory.CreateDirectory(baseDir);
             Directory.CreateDirectory(Path.Combine(baseDir, "mats"));
             Directory.CreateDirectory(Path.Combine(baseDir, "instances"));
-            
+
             EditorSceneManager.SaveScene(scene, scenePath);
             SceneManager.SetActiveScene(currentScene);
         }

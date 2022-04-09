@@ -8,15 +8,22 @@ namespace Rampancy.UI
     public class ToolOutput : EditorWindow
     {
         public        Vector2      ScrollPos;
-        public static List<string> Lines          = new();
+        public static List<string> Lines = new();
 
-        public static void LogInfo(string  line) => Lines.Add(line);
-        public static void LogError(string line) => Lines.Add(line);
+        public static void LogInfo(string line)
+        {
+            Lines.Add(line);
+        }
+
+        public static void LogError(string line)
+        {
+            Lines.Add(line);
+        }
 
         [MenuItem("Rampancy/ToolOutput")]
         public static void ShowWindow()
         {
-            EditorWindow window = GetWindow(typeof(ToolOutput));
+            var window = GetWindow(typeof(ToolOutput));
             window.Show();
         }
 
@@ -25,21 +32,19 @@ namespace Rampancy.UI
             Lines.Clear();
         }
 
-        void OnGUI()
+        private void OnGUI()
         {
             GUILayout.BeginHorizontal();
-            
+
             var clearBefore = Rampancy.Cfg.ToolOutputClearOnCompile;
             Rampancy.Cfg.ToolOutputClearOnCompile = GUILayout.Toggle(Rampancy.Cfg.ToolOutputClearOnCompile, "Clear on compile");
             if (clearBefore != Rampancy.Cfg.ToolOutputClearOnCompile) Rampancy.Cfg.Save();
-            
+
             if (GUILayout.Button("Clear")) Clear();
             GUILayout.EndHorizontal();
 
             ScrollPos = EditorGUILayout.BeginScrollView(ScrollPos);
-            foreach (var line in Lines) {
-                GUILayout.Label(line);
-            }
+            foreach (var line in Lines) GUILayout.Label(line);
 
             EditorGUILayout.EndScrollView();
         }

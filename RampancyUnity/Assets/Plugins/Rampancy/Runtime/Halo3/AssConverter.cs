@@ -41,7 +41,7 @@ namespace Rampancy
 
             // Get the materials
             MissingMatMat    = AssetDatabase.LoadAssetAtPath<Material>("Assets/BaseData/uv Grid.mat");
-            ShaderCollection = Actions.H3_GetShaderCollection();
+            ShaderCollection = Rampancy.Halo3Implementation.GetShaderCollection();
             for (var i = 0; i < ass.Materials.Count; i++) {
                 var matData = ass.Materials[i];
                 var mat     = GetMat(matData);

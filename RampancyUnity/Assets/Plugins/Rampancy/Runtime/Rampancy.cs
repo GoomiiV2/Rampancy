@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Rampancy.Halo1;
 using Rampancy.Halo3;
 using Rampancy.UI;
 using RampantC20;
@@ -19,6 +21,17 @@ namespace Rampancy
     {
         public static Config  Cfg     = new();
         public static AssetDb AssetDB = new();
+
+        public static Dictionary<GameVersions, GameImplementationBase> GameImplementation = new()
+        {
+            {GameVersions.Halo1Mcc, new Halo1Implementation()},
+            {GameVersions.Halo3, new Halo3Implementation()}
+        };
+
+        public static GameImplementationBase CurrentGameImplementation => GameImplementation[Cfg.GameVersion];
+
+        public static Halo1Implementation Halo1Implementation => GameImplementation[GameVersions.Halo1Mcc] as Halo1Implementation;
+        public static Halo3Implementation Halo3Implementation => GameImplementation[GameVersions.Halo3] as Halo3Implementation;
 
         public static string BaseUnityDir => Path.Combine("Assets", $"{Cfg.GameVersion}");
         public static string SceneDir     => Path.Combine(BaseUnityDir, Statics.SrcLevelsName);
@@ -70,12 +83,12 @@ namespace Rampancy
         {
             // If its a prefab, and the parent is an instance, select the instance object
             // Don't select the instance if the instance was the last thing selected, the user really wanted the prefab then
-            if (Selection.activeGameObject != null
+            if (Selection.activeGameObject       != null
+             && Selection.activeTransform.parent != null
              && PrefabUtility.IsPartOfAnyPrefab(Selection.activeGameObject)
              && Selection.activeTransform.parent.GetComponent<Instance>() != null
-             && Selection.activeTransform.parent                          != LastSelectedTransform) {
+             && Selection.activeTransform.parent                          != LastSelectedTransform)
                 EditorApplication.delayCall += () => Selection.activeTransform = Selection.activeTransform.parent;
-            }
 
             LastSelectedTransform = Selection.activeTransform;
         }

@@ -24,9 +24,7 @@ namespace Rampancy.UI
         {
             var go = EditorUtility.InstanceIDToObject(instanceid) as GameObject;
 
-            if (go?.GetComponent<Instance>()) {
-                DrawIcon(InstanceIcon,  selectionrect);
-            }
+            if (go?.GetComponent<Instance>()) DrawIcon(InstanceIcon, selectionrect);
         }
 
         private static void DrawIcon(Texture tex, Rect selectionrect)
