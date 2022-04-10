@@ -5,22 +5,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using RampantC20;
 using RampantC20.Halo3;
+using RealtimeCSG.Components;
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Rampancy.Halo3
 {
     public class Halo3Implementation : GameImplementationBase
     {
-        public override bool CanOpenTagTest()
-        {
-            return false;
-        }
+        public override bool CanOpenTagTest() => false;
 
-        public override bool CanCompileLightmaps()
-        {
-            return false;
-        }
+        public override bool CanCompileLightmaps() => false;
 
         public override void CompileStructure()
         {
@@ -34,6 +32,39 @@ namespace Rampancy.Halo3
             Rampancy.RunToolCommand(cmd);
 
             Debug.Log("Compiled Halo 3 structure");
+        }
+
+        public override void CreateNewScene(string name, bool isSinglePlayer = true)
+        {
+            if (DoesSceneExist(name)) return;
+            
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            scene.name = name;
+
+            var currentScene = SceneManager.GetActiveScene();
+            SceneManager.SetActiveScene(scene);
+            var rs = RampancySentinel.GetOrCreateInScene();
+            rs.LevelName = name;
+            rs.DataDir   = isSinglePlayer ? $"levels/solo/{name}" : $"levels/multi/{name}";
+
+            var frame    = new GameObject("Frame");
+            var levelGeo = new GameObject("LevelGeo");
+            levelGeo.transform.parent = frame.transform;
+
+            var debugGeo = new GameObject("DebugGeo");
+            debugGeo.transform.parent = frame.transform;
+
+            var csgModel = levelGeo.AddComponent<CSGModel>();
+            csgModel.Settings = ModelSettingsFlags.InvertedWorld | ModelSettingsFlags.NoCollider;
+
+            var baseDir   = $"{Rampancy.SceneDir}/{name}";
+            var scenePath = $"{baseDir}/{name}.unity";
+            Directory.CreateDirectory(baseDir);
+            Directory.CreateDirectory(Path.Combine(baseDir, "mats"));
+            Directory.CreateDirectory(Path.Combine(baseDir, "instances"));
+
+            EditorSceneManager.SaveScene(scene, scenePath);
+            SceneManager.SetActiveScene(currentScene);
         }
 
         public override void ImportScene(string path = null)

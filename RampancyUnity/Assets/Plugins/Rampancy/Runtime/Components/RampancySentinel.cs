@@ -15,9 +15,10 @@ namespace Rampancy
     {
         public const string NAME = "Rampancy Sentinel";
 
-        public string LevelName;
-        public string DataDir;
-        public bool   DisplayDebugGeo = true;
+        public string       LevelName;
+        public string       DataDir;
+        public bool         DisplayDebugGeo = true;
+        public GameVersions GameVersion     = GameVersions.Halo1Mcc;
 
         private DebugGeoData      DebugGeo        = null;
         private FileSystemWatcher DebugWrlWatcher = null;

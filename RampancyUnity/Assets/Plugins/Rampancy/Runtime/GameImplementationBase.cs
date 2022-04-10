@@ -1,4 +1,9 @@
-﻿using RampantC20;
+﻿using System.IO;
+using RampantC20;
+using RealtimeCSG.Components;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Rampancy
 {
@@ -6,45 +11,21 @@ namespace Rampancy
     public class GameImplementationBase
     {
         // To enable the menu options for these
-        public virtual bool CanOpenSapien()
-        {
-            return true;
-        }
+        public virtual bool CanOpenSapien() => true;
 
-        public virtual bool CanOpenGuerilla()
-        {
-            return true;
-        }
+        public virtual bool CanOpenGuerilla() => true;
 
-        public virtual bool CanOpenTagTest()
-        {
-            return true;
-        }
+        public virtual bool CanOpenTagTest() => true;
 
-        public virtual bool CanCompileStructure()
-        {
-            return true;
-        }
+        public virtual bool CanCompileStructure() => true;
 
-        public virtual bool CanCompileLightmaps()
-        {
-            return true;
-        }
+        public virtual bool CanCompileLightmaps() => true;
 
-        public virtual bool CanCompileStructureAndLightmaps()
-        {
-            return true;
-        }
+        public virtual bool CanCompileStructureAndLightmaps() => CanCompileStructure() && CanCompileLightmaps();
 
-        public virtual bool CanImportScene()
-        {
-            return true;
-        }
+        public virtual bool CanImportScene() => true;
 
-        public virtual bool CanExportScene()
-        {
-            return true;
-        }
+        public virtual bool CanExportScene() => true;
 
         public virtual void OpenSapien()
         {
@@ -77,6 +58,20 @@ namespace Rampancy
         {
         }
 
+        public virtual void CreateNewScene(string name, bool isSinglePlayer = true)
+        {
+            
+        }
+
+        public virtual bool DoesSceneExist(string name)
+        {
+            var baseDir   = $"{Rampancy.SceneDir}/{name}";
+            var scenePath = $"{baseDir}/{name}.unity";
+
+            var exists = File.Exists(scenePath);
+            return exists;
+        }
+        
         public virtual void ImportScene(string path = null)
         {
         }

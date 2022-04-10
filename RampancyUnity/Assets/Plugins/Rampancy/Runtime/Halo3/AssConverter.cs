@@ -70,7 +70,7 @@ namespace Rampancy
 
         public Material GetMat(Ass.Material matData)
         {
-            // Specail materials
+            // Special materials
             if (matData.Name.StartsWith("+portal")) return AssetDatabase.LoadAssetAtPath<Material>("Assets/BaseData/+portal.mat");
 
             var relPath          = Utils.GetDataRelPath(Path.GetDirectoryName(AssFilePath), Rampancy.Cfg.Halo3MccGameConfig.DataPath);
@@ -135,26 +135,6 @@ namespace Rampancy
                 }
 
                 newMats[i] = MatLookup[matIdx];
-
-                /*var matName   = AssFile.Materials[matIdx].Name;
-                var shortName = matName.Contains(' ') ? matName.Split(' ')[1] : matName;
-                var name      = $"{shortName.Trim()}_mat";
-                var mats      = AssetDatabase.FindAssets(name);
-
-                var mat = mats.FirstOrDefault();
-
-
-                if (mat == null)
-                {
-                    newMats[i] = MissingMatMat;
-                    Debug.Log($"Couldn't find mat for: {name} ({matName})");
-                }
-                else
-                {
-                    var assetPath = AssetDatabase.GUIDToAssetPath(mat);
-                    var matData   = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
-                    newMats[i]    = new Material(matData);
-                }*/
             }
 
             mr.sharedMaterials = newMats;
