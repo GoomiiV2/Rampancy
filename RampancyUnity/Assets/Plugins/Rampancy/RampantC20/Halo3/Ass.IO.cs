@@ -298,7 +298,7 @@ namespace RampantC20.Halo3
                 UseFarAttenuation    = int.Parse(sr.ReadValidLine()) == 1,
                 FarAttenuationStart  = float.Parse(sr.ReadValidLine()),
                 FarAttenuationEnd    = float.Parse(sr.ReadValidLine()),
-                LightShape           = sr.ReadValidLine(),
+                LightShape           = (LightShape) Enum.Parse(typeof(LightShape), sr.ReadValidLine()),
                 AspectRatio          = float.Parse(sr.ReadValidLine())
             };
 
@@ -589,7 +589,7 @@ namespace RampantC20.Halo3
             sb.AppendLine($"{BoolToStr(obj.UseFarAttenuation)}");
             sb.AppendLine($"{obj.FarAttenuationStart:F10}");
             sb.AppendLine($"{obj.FarAttenuationEnd:F10}");
-            sb.AppendLine($"{obj.LightShape}");
+            sb.AppendLine($"{(int)obj.LightShape}");
             sb.AppendLine($"{obj.AspectRatio:F10}");
 
             sb.AppendLine();

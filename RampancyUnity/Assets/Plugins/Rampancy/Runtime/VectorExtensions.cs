@@ -28,6 +28,13 @@ namespace Rampancy
         {
             return new(vec3.x, vec3.y, vec3.z);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static System.Numerics.Vector3 ToNumerics(this Color color)
+        {
+            return new(color.r, color.g, color.b);
+        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 ToYUp(this Vector3 vec3)

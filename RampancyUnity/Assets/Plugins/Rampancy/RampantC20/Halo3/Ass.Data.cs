@@ -151,19 +151,19 @@ namespace RampantC20.Halo3
 
         public class LightObject : AssObject
         {
-            public LightType LightType;
-            public Vector3   Color;
-            public float     Intensity;
-            public float     HotspotSize;
-            public float     HotspotFalloff;
-            public bool      UseNearAttenuation;
-            public float     NearAttenuationStart;
-            public float     NearAttenuationEnd;
-            public bool      UseFarAttenuation;
-            public float     FarAttenuationStart;
-            public float     FarAttenuationEnd;
-            public string    LightShape;
-            public float     AspectRatio;
+            public LightType  LightType;
+            public Vector3    Color;
+            public float      Intensity;
+            public float      HotspotSize;
+            public float      HotspotFalloff;
+            public bool       UseNearAttenuation;
+            public float      NearAttenuationStart;
+            public float      NearAttenuationEnd;
+            public bool       UseFarAttenuation;
+            public float      FarAttenuationStart;
+            public float      FarAttenuationEnd;
+            public LightShape LightShape;
+            public float      AspectRatio;
         }
 
         public class MeshObject : AssObject
@@ -204,6 +204,11 @@ namespace RampantC20.Halo3
             DIRECT_LGT,
             OMNI_LGT,
             AMBIENT_LGT
+        }
+        
+        public enum LightShape
+        {
+            
         }
 
         public class Vertex

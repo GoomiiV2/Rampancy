@@ -10,6 +10,7 @@ using RealtimeCSG.Components;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using Light = Rampancy.Halo3.Light;
 using Matrix4x4 = UnityEngine.Matrix4x4;
 using Object = UnityEngine.Object;
 using Quaternion = UnityEngine.Quaternion;
@@ -81,6 +82,13 @@ namespace Rampancy
                 instIdx++;
             }
 
+            // Lights
+            var lights = Object.FindObjectsOfType<Light>();
+            foreach (var light in lights.Where(x => x.enabled)) {
+                var lightInst =  CreateLightInstance(light, ass, instIdx++);
+                ass.Instances.Add(lightInst);
+            }
+
             // Mats
             ass.Materials = new List<Ass.Material>(MatList.Count);
             foreach (var mat in MatList.Values.OrderBy(x => x.Id))
@@ -110,6 +118,45 @@ namespace Rampancy
                 Rotation         = go.transform.rotation.ToNumericsYUpToZUp(),
                 Position         = ScalePos(go.transform.position).ToNumerics(),
                 Scale            = go.transform.localScale.x, // Assume all are uniform
+                PivotRotation    = new System.Numerics.Quaternion(0, 0, 0, 1),
+                PivotScale       = 1
+            };
+
+            return inst;
+        }
+
+        private static Ass.Instance CreateLightInstance(Light light, Ass ass, int instIdx)
+        {
+            var assLight = new Ass.LightObject
+            {
+                Type                 = Ass.ObjectType.GENERIC_LIGHT,
+                LightType            = light.Type,
+                Color                = light.Color.ToNumerics(),
+                Intensity            = light.Intensity,
+                HotspotSize          = light.HotspotSize,
+                HotspotFalloff       = light.HotspotFalloff * Statics.ExportScale,
+                UseNearAttenuation   = light.UseNearAttenuation,
+                NearAttenuationStart = light.NearAttenuationStart,
+                NearAttenuationEnd   = light.NearAttenuationEnd,
+                UseFarAttenuation    = light.UseFarAttenuation,
+                FarAttenuationStart  = light.FarAttenuationStart,
+                FarAttenuationEnd    = light.FarAttenuationEnd,
+                LightShape           = light.LightShape,
+                AspectRatio          = light.AspectRatio
+            };
+                
+            ass.Objects.Add(assLight);
+            
+            var inst = new Ass.Instance
+            {
+                ObjectIdx        = instIdx,
+                Name             = light.name,
+                UniqueId         = InstanceUniqueId++,
+                ParentId         = -1,
+                InheritanceFlags = 0,
+                Rotation         = light.transform.rotation.ToNumericsYUpToZUp(),
+                Position         = ScalePos(light.transform.position).ToNumerics(),
+                Scale            = 1,
                 PivotRotation    = new System.Numerics.Quaternion(0, 0, 0, 1),
                 PivotScale       = 1
             };
