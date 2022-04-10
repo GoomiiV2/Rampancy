@@ -10,7 +10,7 @@ A new level editor for the Halo games based on a CSG/Brush workflow, similar to 
 ## Example
 https://user-images.githubusercontent.com/5684215/148701369-66ef75eb-520c-46e7-a6d0-914bbc6bbbed.mp4
 
-
+P
 
 
 ![sapien_l3i7oo4Zha](https://user-images.githubusercontent.com/5684215/148701019-d1cb7d9d-8a81-4fb8-bf57-98a3e39e9b7a.jpg)
@@ -41,9 +41,41 @@ The project is still early in development and some core issues need to be worked
 A bit more indepth example of creating a level: https://github.com/GoomiiV2/Rampancy/wiki/Creating-a-new-level
 
 ## Supported Games
-* Halo 1 MCC
-* Halo 3 (Eventually)
-* Others (Uncertain, most likely at least Reach eventually)
+### Halo 1 MCC
+- [x] Mesh exporting
+- [x] Material Importing
+- [ ] Per material surface settings
+- [ ] Portal planes
+- [ ] Special shape regions (weather polys)
+- [ ] Device placements
+- [ ] Lightmap baking with Unitys light mapper (not tools, that works already)
+
+### Halo 2 MCC
+* soon tm?
+  
+### Halo 3
+- [x] Mesh exporting
+- [x] Material Importing
+- [x] Brush Based Instances
+- [x] Light objects
+- [ ] Per material surface settings
+- [ ] Portal planes
+- [ ] Special shape regions (weather polys)
+- [ ] External imported mesh instances (eg, complex non brush meshes from blender)
+- [ ] Device xrefs?
+
+### Halo ODST
+* hopefully
+  
+### Halo Reach
+* hopefully
+
+### Halo 4
+* hopefully
+
+### Misc
+- [ ] Blender Material Exporter (as a helper for importing mesh instances)
+- [ ] Terrain tools
 
 
 ## But, why?
