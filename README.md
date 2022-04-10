@@ -10,9 +10,6 @@ A new level editor for the Halo games based on a CSG/Brush workflow, similar to 
 ## Example
 https://user-images.githubusercontent.com/5684215/148701369-66ef75eb-520c-46e7-a6d0-914bbc6bbbed.mp4
 
-P
-
-
 ![sapien_l3i7oo4Zha](https://user-images.githubusercontent.com/5684215/148701019-d1cb7d9d-8a81-4fb8-bf57-98a3e39e9b7a.jpg)
 ![Unity_kmgOSmG7sh](https://user-images.githubusercontent.com/5684215/148701055-6dfe89b7-73e8-4011-a1dd-50d98bfb6c92.jpg)
 
