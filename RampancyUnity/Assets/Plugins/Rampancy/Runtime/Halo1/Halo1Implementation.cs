@@ -87,37 +87,15 @@ namespace Rampancy.Halo1
             CompileLightmaps();
         }
 
-        public override void CreateNewScene(string name, bool isSinglePlayer = true)
+        public override void CreateNewScene(string name, bool isSinglePlayer = true, Action customAction = null)
         {
-            if (DoesSceneExist(name)) return;
-            
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            scene.name = name;
-
-            var currentScene = SceneManager.GetActiveScene();
-            SceneManager.SetActiveScene(scene);
-            var rs = RampancySentinel.GetOrCreateInScene();
-            rs.LevelName = name;
-            rs.DataDir   = isSinglePlayer ? $"levels/{name}" : $"levels/test/{name}";
-
-            var frame    = new GameObject("Frame");
-            var levelGeo = new GameObject("LevelGeo");
-            levelGeo.transform.parent = frame.transform;
-
-            var debugGeo = new GameObject("DebugGeo");
-            debugGeo.transform.parent = frame.transform;
-
-            var csgModel = levelGeo.AddComponent<CSGModel>();
-            csgModel.Settings = ModelSettingsFlags.InvertedWorld | ModelSettingsFlags.NoCollider;
-
-            var baseDir   = $"{Rampancy.SceneDir}/{name}";
-            var scenePath = $"{baseDir}/{name}.unity";
-            Directory.CreateDirectory(baseDir);
-            Directory.CreateDirectory(Path.Combine(baseDir, "mats"));
-            Directory.CreateDirectory(Path.Combine(baseDir, "instances"));
-
-            EditorSceneManager.SaveScene(scene, scenePath);
-            SceneManager.SetActiveScene(currentScene);
+            base.CreateNewScene(name, isSinglePlayer, () =>
+            {
+                var rs = RampancySentinel.GetOrCreateInScene();
+                rs.LevelName   = name;
+                rs.DataDir     = isSinglePlayer ? $"levels/{name}" : $"levels/test/{name}";
+                rs.GameVersion = GameVersions.Halo1Mcc;
+            });
         }
 
         public override void ImportScene(string path = null)

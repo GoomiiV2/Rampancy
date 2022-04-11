@@ -48,6 +48,9 @@ namespace RampantC20.Halo3
 
         public void Save(string filepath)
         {
+            var dirPath = Path.GetDirectoryName(filepath);
+            Directory.CreateDirectory(dirPath);
+            
             var data = ToString();
             File.WriteAllText(filepath, data);
         }

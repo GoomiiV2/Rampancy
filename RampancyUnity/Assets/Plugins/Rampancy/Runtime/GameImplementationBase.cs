@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using RampantC20;
 using RealtimeCSG.Components;
+using RealtimeCSG.Legacy;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -58,9 +60,37 @@ namespace Rampancy
         {
         }
 
-        public virtual void CreateNewScene(string name, bool isSinglePlayer = true)
+        public virtual void CreateNewScene(string name, bool isSinglePlayer = true, Action customAction = null)
         {
+            if (DoesSceneExist(name)) return;
             
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            scene.name = name;
+
+            var currentScene = SceneManager.GetActiveScene();
+            SceneManager.SetActiveScene(scene);
+            var rs = RampancySentinel.GetOrCreateInScene();
+
+            var frame    = new GameObject("Frame");
+            var levelGeo = new GameObject("LevelGeo");
+            levelGeo.transform.parent = frame.transform;
+
+            var debugGeo = new GameObject("DebugGeo");
+            debugGeo.transform.parent = frame.transform;
+
+            var csgModel = levelGeo.AddComponent<CSGModel>();
+            csgModel.Settings = ModelSettingsFlags.InvertedWorld | ModelSettingsFlags.NoCollider;
+
+            var baseDir   = $"{Rampancy.SceneDir}/{name}";
+            var scenePath = $"{baseDir}/{name}.unity";
+            Directory.CreateDirectory(baseDir);
+            Directory.CreateDirectory(Path.Combine(baseDir, "mats"));
+            Directory.CreateDirectory(Path.Combine(baseDir, "instances"));
+            
+            customAction?.Invoke();
+
+            EditorSceneManager.SaveScene(scene, scenePath);
+            SceneManager.SetActiveScene(currentScene);
         }
 
         public virtual bool DoesSceneExist(string name)
