@@ -5,11 +5,14 @@ using System.IO;
 using System.Linq;
 using Rampancy.Halo1;
 using Rampancy.Halo3;
+using Rampancy.Halo3_ODST;
+using Rampancy.RampantC20;
 using Rampancy.UI;
 using RampantC20;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
@@ -20,21 +23,28 @@ namespace Rampancy
     public class Rampancy
     {
         public static Config  Cfg     = new();
-        public static AssetDb AssetDB = new();
+        public static AssetDb AssetDB = null;
 
         public static Dictionary<GameVersions, GameImplementationBase> GameImplementation = new()
         {
             {GameVersions.Halo1Mcc, new Halo1Implementation()},
-            {GameVersions.Halo3, new Halo3Implementation()}
+            {GameVersions.Halo3, new Halo3Implementation()},
+            {GameVersions.Halo3ODST, new Halo3ODSTImplementation()}
         };
+
+        public static ToolTasker ToolTaskRunner = new ();
 
         public static GameImplementationBase CurrentGameImplementation => GameImplementation[Cfg.GameVersion];
 
-        public static Halo1Implementation Halo1Implementation => GameImplementation[GameVersions.Halo1Mcc] as Halo1Implementation;
-        public static Halo3Implementation Halo3Implementation => GameImplementation[GameVersions.Halo3] as Halo3Implementation;
+        public static Halo1Implementation Halo1Implementation     => GameImplementation[GameVersions.Halo1Mcc] as Halo1Implementation;
+        public static Halo3Implementation Halo3Implementation     => GameImplementation[GameVersions.Halo3] as Halo3Implementation;
+        public static Halo3Implementation Halo3ODSTImplementation => GameImplementation[GameVersions.Halo3ODST] as Halo3ODSTImplementation;
+
+        public static GameVersions ActiveGameVersion => Cfg.GameVersion;
 
         public static string BaseUnityDir => Path.Combine("Assets", $"{Cfg.GameVersion}");
         public static string SceneDir     => Path.Combine(BaseUnityDir, Statics.SrcLevelsName);
+        public static string TagsDbPath   => Path.Combine(Cfg.ActiveGameConfig.UnityBaseDir, "TagsDb.json");
 
         static Rampancy()
         {
@@ -57,7 +67,7 @@ namespace Rampancy
                 EditorApplication.update += showSettings;
             }
             else {
-                AssetDB.ScanTags(Cfg.ActiveGameConfig.TagsPath);
+                SetupTagDb();
             }
 
             EditorSceneManager.sceneSaving += (scene, path) =>
@@ -75,6 +85,41 @@ namespace Rampancy
             EditorSceneManager.sceneOpened += (scene, mode) => { Actions.UpdateSceneMatRefs(); };
 
             Selection.selectionChanged += SelectionChanged;
+
+            EditorApplication.update += () =>
+            {
+                ToolTaskRunner.MainThreadTick();
+            };
+        }
+
+        public static void SetupTagDb()
+        {
+            AssetDB = new(Cfg.ActiveGameConfig.ToolBasePath);
+            AssetDB.OnTagChanged += (changeType, path) =>
+            {
+                var ext = Path.GetExtension(path)[1..];
+                //var tagPath = path[(Cfg.ActiveGameConfig.TagsPath.Length+1)..];
+                CurrentGameImplementation.OnTagChanged(path, ext, changeType);
+                Debug.Log($"Tag {changeType}: {path}");
+            };
+
+            AssetDB.LoadDb(TagsDbPath);
+            //AssetDB.CheckForChanges(TagsDbPath);
+        }
+
+        public static void AssetDBSave() => AssetDB.Save(TagsDbPath);
+
+        public static void AssetDBCheckForChanges() => AssetDB.CheckForChanges(TagsDbPath);
+
+        // Import tag changes
+        public static void TagSync()
+        {
+            //AssetDatabase.StartAssetEditing();
+            Debug.Log("Checking for asset changes");
+            AssetDBCheckForChanges();
+            Debug.Log("Checking for asset changes, done");
+            //AssetDatabase.StopAssetEditing();
+            //AssetDatabase.Refresh();
         }
 
         private static Transform LastSelectedTransform = null;

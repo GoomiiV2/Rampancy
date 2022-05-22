@@ -146,6 +146,18 @@ namespace Rampancy.UI
 
     #endregion
 
+        [MenuItem("Rampancy/Sync/Full Tag Sync", false, 3)]
+        public static void FullTagSync()
+        {
+            Rampancy.CurrentGameImplementation.SyncMaterials();
+        }
+        
+        [MenuItem("Rampancy/Sync/Tag Sync", false, 3)]
+        public static void TagSync()
+        {
+            Rampancy.TagSync();
+        }
+        
     #region Help
 
         [MenuItem("Rampancy/Help/Rampancy Docs", false, 4)]

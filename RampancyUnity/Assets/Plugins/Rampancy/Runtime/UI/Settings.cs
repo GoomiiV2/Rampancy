@@ -29,13 +29,15 @@ namespace Rampancy.UI
             // Game configs
             DrawGameConfig("Halo 1 MCC", Rampancy.Cfg.Halo1MccGameConfig);
             DrawGameConfig("Halo 3 MCC", Rampancy.Cfg.Halo3MccGameConfig);
+            DrawGameConfig("Halo 3 ODST", Rampancy.Cfg.Halo3ODSTMccGameConfig);
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             if (GUILayout.Button("Save")) {
                 Rampancy.Cfg.Save();
+                Rampancy.AssetDBSave();
 
                 // TODO: only do this is the path of a game changed or the game version
-                Rampancy.AssetDB.ScanTags(Rampancy.Cfg.ActiveGameConfig.TagsPath);
+                Rampancy.AssetDBCheckForChanges();
             }
 
             ShowVersion();

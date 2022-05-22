@@ -20,7 +20,8 @@ namespace Rampancy.AssetProcessors
         public static string TrimPath(string path)
         {
             path = path.Replace($"Assets/{nameof(GameVersions.Halo1Mcc)}/TagData/", "")
-                       .Replace($"Assets/{nameof(GameVersions.Halo3)}/TagData/", "");
+                       .Replace($"Assets/{nameof(GameVersions.Halo3)}/TagData/", "")
+                       .Replace($"Assets/{nameof(GameVersions.Halo3ODST)}/TagData/", "");
 
             return path;
         }
@@ -28,20 +29,32 @@ namespace Rampancy.AssetProcessors
         // Replace guids with path based ones
         private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
-            foreach (var imported in importedAssets)
-                if (imported.Contains($"{nameof(GameVersions.Halo3)}/TagData") && imported.EndsWith(".tga"))
+            var paths = new string[]
+            {
+                $"{nameof(GameVersions.Halo3)}/TagData",
+                $"{nameof(GameVersions.Halo3ODST)}/TagData"
+            };
+
+            foreach (var imported in importedAssets) {
+                var gameVersion = GameVersions.Halo3;
+                if (imported.Contains(nameof(GameVersions.Halo3ODST))) {
+                    gameVersion = GameVersions.Halo3ODST;
+                }
+
+                if (paths.Any(x => imported.Contains(x)) && (imported.EndsWith(".tga") || imported.EndsWith(".hdds")))
                     try {
                         var metaPath = $"{imported}.meta";
                         var trimed   = TrimPath(imported);
                         var metaTxt  = File.ReadAllText(metaPath);
 
-                        var texPath = trimed.Replace("/", "\\").Replace("_00.tga", ""); // To match the tag path
-                        var guid    = TagPathHash.H3MccPathHash(texPath);
+                        var texPath = trimed.Replace("/", "\\").Replace("_00.tga", "").Replace("_00.hdds", ""); // To match the tag path
+                        var guid    = TagPathHash.GetHash(texPath, gameVersion);
                         metaTxt = Regex.Replace(metaTxt, @"guid: ([\d|\w]+)", $"guid: {guid}");
                         File.WriteAllText(metaPath, metaTxt);
                     }
                     catch (Exception) {
                     }
+            }
         }
     }
 }

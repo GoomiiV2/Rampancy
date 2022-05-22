@@ -44,6 +44,10 @@ namespace Rampancy.UI
                             break;
                     }
 
+                    if (GUILayout.Button("AssetDB check for changes")) {
+                        Rampancy.AssetDBCheckForChanges();
+                    }
+
                     break;
             }
         }

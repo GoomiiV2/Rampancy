@@ -22,9 +22,11 @@ namespace Rampancy
         {
             var guid = version switch
             {
-                GameVersions.Halo1Mcc => H1MccPathHash(path),
-                GameVersions.Halo3    => H3MccPathHash(path),
-                _                     => string.Empty
+                GameVersions.Halo1Mcc  => H1MccPathHash(path),
+                //GameVersions.Halo2Mcc  => H2MccPathHash(path),
+                GameVersions.Halo3     => H3MccPathHash(path),
+                GameVersions.Halo3ODST => H3MccODSTPathHash(path),
+                _                      => string.Empty
             };
 
             return guid;

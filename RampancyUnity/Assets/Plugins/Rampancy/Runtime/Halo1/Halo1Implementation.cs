@@ -204,7 +204,7 @@ namespace Rampancy.Halo1
         public Texture2D ImportBitmapFromTagRef(string path, bool convertToNormal = false)
         {
             var baseTagInfo = Rampancy.AssetDB.FindTagByRelPath(path, "bitmap");
-            if (baseTagInfo != null) return ImportBitmap(baseTagInfo.Value, convertToNormal: convertToNormal);
+            if (baseTagInfo != null) return ImportBitmap(baseTagInfo, convertToNormal: convertToNormal);
             return null;
         }
 

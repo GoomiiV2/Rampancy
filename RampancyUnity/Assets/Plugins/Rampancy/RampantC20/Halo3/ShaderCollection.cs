@@ -39,5 +39,16 @@ namespace RampantC20.Halo3
                 }
             }
         }
+
+        public string GetCollectionNameForShader(string tagPath)
+        {
+            foreach (var (col, path) in Mapping) {
+                if (tagPath.Contains(path)) {
+                    return col;
+                }
+            }
+
+            return null;
+        }
     }
 }

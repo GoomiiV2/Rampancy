@@ -1829,12 +1829,20 @@ PrefabInstance:
       value: '[generated-collider-mesh]'
       objectReference: {fileID: 0}
     - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -1960,6 +1968,14 @@ PrefabInstance:
       propertyPath: helperSurfaces.Array.data[3].MeshDescription.meshQuery.maskAndChannels
       value: 8388608
       objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8446851670895050518, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: Fore_Box_thing
@@ -2007,6 +2023,22 @@ PrefabInstance:
     - target: {fileID: 8446851670895050519, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7522742613659920366, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
@@ -2253,12 +2285,20 @@ PrefabInstance:
       value: '[generated-collider-mesh]'
       objectReference: {fileID: 0}
     - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -2384,6 +2424,14 @@ PrefabInstance:
       propertyPath: helperSurfaces.Array.data[3].MeshDescription.meshQuery.maskAndChannels
       value: 8388608
       objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8446851670895050518, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: Fore_Box_thing
@@ -2431,6 +2479,22 @@ PrefabInstance:
     - target: {fileID: 8446851670895050519, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7522742613659920366, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
@@ -3761,7 +3825,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 912830838}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7332b6d105ed46fdb67cf0b1d0b12b66, type: 3}
   m_Name: 
@@ -3771,12 +3835,12 @@ MonoBehaviour:
   DisplayDebugGeo: 1
   GameVersion: 3
   MatIdToPathLookup_Guids:
-  - 7d8b6e6451c05edf9a03af1659bc630a
-  - 7b1e6936936f5ff8b2ab2d6a20472579
-  - 7ebb75f6ee8150e8a9d11a235d78a4bc
   - 17a46b54311f5551ac2622ad44301dce
+  - 7d8b6e6451c05edf9a03af1659bc630a
   - 244c19bd7c5b52bd9d643affc4022ff6
   - 0e2f541707065b7698cfe76e1222d5bd
+  - 7b1e6936936f5ff8b2ab2d6a20472579
+  - 7ebb75f6ee8150e8a9d11a235d78a4bc
   - 04db894483055ca286a8080e1f07c335
   - 31ea212d54ae4354fb1d9e10d97c2eb0
   - ca23d17cde495ca4e9994fef4535770c
@@ -3789,12 +3853,12 @@ MonoBehaviour:
   - 3dd548aece7d5524a0503d0ece157c21
   - 6977337a02cf5319a83e2725b6f8f2f8
   MatIdToPathLookup_Paths:
-  - Assets/Halo3/TagData/levels/solo/020_base/shaders/hb_concrete_floor_crumble_mat.asset
-  - Assets/Halo3/TagData/levels/multi/snowbound/shaders/for/for_wall_bigtrim_mat.asset
-  - Assets/Halo3/TagData/levels/multi/riverworld/shaders/forerunner/panel_tech_vert_red_mat.asset
   - Assets/Halo3/TagData/levels/multi/guardian/shaders/guardian_int_light_warm_mat.asset
+  - Assets/Halo3/TagData/levels/solo/020_base/shaders/hb_concrete_floor_crumble_mat.asset
   - Assets/Halo3/TagData/levels/multi/guardian/shaders/guardian_centercircle_tech_mat.asset
   - Assets/Halo3/TagData/levels/multi/riverworld/shaders/forerunner/waste_panel_trim_mat.asset
+  - Assets/Halo3/TagData/levels/multi/snowbound/shaders/for/for_wall_bigtrim_mat.asset
+  - Assets/Halo3/TagData/levels/multi/riverworld/shaders/forerunner/panel_tech_vert_red_mat.asset
   - Assets/Halo3/TagData/levels/multi/salvation/shaders/sal_glass_floor_mat.asset
   - Assets/BaseData/Skip.mat
   - Assets/BaseData/+portal.mat
@@ -5728,73 +5792,6 @@ MonoBehaviour:
     - EdgeIndices: 07000000060000000500000004000000
       TexGenIndex: 5
     Generation: 4
---- !u!1 &1322556555
-GameObject:
-  m_ObjectHideFlags: 17
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1322556557}
-  - component: {fileID: 1322556556}
-  m_Layer: 0
-  m_Name: '[default-CSGModel]'
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 124
-  m_IsActive: 1
---- !u!114 &1322556556
-MonoBehaviour:
-  m_ObjectHideFlags: 17
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1322556555}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8672dcc90e16b0a489a41edf56e016f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PrefabBehaviour: 0
-  PrefabSourceAlignment: 4
-  PrefabDestinationAlignment: 0
-  Version: 1.1
-  infiniteBrush: {fileID: 0}
-  Settings: 1537
-  VertexChannels: 14
-  ReceiveGI: 2
-  MeshColliderCookingOptions: 14
-  ShowGeneratedMeshes: 0
-  DefaultPhysicsMaterial: {fileID: 13400000, guid: 0c5fdfb44d6f19646a41a0720fbf751a, type: 2}
-  exportType: 0
-  originType: 0
-  exportColliders: 0
-  exportPath: 
-  angleError: 1
-  areaError: 1
-  hardAngle: 60
-  packMargin: 20
-  scaleInLightmap: 1
-  autoUVMaxDistance: 0.5
-  autoUVMaxAngle: 89
-  minimumChartSize: 4
---- !u!4 &1322556557
-Transform:
-  m_ObjectHideFlags: 17
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1322556555}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1327737670
 GameObject:
   m_ObjectHideFlags: 0
@@ -6495,12 +6492,20 @@ PrefabInstance:
       value: '[generated-collider-mesh]'
       objectReference: {fileID: 0}
     - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -6626,6 +6631,14 @@ PrefabInstance:
       propertyPath: helperSurfaces.Array.data[3].MeshDescription.meshQuery.maskAndChannels
       value: 8388608
       objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8446851670895050518, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: Fore_Box_thing
@@ -6673,6 +6686,22 @@ PrefabInstance:
     - target: {fileID: 8446851670895050519, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7522742613659920366, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
@@ -8148,12 +8177,20 @@ PrefabInstance:
       value: '[generated-collider-mesh]'
       objectReference: {fileID: 0}
     - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -8279,6 +8316,14 @@ PrefabInstance:
       propertyPath: helperSurfaces.Array.data[3].MeshDescription.meshQuery.maskAndChannels
       value: 8388608
       objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8446851670895050518, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: Fore_Box_thing
@@ -8326,6 +8371,22 @@ PrefabInstance:
     - target: {fileID: 8446851670895050519, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7522742613659920366, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
@@ -9367,6 +9428,73 @@ MonoBehaviour:
     - EdgeIndices: 220000003e0000003f000000
       TexGenIndex: 17
     Generation: 15
+--- !u!1 &1891736421
+GameObject:
+  m_ObjectHideFlags: 17
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1891736423}
+  - component: {fileID: 1891736422}
+  m_Layer: 0
+  m_Name: '[default-CSGModel]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 124
+  m_IsActive: 1
+--- !u!114 &1891736422
+MonoBehaviour:
+  m_ObjectHideFlags: 17
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891736421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8672dcc90e16b0a489a41edf56e016f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PrefabBehaviour: 0
+  PrefabSourceAlignment: 4
+  PrefabDestinationAlignment: 0
+  Version: 1.1
+  infiniteBrush: {fileID: 0}
+  Settings: 1537
+  VertexChannels: 14
+  ReceiveGI: 2
+  MeshColliderCookingOptions: 14
+  ShowGeneratedMeshes: 0
+  DefaultPhysicsMaterial: {fileID: 13400000, guid: 0c5fdfb44d6f19646a41a0720fbf751a, type: 2}
+  exportType: 0
+  originType: 0
+  exportColliders: 0
+  exportPath: 
+  angleError: 1
+  areaError: 1
+  hardAngle: 60
+  packMargin: 20
+  scaleInLightmap: 1
+  autoUVMaxDistance: 0.5
+  autoUVMaxAngle: 89
+  minimumChartSize: 4
+--- !u!4 &1891736423
+Transform:
+  m_ObjectHideFlags: 17
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891736421}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1923594826
 GameObject:
   m_ObjectHideFlags: 0
@@ -9767,12 +9895,20 @@ PrefabInstance:
       value: '[generated-collider-mesh]'
       objectReference: {fileID: 0}
     - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -9898,6 +10034,14 @@ PrefabInstance:
       propertyPath: helperSurfaces.Array.data[3].MeshDescription.meshQuery.maskAndChannels
       value: 8388608
       objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8446851670895050518, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: Fore_Box_thing
@@ -9945,6 +10089,22 @@ PrefabInstance:
     - target: {fileID: 8446851670895050519, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7522742613659920366, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
@@ -10030,12 +10190,20 @@ PrefabInstance:
       value: '[generated-collider-mesh]'
       objectReference: {fileID: 0}
     - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1296706352305422998, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2680214815597344525, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -10161,6 +10329,14 @@ PrefabInstance:
       propertyPath: helperSurfaces.Array.data[3].MeshDescription.meshQuery.maskAndChannels
       value: 8388608
       objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957652716127525899, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8446851670895050518, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_Name
       value: Fore_Box_thing
@@ -10208,6 +10384,22 @@ PrefabInstance:
     - target: {fileID: 8446851670895050519, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628272022828383556, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_Name
+      value: '[generated-render-mesh]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116017877892712799, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7522742613659920366, guid: 2c85453aa1fcb6844bf641667efbde78, type: 3}

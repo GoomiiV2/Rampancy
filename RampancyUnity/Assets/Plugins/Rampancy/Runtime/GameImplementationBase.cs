@@ -2,7 +2,7 @@
 using System.IO;
 using RampantC20;
 using RealtimeCSG.Components;
-using RealtimeCSG.Legacy;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,6 +12,21 @@ namespace Rampancy
     // Common interface for game integrations to extend from
     public class GameImplementationBase
     {
+        public virtual string GetUnityBasePath() => Path.Combine("Assets", $"{GameVersions.Halo1Mcc}");
+
+        public    ImportedAssetDb   ImportedDB;
+        protected bool              IsImportingAssets = false;
+        protected PostponableAction PostponableAssetImportingEnd;
+        
+        public GameImplementationBase()
+        {
+            var importedDbPath = Path.Combine(GetUnityBasePath(), "ImportedAssetsDB.json");
+            ImportedDB = new(importedDbPath);
+            ImportedDB.Load();
+
+            PostponableAssetImportingEnd = new(TimeSpan.FromSeconds(2), RealStopEditingAssets);
+        }
+
         // To enable the menu options for these
         public virtual bool CanOpenSapien() => true;
 
@@ -110,12 +125,50 @@ namespace Rampancy
         {
         }
 
-        public virtual void ImportMaterial(string path)
+        // When a tag change has been detected
+        public virtual void OnTagChanged(string path, string ext, AssetDb.TagChangedType type)
+        {
+            
+        }
+
+        public virtual void ImportMaterial(string path, string collection, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
+        {
+        }
+        
+        public virtual void ImportBitmap(string path, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
         {
         }
 
         public virtual void SyncMaterials()
         {
         }
+
+        protected void StartImportingAssets()
+        {
+            if (IsImportingAssets) return;
+            
+            AssetDatabase.StartAssetEditing();
+            IsImportingAssets = true;
+            
+            Debug.Log("Starting importing assets");
+        }
+
+        protected void StopImportingAssets()
+        {
+            PostponableAssetImportingEnd.Invoke();
+        }
+
+        private void RealStopEditingAssets()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                AssetDatabase.StopAssetEditing();
+                AssetDatabase.Refresh();
+                IsImportingAssets = false;
+            
+                Debug.Log("Stopping importing assets");
+            };
+        }
+        
     }
 }

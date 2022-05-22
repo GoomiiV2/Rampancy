@@ -5,17 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using RampantC20;
 using RampantC20.Halo3;
-using RealtimeCSG.Components;
-using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Rampancy.Halo3
 {
     public class Halo3Implementation : GameImplementationBase
     {
+        public virtual GameVersions GameVersion => GameVersions.Halo3;
+        
         public override bool CanOpenTagTest() => false;
 
         public override bool CanCompileLightmaps() => false;
@@ -41,7 +39,7 @@ namespace Rampancy.Halo3
                 var rs = RampancySentinel.GetOrCreateInScene();
                 rs.LevelName   = name;
                 rs.DataDir     = isSinglePlayer ? $"levels/solo/{name}" : $"levels/multi/{name}";
-                rs.GameVersion = GameVersions.Halo3;
+                rs.GameVersion = GameVersion;
             });
         }
 
@@ -64,9 +62,9 @@ namespace Rampancy.Halo3
             exporter.Export(path);
         }
 
-        public override void ImportMaterial(string path)
+        public override void ImportMaterial(string path, string collection, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
         {
-            base.ImportMaterial(path);
+            base.ImportMaterial(path, collection);
         }
 
         public override void SyncMaterials()
@@ -77,7 +75,7 @@ namespace Rampancy.Halo3
 
         public ShaderCollection GetShaderCollection(bool onlyLevelShaders = true)
         {
-            var shaderCollectionPath = Path.Combine(Rampancy.Cfg.Halo3MccGameConfig.TagsPath, "levels/shader_collections.txt");
+            var shaderCollectionPath = Path.Combine(Rampancy.Cfg.GetGameConfig(GameVersion).TagsPath, "levels/shader_collections.txt");
             var shaderCollection     = new ShaderCollection(shaderCollectionPath, onlyLevelShaders);
             return shaderCollection;
         }
@@ -89,7 +87,7 @@ namespace Rampancy.Halo3
             var shaderCollection = GetShaderCollection();
 
             foreach (var (key, dirPath) in shaderCollection.Mapping) {
-                var diFullPath = Path.Combine(Rampancy.Cfg.Halo3MccGameConfig.TagsPath, dirPath);
+                var diFullPath = Path.Combine(Rampancy.Cfg.GetGameConfig(GameVersion).TagsPath, dirPath);
                 if (!Directory.Exists(diFullPath)) continue;
 
                 var shaderTypes = new[] {"*.shader", "*.shader_terrain"};
@@ -118,6 +116,8 @@ namespace Rampancy.Halo3
             var tasksCount          = flattendShaderPaths.Length + 1;
             var matDataList         = new List<(string, string, string)>();
 
+            AssetDatabase.StartAssetEditing();
+            
             var task = Task.Factory.StartNew(() =>
             {
                 // Import the textures
@@ -170,6 +170,8 @@ namespace Rampancy.Halo3
                     AssetDatabase.Refresh();
                     AssetDatabase.SaveAssets();
                     Progress.Remove(progressId);
+                    
+                    AssetDatabase.StopAssetEditing();
                 };
             });
         }
@@ -177,21 +179,21 @@ namespace Rampancy.Halo3
         // Create a material to represent this shader
         public string CreateMaterialForShader(ShaderData shaderData)
         {
-            var shaderTagRelPath  = shaderData.TagPath.Replace("/", "\\").Replace(Rampancy.Cfg.Halo3MccGameConfig.TagsPath.Replace("/", "\\"), "");
-            var shaderProjectPath = Utils.GetProjectRelPath(shaderTagRelPath.Substring(1), GameVersions.Halo3);
+            var shaderTagRelPath  = shaderData.TagPath.Replace("/", "\\").Replace(Rampancy.Cfg.GetGameConfig(GameVersion).TagsPath.Replace("/", "\\"), "");
+            var shaderProjectPath = Utils.GetProjectRelPath(shaderTagRelPath.TrimStart('/', '\\'), GameVersion);
             var shaderDirPath     = Path.GetDirectoryName(shaderProjectPath);
             var shaderPath        = Path.Combine(shaderDirPath, $"{Path.GetFileNameWithoutExtension(shaderProjectPath)}_mat.asset");
             Directory.CreateDirectory(shaderDirPath);
 
             var shaderTypeStr = Path.GetExtension(shaderData.TagPath).Substring(1);
-            var tags          = new List<string>() {"mat", nameof(GameVersions.Halo3), shaderTypeStr, shaderData.Collection}; // some tags to add to the mats to help when searching
+            var tags          = new List<string>() {"mat", nameof(GameVersion), shaderTypeStr, shaderData.Collection}; // some tags to add to the mats to help when searching
 
             if (shaderData is BasicShaderData basicShader) {
                 if (basicShader.DiffuseTex != null) {
                     if (basicShader.IsAlphaTested) tags.Add("AlphaTested");
 
-                    var guid       = TagPathHash.H3MccPathHash(basicShader.DiffuseTex);
-                    var shaderGuid = TagPathHash.H3MccPathHash(basicShader.TagPath.Replace("/", "\\"));
+                    var guid       = TagPathHash.GetHash(basicShader.DiffuseTex, GameVersion);
+                    var shaderGuid = TagPathHash.GetHash(basicShader.TagPath.Replace("/", "\\"), GameVersion);
                     FastMatCreate.CreateBasicMat(guid, shaderPath, shaderGuid, tags.ToArray(), basicShader.IsAlphaTested, basicShader.BaseMapScale);
 
                     return shaderGuid;
@@ -218,18 +220,35 @@ namespace Rampancy.Halo3
             }
         }
 
+        public override void ImportBitmap(string path, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
+        {
+            if (path == null) return;
+            
+            var progressId = Progress.Start($"Importing bitmap: {path}");
+            ExportBitmapToTga(path);
+            
+            ImportedDB.Add(path, "bitmap");
+            parentAssetRecord?.AddRef(path, "bitmap");
+            ImportedDB.AddRefToEntry(parentAssetRecord, path, "bitmap");
+            
+            Progress.Remove(progressId);
+        }
+
         // Use Tool to export a texture to a tga in the project dir
-        public void ExportBitmapToTga(string tagPath, string outPath = null)
+        public virtual void ExportBitmapToTga(string tagPath, string outPath = null)
         {
             if (outPath == null) {
-                var destPath = Utils.GetProjectRelPath(tagPath, GameVersions.Halo3, Environment.CurrentDirectory);
+                var destPath = Utils.GetProjectRelPath(tagPath, GameVersion, Environment.CurrentDirectory);
                 var dirPath  = Path.GetDirectoryName(destPath);
                 Directory.CreateDirectory(dirPath);
                 outPath = $"{dirPath}/";
             }
 
             var fullPath = outPath + $"{Path.GetFileName(tagPath)}_00.tga";
-            if (!File.Exists(fullPath)) Rampancy.RunProgram(Rampancy.Cfg.Halo3MccGameConfig.ToolFastPath, $"export-bitmap-tga \"{tagPath}\" \"{outPath}\"", true, true);
+            if (!File.Exists(fullPath)) Rampancy.RunProgram(((H3GameConfig)Rampancy.Cfg.GetGameConfig(GameVersion)).ToolFastPath, $"export-bitmap-tga \"{tagPath}\" \"{outPath}\"", true, true);
         }
+        
+        // New shader import pipeline
+        // Gather list of shaders paths
     }
 }
