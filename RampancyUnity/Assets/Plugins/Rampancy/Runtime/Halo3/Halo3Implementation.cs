@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Rampancy.RampantC20;
 using RampantC20;
 using RampantC20.Halo3;
 using UnityEditor;
@@ -13,7 +14,9 @@ namespace Rampancy.Halo3
     public class Halo3Implementation : GameImplementationBase
     {
         public virtual GameVersions GameVersion => GameVersions.Halo3;
-        
+
+        public override string GetUnityBasePath() => Path.Combine("Assets", $"{GameVersions.Halo3}");
+
         public override bool CanOpenTagTest() => false;
 
         public override bool CanCompileLightmaps() => false;
@@ -62,15 +65,72 @@ namespace Rampancy.Halo3
             exporter.Export(path);
         }
 
-        public override void ImportMaterial(string path, string collection, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
+        public override void ImportMaterial(string tagPath, string collection, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
         {
-            base.ImportMaterial(path, collection);
+            var progressId = Progress.Start($"Importing shader: {tagPath}");
+
+            var tagsPath    = Rampancy.Cfg.GetGameConfig(GameVersion).TagsPath;
+            var fullTagPath = Path.Combine(tagsPath, tagPath);
+            var assetRecord = new ImportedAssetDb.ImportedAsset(tagPath);
+
+            if (collection == null) {
+                var shaderCollection = GetShaderCollection();
+                collection = shaderCollection.GetCollectionNameForShader(tagPath);
+            }
+
+            // Get info for the shader
+            var shdData = ShaderData.GetDataFromScan(fullTagPath);
+            shdData.TagPath    = tagPath;
+            shdData.Collection = collection;
+
+            if (shdData is BasicShaderData shdBasic) {
+                // import the bitmaps needed
+                Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(shdBasic.DiffuseTex, assetRecord)));
+
+                parentAssetRecord?.AddRef(tagPath, "shader");
+            }
+
+            CreateMaterialForShader(shdData);
+
+            var tagType = Path.GetExtension(tagPath)[1..];
+            ImportedDB.Add(assetRecord, tagType);
+
+            Progress.Remove(progressId);
         }
 
         public override void SyncMaterials()
         {
-            // TODO: actually sync, check for changes, setup a watcher etc
-            ImportShaders();
+            var shaderPaths = GetLevelShaders();
+
+            var progressId = Progress.Start("Importing tags...", "This could take a while :<");
+            Progress.ShowDetails(false);
+            int currentIdx   = 0;
+            int totalShaders = shaderPaths.SelectMany(x => x.Value.Select(y => y.Length)).Sum();
+
+            //AssetDatabase.StartAssetEditing();
+            {
+                var changes = Rampancy.AssetDB.GetTagChanges(Rampancy.TagsDbPath);
+                AssetDatabase.StartAssetEditing();
+                foreach (var change in changes) {
+                    var ext = Path.GetExtension(change.Path)[1..];
+                    OnTagChanged(change.Path, ext, change.ChangeType);
+                    Progress.Report(progressId, currentIdx, changes.Count, change.Path);
+                }
+
+                AssetDatabase.StopAssetEditing();
+                AssetDatabase.Refresh();
+
+                /*foreach (var (col, paths) in shaderPaths) {
+                    foreach (var path in paths) {
+                        Progress.Report(progressId, currentIdx++, totalShaders);
+                        Progress.SetDescription(progressId, $"{path}");
+                        ImportMaterial(path, col);
+                    }
+                }*/
+            }
+            //AssetDatabase.StopAssetEditing();
+
+            Progress.Remove(progressId);
         }
 
         public ShaderCollection GetShaderCollection(bool onlyLevelShaders = true)
@@ -80,100 +140,38 @@ namespace Rampancy.Halo3
             return shaderCollection;
         }
 
-        // Read the  shader_collections.txt and get all the .shaders paths in those dirs
-        public Dictionary<string, List<string>> GetLevelShaders()
+        public override void OnTagChanged(string path, string ext, AssetDb.TagChangedType type)
         {
-            var shaderGroupings  = new Dictionary<string, List<string>>();
-            var shaderCollection = GetShaderCollection();
+            //StartImportingAssets();
+            var tagPath = path[..^Path.GetExtension(path).Length];
 
-            foreach (var (key, dirPath) in shaderCollection.Mapping) {
-                var diFullPath = Path.Combine(Rampancy.Cfg.GetGameConfig(GameVersion).TagsPath, dirPath);
-                if (!Directory.Exists(diFullPath)) continue;
-
-                var shaderTypes = new[] {"*.shader", "*.shader_terrain"};
-                var shaderPaths = new List<string>();
-                foreach (var shaderType in shaderTypes) {
-                    var sPaths     = Directory.GetFiles(diFullPath, shaderType, SearchOption.AllDirectories);
-                    var fixedPaths = sPaths.Select(x => x.Replace("/", "\\"));
-                    shaderPaths.AddRange(fixedPaths);
+            if (type == AssetDb.TagChangedType.Deleted) {
+                if (ImportedDB.IsImported(path, ext)) {
+                    var unityPath = Path.Combine(GetUnityBasePath(), tagPath);
+                    AssetDatabase.DeleteAsset(unityPath);
                 }
 
-                shaderGroupings.Add(key, shaderPaths);
+                ImportedDB.Remove(path, ext);
+            }
+            else if (type is AssetDb.TagChangedType.Added or AssetDb.TagChangedType.Changed) {
+                // Check if a shader
+                if (new[] {"shader", "shader_terrain"}.Any(x => x == ext)) {
+                    // is a level shader, is in the collection
+                    var shaderCollection = GetShaderCollection();
+                    var collection       = shaderCollection.GetCollectionNameForShader(path);
+                    if (collection != null) {
+                        ImportMaterial(path, collection);
+                    }
+                }
+                else if (new[] {"bitmap"}.Any(x => x == ext)) { // texture
+                    // Only if its an update to an imported one
+                    if (ImportedDB.IsImported(path, ext)) {
+                        Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(path)));
+                    }
+                }
             }
 
-            return shaderGroupings;
-        }
-
-        public void ImportShaders()
-        {
-            var progressId = Progress.Start("Importing shaders...", "This could take a while :<");
-            Progress.ShowDetails(false);
-            var currentIdx = 0;
-
-            var shaderPaths         = GetLevelShaders();
-            var flattendShaderPaths = shaderPaths.SelectMany(x => x.Value.Select(y => (x.Key, y))).ToArray();
-            var shaderDatas         = new Dictionary<string, ShaderData>(shaderPaths.Count);
-            var tasksCount          = flattendShaderPaths.Length + 1;
-            var matDataList         = new List<(string, string, string)>();
-
-            AssetDatabase.StartAssetEditing();
-            
-            var task = Task.Factory.StartNew(() =>
-            {
-                // Import the textures
-                Parallel.ForEach(flattendShaderPaths, (collectionAndPath) =>
-                {
-                    Progress.Report(progressId, currentIdx++, tasksCount);
-                    Progress.SetDescription(progressId, collectionAndPath.y);
-
-                    var path       = collectionAndPath.y;
-                    var shaderData = ShaderData.GetDataFromScan(path);
-                    shaderData.Collection = collectionAndPath.Key;
-
-                    var doImport = false;
-                    lock (shaderDatas) {
-                        if (shaderDatas.TryAdd(path, shaderData))
-                            doImport = true;
-                        else
-                            Debug.LogWarning($"Duplicate shader, not importing copy: {path}");
-                    }
-
-                    if (doImport) ImportShaderTextures(shaderData);
-                    var shaderGuid = CreateMaterialForShader(shaderData);
-
-                    matDataList.Add((shaderGuid, shaderData.Collection, shaderData.TagPath));
-                });
-
-                EditorApplication.delayCall += () =>
-                {
-                    // Unity importing of the textures
-                    Progress.Report(progressId, currentIdx++, tasksCount);
-                    Progress.SetDescription(progressId, "Waiting for Unity to import the textures");
-                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-
-                    Progress.Report(progressId, currentIdx++, tasksCount);
-                    Progress.SetDescription(progressId, "Adding data to materials");
-                    foreach (var matData in matDataList) {
-                        var assetPath = AssetDatabase.GUIDToAssetPath(matData.Item1);
-                        var matAsset  = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
-
-                        if (matAsset != null) {
-                            var matInfo = ScriptableObject.CreateInstance<MatInfo>();
-                            matInfo.Mat        = matAsset;
-                            matInfo.Collection = matData.Item2;
-                            matInfo.Name       = Path.GetFileNameWithoutExtension(matData.Item3);
-                            matInfo.name       = "Info";
-                            AssetDatabase.AddObjectToAsset(matInfo, matAsset);
-                        }
-                    }
-
-                    AssetDatabase.Refresh();
-                    AssetDatabase.SaveAssets();
-                    Progress.Remove(progressId);
-                    
-                    AssetDatabase.StopAssetEditing();
-                };
-            });
+            //StopImportingAssets();
         }
 
         // Create a material to represent this shader
@@ -186,7 +184,7 @@ namespace Rampancy.Halo3
             Directory.CreateDirectory(shaderDirPath);
 
             var shaderTypeStr = Path.GetExtension(shaderData.TagPath).Substring(1);
-            var tags          = new List<string>() {"mat", nameof(GameVersion), shaderTypeStr, shaderData.Collection}; // some tags to add to the mats to help when searching
+            var tags          = new List<string>() {"mat", $"{GameVersion}", shaderTypeStr, shaderData.Collection}; // some tags to add to the mats to help when searching
 
             if (shaderData is BasicShaderData basicShader) {
                 if (basicShader.DiffuseTex != null) {
@@ -195,6 +193,8 @@ namespace Rampancy.Halo3
                     var guid       = TagPathHash.GetHash(basicShader.DiffuseTex, GameVersion);
                     var shaderGuid = TagPathHash.GetHash(basicShader.TagPath.Replace("/", "\\"), GameVersion);
                     FastMatCreate.CreateBasicMat(guid, shaderPath, shaderGuid, tags.ToArray(), basicShader.IsAlphaTested, basicShader.BaseMapScale);
+
+                    AddMetaDataToMat(shaderData.Collection, shaderPath);
 
                     return shaderGuid;
                 }
@@ -205,33 +205,19 @@ namespace Rampancy.Halo3
             return null;
         }
 
-        // Import the textures needed for a shader
-        public void ImportShaderTextures(ShaderData shaderData)
-        {
-            // Export the diffuse just for now
-            if (shaderData is BasicShaderData basicShader) {
-                if (basicShader.DiffuseTex != null) ExportBitmapToTga(basicShader.DiffuseTex);
-                /*if (basicShader.DetailTex     != null) ExportBitmapToTga(basicShader.DetailTex);
-                if (basicShader.BumpTex       != null) ExportBitmapToTga(basicShader.BumpTex);
-                if (basicShader.BumpDetailTex != null) ExportBitmapToTga(basicShader.BumpDetailTex);
-                if (basicShader.AlphaTestMap  != null) ExportBitmapToTga(basicShader.AlphaTestMap);*/
-            }
-            else if (shaderData is TerrainShaderData terrainShader) {
-            }
-        }
 
         public override void ImportBitmap(string path, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
         {
             if (path == null) return;
-            
-            var progressId = Progress.Start($"Importing bitmap: {path}");
+
+            //var progressId = Progress.Start($"Importing bitmap: {path}");
             ExportBitmapToTga(path);
-            
+
             ImportedDB.Add(path, "bitmap");
             parentAssetRecord?.AddRef(path, "bitmap");
             ImportedDB.AddRefToEntry(parentAssetRecord, path, "bitmap");
-            
-            Progress.Remove(progressId);
+
+            //Progress.Remove(progressId);
         }
 
         // Use Tool to export a texture to a tga in the project dir
@@ -245,10 +231,44 @@ namespace Rampancy.Halo3
             }
 
             var fullPath = outPath + $"{Path.GetFileName(tagPath)}_00.tga";
-            if (!File.Exists(fullPath)) Rampancy.RunProgram(((H3GameConfig)Rampancy.Cfg.GetGameConfig(GameVersion)).ToolFastPath, $"export-bitmap-tga \"{tagPath}\" \"{outPath}\"", true, true);
+            if (!File.Exists(fullPath)) Rampancy.RunProgram(((H3GameConfig) Rampancy.Cfg.GetGameConfig(GameVersion)).ToolFastPath, $"export-bitmap-tga \"{tagPath}\" \"{outPath}\"", true, true);
         }
-        
-        // New shader import pipeline
-        // Gather list of shaders paths
+
+        public void AddMetaDataToMat(string collection, string matPath)
+        {
+            var matInfo = ScriptableObject.CreateInstance<MatInfo>();
+            var name    = Path.GetFileNameWithoutExtension(matPath);
+
+            if (name.EndsWith("_mat")) name = name[..^4];
+
+            //matInfo.Mat        = matAsset;
+            matInfo.Collection = collection;
+            matInfo.Name       = name;
+            matInfo.name       = "Info";
+
+            matInfo.Save(matPath);
+        }
+
+        // Read the shader_collections.txt and get all the .shaders paths in those dirs
+        public Dictionary<string, List<string>> GetLevelShaders(bool tagRelPath = true)
+        {
+            var collectionsAndPaths = new Dictionary<string, List<string>>();
+            var shaderCollection    = GetShaderCollection();
+            var tagsDir             = Path.GetFullPath(Rampancy.Cfg.GetGameConfig(GameVersion).TagsPath);
+            var shaderTypes         = new[] {"*.shader", "*.shader_terrain"}; // we only want these
+
+            foreach (var (collection, colPath) in shaderCollection.Mapping) {
+                var dirFullPath = Path.Combine(tagsDir, colPath);
+                if (!Directory.Exists(dirFullPath)) continue;
+
+                var shadersInCol = shaderTypes.SelectMany(x => Directory.GetFiles(dirFullPath, x, SearchOption.AllDirectories))
+                                              .Select(Path.GetFullPath)
+                                              .Select(x => tagRelPath ? x[(tagsDir.Length + 1)..] : x);
+
+                collectionsAndPaths.Add(collection, shadersInCol.ToList());
+            }
+
+            return collectionsAndPaths;
+        }
     }
 }

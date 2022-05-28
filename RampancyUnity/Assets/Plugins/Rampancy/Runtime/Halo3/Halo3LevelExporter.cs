@@ -271,10 +271,10 @@ namespace Rampancy
 
         private int GetMatId(Material mat)
         {
-            var path = AssetDatabase.GetAssetPath(mat);
+            var path    = AssetDatabase.GetAssetPath(mat);
             if (!MatList.ContainsKey(path)) {
-                var info = AssetDatabase.LoadAssetAtPath<MatInfo>(path);
-                MatList.Add(path, new MatInfoAndId(MatIdx++, info, mat.name));
+                var matInfo = MatInfo.Load(path);
+                MatList.Add(path, new MatInfoAndId(MatIdx++, matInfo, mat.name));
                 return MatIdx - 1;
             }
 

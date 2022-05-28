@@ -34,10 +34,10 @@ namespace Rampancy.UI
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             if (GUILayout.Button("Save")) {
                 Rampancy.Cfg.Save();
-                Rampancy.AssetDBSave();
+                //Rampancy.AssetDBSave();
 
                 // TODO: only do this is the path of a game changed or the game version
-                Rampancy.AssetDBCheckForChanges();
+                //Rampancy.AssetDBCheckForChanges();
             }
 
             ShowVersion();
