@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Rampancy
 {
@@ -49,15 +49,17 @@ namespace Rampancy
         // Add a new tag of a type to be tracked as imported
         public void Add(ImportedAsset importedAsset, string type)
         {
-            if (Imported.Assets.TryGetValue(type, out var tags)) {
-                if (!tags.Any(x => x.Path == importedAsset.Path)) {
-                    tags.Add(importedAsset);
+            lock (Imported.Assets) {
+                if (Imported.Assets.TryGetValue(type, out var tags)) {
+                    if (!tags.Any(x => x.Path == importedAsset.Path)) {
+                        tags.Add(importedAsset);
+                    }
                 }
-            }
-            else {
-                var tagList = new List<ImportedAsset>();
-                tagList.Add(importedAsset);
-                Imported.Assets.Add(type, tagList);
+                else {
+                    var tagList = new List<ImportedAsset>();
+                    tagList.Add(importedAsset);
+                    Imported.Assets.Add(type, tagList);
+                }
             }
 
             PostponableSave.Invoke();
@@ -73,8 +75,10 @@ namespace Rampancy
         // TODO: return a list of tags that can be removed since nothing else referances them
         public void Remove(string tagPath, string type)
         {
-            if (Imported.Assets.TryGetValue(type, out var tags)) {
-                tags.RemoveAll(x => x.Path == tagPath);
+            lock (Imported.Assets) {
+                if (Imported.Assets.TryGetValue(type, out var tags)) {
+                    tags.RemoveAll(x => x.Path == tagPath);
+                }
             }
 
             PostponableSave.Invoke();
@@ -87,8 +91,10 @@ namespace Rampancy
                 type = System.IO.Path.GetExtension(tagPath)[1..];
             }
 
-            if (Imported.Assets.TryGetValue(type, out var tags)) {
-                return tags.Any(x => x.Path == tagPath);
+            lock (Imported.Assets) {
+                if (Imported.Assets.TryGetValue(type, out var tags)) {
+                    return tags.Any(x => x.Path == tagPath);
+                }
             }
 
             return false;
@@ -98,17 +104,19 @@ namespace Rampancy
 
         public void AddRefToEntry(string parentPath, string parentType, string refPath, string refType)
         {
-            if (Imported.Assets.TryGetValue(parentType, out var tagsOfType)) {
-                var entry = tagsOfType.FirstOrDefault(x => x.Path == parentPath);
-                if (entry != null) {
-                    if (!entry.Refs.Any(x => x.TagPath == refPath && x.TagType == refType)) {
-                        entry.Refs.Add(new ImportedAssetRef
-                        {
-                            TagType = refType,
-                            TagPath = refPath
-                        });
-                        
-                        MarkForSave();
+            lock (Imported.Assets) {
+                if (Imported.Assets.TryGetValue(parentType, out var tagsOfType)) {
+                    var entry = tagsOfType.FirstOrDefault(x => x.Path == parentPath);
+                    if (entry != null) {
+                        if (!entry.Refs.Any(x => x.TagPath == refPath && x.TagType == refType)) {
+                            entry.Refs.Add(new ImportedAssetRef
+                            {
+                                TagType = refType,
+                                TagPath = refPath
+                            });
+
+                            MarkForSave();
+                        }
                     }
                 }
             }

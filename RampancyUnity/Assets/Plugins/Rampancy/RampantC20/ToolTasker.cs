@@ -13,15 +13,32 @@ namespace Rampancy.RampantC20
         private ConcurrentQueue<ToolTask> TaskQueue       = new();
         private ConcurrentQueue<ToolTask> MainThreadQueue = new();
         public  int                       ActiveTasksCount { get; private set; }
+        public  Action                    OnBatchStart;
+        public  Action<int, TimeSpan>               OnBatchFinished; // When a batch of tasks have been completed and nothing else has happened for 2 seconds
+        public  Action<int, int, string>  OnTaskComplete;
+
+        private int               TotalBatchTasksCount;
+        private int               ColmepetedTasksCount;
+        private bool              IsBatchStarted = false;
+        private DateTime          BatchStartTime;
+        private PostponableAction BatchFinished;
 
         public ToolTasker(int maxNumWorkers = 12)
         {
             MaxNumWorkers = maxNumWorkers;
+            BatchFinished = new PostponableAction(TimeSpan.FromSeconds(2), OnBatchFinishedInternal);
         }
 
         public void Queue(ToolTask task)
         {
+            if (TaskQueue.IsEmpty && !IsBatchStarted) {
+                IsBatchStarted = true;
+                OnBatchStart?.Invoke();
+                BatchStartTime = DateTime.Now;
+            }
+
             TaskQueue.Enqueue(task);
+            TotalBatchTasksCount++;
             RunNextTask();
         }
 
@@ -33,12 +50,15 @@ namespace Rampancy.RampantC20
                 if (MainThreadQueue.TryDequeue(out var toolTask)) {
                     try {
                         toolTask.MainThreadTask(toolTask.State);
+                        OnTaskCompleteInternal();
                     }
-                    catch (Exception) { }
+                    catch (Exception ex) {
+                        OnTaskCompleteInternal(ex.ToString());
+                    }
                 }
             }
         }
-        
+
         private void RunNextTask()
         {
             if (ActiveTasksCount < MaxNumWorkers) {
@@ -48,16 +68,41 @@ namespace Rampancy.RampantC20
                     {
                         try {
                             toolTask.State = toolTask.Task();
-                            if (toolTask.MainThreadTask != null)
+                            if (toolTask.MainThreadTask != null) {
                                 MainThreadQueue.Enqueue(toolTask);
+                            }
+                            else {
+                                OnTaskCompleteInternal();
+                            }
                         }
-                        catch (Exception) {}
-                        
+                        catch (Exception ex) {
+                            OnTaskCompleteInternal(ex.ToString());
+                        }
+
                         ActiveTasksCount--;
                         System.Diagnostics.Debug.WriteLine("Ran task");
                         RunNextTask();
                     });
                 }
+            }
+        }
+
+        private void OnTaskCompleteInternal(string error = null)
+        {
+            ColmepetedTasksCount++;
+            OnTaskComplete.Invoke(ColmepetedTasksCount, TotalBatchTasksCount, error);
+            BatchFinished.Invoke();
+        }
+
+        private void OnBatchFinishedInternal()
+        {
+            if (ColmepetedTasksCount == TotalBatchTasksCount) {
+                var batchDuration = DateTime.Now - BatchStartTime;
+                OnBatchFinished?.Invoke(ColmepetedTasksCount, batchDuration);
+
+                TotalBatchTasksCount = 0;
+                ColmepetedTasksCount = 0;
+                IsBatchStarted       = false;
             }
         }
 

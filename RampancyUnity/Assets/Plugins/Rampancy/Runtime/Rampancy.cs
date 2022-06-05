@@ -32,6 +32,7 @@ namespace Rampancy
             {GameVersions.Halo3ODST, new Halo3ODSTImplementation()}
         };
 
+        public static int        ToolTaskRunnerProgressId;
         public static ToolTasker ToolTaskRunner = new ();
 
         public static GameImplementationBase CurrentGameImplementation => GameImplementation[Cfg.GameVersion];
@@ -86,6 +87,28 @@ namespace Rampancy
 
             Selection.selectionChanged += SelectionChanged;
 
+            ToolTaskRunner.OnBatchStart += () =>
+            {
+                Debug.Log("Tool tasker batch start");
+                ToolTaskRunnerProgressId = Progress.Start("Tool Tasks");
+            };
+            
+            ToolTaskRunner.OnTaskComplete += (completedCount, pendingCount, errorMsg) =>
+            {
+                if (errorMsg != null) {
+                    Debug.Log($"Erro completing task ({completedCount}/{pendingCount}):\n {errorMsg}");
+                }
+                
+                Progress.Report(ToolTaskRunnerProgressId, completedCount, pendingCount);
+            };
+            
+            ToolTaskRunner.OnBatchFinished += (completedCount, duration) =>
+            {
+                Debug.Log($"Tool tasker batch finished, completed {completedCount} tasks, took: {duration}");
+
+                Progress.Remove(ToolTaskRunnerProgressId);
+            };
+            
             EditorApplication.update += () =>
             {
                 ToolTaskRunner.MainThreadTick();
@@ -100,7 +123,7 @@ namespace Rampancy
                 var ext = Path.GetExtension(path)[1..];
                 //var tagPath = path[(Cfg.ActiveGameConfig.TagsPath.Length+1)..];
                 CurrentGameImplementation.OnTagChanged(path, ext, changeType);
-                Debug.Log($"Tag {changeType}: {path}");
+                //Debug.Log($"Tag {changeType}: {path}");
             };
 
             AssetDB.LoadDb(TagsDbPath);
@@ -116,8 +139,10 @@ namespace Rampancy
         {
             //AssetDatabase.StartAssetEditing();
             Debug.Log("Checking for asset changes");
+            var start = DateTime.Now;
             AssetDBCheckForChanges();
-            Debug.Log("Checking for asset changes, done");
+            var duration = DateTime.Now - start;
+            Debug.Log($"Checking for asset changes, done, took: {duration}");
             //AssetDatabase.StopAssetEditing();
             //AssetDatabase.Refresh();
         }

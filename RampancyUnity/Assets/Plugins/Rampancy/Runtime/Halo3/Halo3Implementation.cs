@@ -148,7 +148,7 @@ namespace Rampancy.Halo3
             if (type == AssetDb.TagChangedType.Deleted) {
                 if (ImportedDB.IsImported(path, ext)) {
                     var unityPath = Path.Combine(GetUnityBasePath(), tagPath);
-                    AssetDatabase.DeleteAsset(unityPath);
+                    //AssetDatabase.DeleteAsset(unityPath);
                 }
 
                 ImportedDB.Remove(path, ext);
@@ -193,8 +193,7 @@ namespace Rampancy.Halo3
                     var guid       = TagPathHash.GetHash(basicShader.DiffuseTex, GameVersion);
                     var shaderGuid = TagPathHash.GetHash(basicShader.TagPath.Replace("/", "\\"), GameVersion);
                     FastMatCreate.CreateBasicMat(guid, shaderPath, shaderGuid, tags.ToArray(), basicShader.IsAlphaTested, basicShader.BaseMapScale);
-
-                    AddMetaDataToMat(shaderData.Collection, shaderPath);
+                    AddMetaDataToMat(shaderData.Collection, shaderPath, shaderData.TagPath);
 
                     return shaderGuid;
                 }
@@ -209,15 +208,11 @@ namespace Rampancy.Halo3
         public override void ImportBitmap(string path, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
         {
             if (path == null) return;
-
-            //var progressId = Progress.Start($"Importing bitmap: {path}");
             ExportBitmapToTga(path);
 
             ImportedDB.Add(path, "bitmap");
             parentAssetRecord?.AddRef(path, "bitmap");
             ImportedDB.AddRefToEntry(parentAssetRecord, path, "bitmap");
-
-            //Progress.Remove(progressId);
         }
 
         // Use Tool to export a texture to a tga in the project dir
@@ -234,18 +229,10 @@ namespace Rampancy.Halo3
             if (!File.Exists(fullPath)) Rampancy.RunProgram(((H3GameConfig) Rampancy.Cfg.GetGameConfig(GameVersion)).ToolFastPath, $"export-bitmap-tga \"{tagPath}\" \"{outPath}\"", true, true);
         }
 
-        public void AddMetaDataToMat(string collection, string matPath)
+        public void AddMetaDataToMat(string collection, string matPath, string tagPath)
         {
-            var matInfo = ScriptableObject.CreateInstance<MatInfo>();
-            var name    = Path.GetFileNameWithoutExtension(matPath);
-
-            if (name.EndsWith("_mat")) name = name[..^4];
-
-            //matInfo.Mat        = matAsset;
-            matInfo.Collection = collection;
-            matInfo.Name       = name;
-            matInfo.name       = "Info";
-
+            var matInfo = MatInfo.Create(matPath, collection);
+            matInfo.TagPath = tagPath;
             matInfo.Save(matPath);
         }
 
