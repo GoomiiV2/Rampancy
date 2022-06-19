@@ -72,6 +72,9 @@ namespace Rampancy.Halo3
             var tagsPath    = Rampancy.Cfg.GetGameConfig(GameVersion).TagsPath;
             var fullTagPath = Path.Combine(tagsPath, tagPath);
             var assetRecord = new ImportedAssetDb.ImportedAsset(tagPath);
+            
+            var tagType = Path.GetExtension(tagPath)[1..];
+            ImportedDB.Add(assetRecord, tagType);
 
             if (collection == null) {
                 var shaderCollection = GetShaderCollection();
@@ -91,9 +94,6 @@ namespace Rampancy.Halo3
             }
 
             CreateMaterialForShader(shdData);
-
-            var tagType = Path.GetExtension(tagPath)[1..];
-            ImportedDB.Add(assetRecord, tagType);
 
             Progress.Remove(progressId);
         }
@@ -143,19 +143,25 @@ namespace Rampancy.Halo3
         public override void OnTagChanged(string path, string ext, AssetDb.TagChangedType type)
         {
             //StartImportingAssets();
-            var tagPath = path[..^Path.GetExtension(path).Length];
+            var tagPath  = path[..^Path.GetExtension(path).Length];
+            var isShader = new[] {"shader", "shader_terrain"}.Any(x => x == ext);
+            var isBitmap = new[] {"bitmap"}.Any(x => x                   == ext);
 
             if (type == AssetDb.TagChangedType.Deleted) {
                 if (ImportedDB.IsImported(path, ext)) {
-                    var unityPath = Path.Combine(GetUnityBasePath(), tagPath);
-                    //AssetDatabase.DeleteAsset(unityPath);
+                    var unityPath = Path.Combine(GetUnityBasePath(), "TagData", tagPath);
+                    if (isShader) {
+                        var matPath = $"{unityPath}_mat.asset";
+                        DeleteAsset(matPath, ext);
+                    }
+                    else if (isBitmap) {
+                        DeleteAsset($"{unityPath}_00.tga", ext);
+                    }
                 }
-
-                ImportedDB.Remove(path, ext);
             }
             else if (type is AssetDb.TagChangedType.Added or AssetDb.TagChangedType.Changed) {
                 // Check if a shader
-                if (new[] {"shader", "shader_terrain"}.Any(x => x == ext)) {
+                if (isShader) {
                     // is a level shader, is in the collection
                     var shaderCollection = GetShaderCollection();
                     var collection       = shaderCollection.GetCollectionNameForShader(path);
@@ -163,7 +169,7 @@ namespace Rampancy.Halo3
                         ImportMaterial(path, collection);
                     }
                 }
-                else if (new[] {"bitmap"}.Any(x => x == ext)) { // texture
+                else if (isBitmap) { // texture
                     // Only if its an update to an imported one
                     if (ImportedDB.IsImported(path, ext)) {
                         Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(path)));

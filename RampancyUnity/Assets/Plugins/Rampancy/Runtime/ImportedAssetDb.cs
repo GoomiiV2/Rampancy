@@ -34,8 +34,6 @@ namespace Rampancy
             }
             catch (Exception) {
             }
-
-            Imported = new Db();
         }
 
         public void Save()
@@ -71,18 +69,54 @@ namespace Rampancy
             Add(asset, type);
         }
 
+        public ImportedAsset Get(string tagPath, string type)
+        {
+            lock (Imported.Assets) {
+                if (Imported.Assets.TryGetValue(type, out var tags)) {
+                    return tags.FirstOrDefault(x => x.Path == tagPath);
+                }
+            }
+
+            return null;
+        }
+
         // remove a tag path of a type from the db
         // TODO: return a list of tags that can be removed since nothing else referances them
         public void Remove(string tagPath, string type)
         {
+            var fullTagPath = $"{tagPath}.{type}";
+            
             lock (Imported.Assets) {
                 if (Imported.Assets.TryGetValue(type, out var tags)) {
-                    tags.RemoveAll(x => x.Path == tagPath);
+                    var removedCount = tags.RemoveAll(x => x.Path == fullTagPath);
                 }
             }
 
             PostponableSave.Invoke();
         }
+
+        public List<ImportedAssetRef> GetAssetsReferencing(string inTagPath, string inTagType)
+        {
+            var refs = new List<ImportedAssetRef>();
+
+            foreach (var (tagType, tags) in Imported.Assets) {
+                foreach (var tagData in tags) {
+                    foreach (var tagRef in tagData.Refs) {
+                        if (tagRef.TagType == inTagType && tagRef.TagPath == inTagPath) {
+                            refs.Add(new ImportedAssetRef
+                            {
+                                TagType = tagType,
+                                TagPath = System.IO.Path.GetFileNameWithoutExtension(tagData.Path)
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return refs;
+        }
+
+        public bool IsAssetReferanced(string tagType, string tagPath) => GetAssetsReferencing(tagType, tagPath).Count > 0;
 
         // Check if a tag of a type is imported
         public bool IsImported(string tagPath, string type = null)
@@ -156,6 +190,8 @@ namespace Rampancy
         {
             public string TagType;
             public string TagPath;
+
+            [JsonIgnore] public string FullTagPath => $"{TagPath}.{TagType}";
         }
     }
 }

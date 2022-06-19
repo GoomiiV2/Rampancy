@@ -17,7 +17,7 @@ namespace Rampancy
         public    ImportedAssetDb   ImportedDB;
         protected bool              IsImportingAssets = false;
         protected PostponableAction PostponableAssetImportingEnd;
-        
+
         public GameImplementationBase()
         {
             var importedDbPath = Path.Combine(GetUnityBasePath(), "ImportedAssetsDB.json");
@@ -78,7 +78,7 @@ namespace Rampancy
         public virtual void CreateNewScene(string name, bool isSinglePlayer = true, Action customAction = null)
         {
             if (DoesSceneExist(name)) return;
-            
+
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = name;
 
@@ -101,7 +101,7 @@ namespace Rampancy
             Directory.CreateDirectory(baseDir);
             Directory.CreateDirectory(Path.Combine(baseDir, "mats"));
             Directory.CreateDirectory(Path.Combine(baseDir, "instances"));
-            
+
             customAction?.Invoke();
 
             EditorSceneManager.SaveScene(scene, scenePath);
@@ -116,7 +116,7 @@ namespace Rampancy
             var exists = File.Exists(scenePath);
             return exists;
         }
-        
+
         public virtual void ImportScene(string path = null)
         {
         }
@@ -128,13 +128,12 @@ namespace Rampancy
         // When a tag change has been detected
         public virtual void OnTagChanged(string path, string ext, AssetDb.TagChangedType type)
         {
-            
         }
 
         public virtual void ImportMaterial(string path, string collection, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
         {
         }
-        
+
         public virtual void ImportBitmap(string path, ImportedAssetDb.ImportedAsset parentAssetRecord = null)
         {
         }
@@ -146,10 +145,10 @@ namespace Rampancy
         protected void StartImportingAssets()
         {
             if (IsImportingAssets) return;
-            
+
             AssetDatabase.StartAssetEditing();
             IsImportingAssets = true;
-            
+
             Debug.Log("Starting importing assets");
         }
 
@@ -165,10 +164,44 @@ namespace Rampancy
                 AssetDatabase.StopAssetEditing();
                 AssetDatabase.Refresh();
                 IsImportingAssets = false;
-            
+
                 Debug.Log("Stopping importing assets");
             };
         }
-        
+
+        public void DeleteAsset(string unityPath, string tagType)
+        {
+            if (File.Exists(unityPath))
+                File.Delete(unityPath);
+
+            var unityMetaPath = $"{unityPath}.meta";
+            if (File.Exists(unityMetaPath))
+                File.Delete(unityMetaPath);
+
+            var metaPath = $"{unityPath}_meta.json";
+            if (File.Exists(metaPath))
+                File.Delete(metaPath);
+
+            var tagPath = Path.Combine(Path.GetDirectoryName(unityPath), Path.GetFileNameWithoutExtension(unityPath));
+            tagPath = tagPath.Replace($"{Path.Combine(GetUnityBasePath(), "TagData")}\\", "");
+
+            if (tagPath.EndsWith("_mat")) {
+                tagPath = tagPath[..^4];
+            }
+
+            ImportedDB.Remove(tagPath, tagType);
+
+            var importedDbAsset = ImportedDB.Get(tagPath, tagType);
+            if (importedDbAsset != null) {
+                // If nothing else references the asset delete it too
+                foreach (var assetRef in importedDbAsset.Refs) {
+                    if (!ImportedDB.IsAssetReferanced(assetRef.TagType, assetRef.TagPath)) {
+                        DeleteAsset(Path.Combine(GetUnityBasePath(), assetRef.FullTagPath), assetRef.TagType);
+                    }
+                }
+            }
+
+            Debug.Log($"Deleted asset: {unityPath}");
+        }
     }
 }
