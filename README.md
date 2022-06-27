@@ -62,7 +62,7 @@ A bit more indepth example of creating a level: https://github.com/GoomiiV2/Ramp
 - [ ] Device xrefs?
 
 ### Halo ODST
-* hopefully
+* See Halo 3 above
   
 ### Halo Reach
 * hopefully
@@ -93,3 +93,4 @@ I like to do silly things and creating a new level editor for the old Halo games
 ## Libraries used with love! <3
 * [Realtime CSG](https://github.com/LogicalError/realtime-CSG-for-unity)
 * [com.ionic.zlib](https://github.com/PixelWizards/com.ionic.zlib)
+* [Pfim](https://github.com/nickbabcock/Pfim)
