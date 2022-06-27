@@ -6,19 +6,19 @@ namespace Rampancy
     // A hack to create a mat asset fast, just wite the text to disk
     public static class FastMatCreate
     {
-        public static void CreateBasicMat(string texId, string matPath, string shaderGuid, string[] tags = null, bool transparent = false, float tiling = 1f)
+        public static void CreateBasicMat(string texId, string matPath, string shaderGuid, string[] tags = null, bool transparent = false, float tiling = 1f, int texType = 2)
         {
             tags = tags ?? new string[] { };
             var matName = Path.GetFileName(matPath).Replace(".asset", "");
 
             var shaderId = transparent ? "30" : "7";
-            var matStr   = GetMatText(matName, texId, shaderId, tiling);
+            var matStr   = GetMatText(matName, texId, shaderId, tiling, texType);
 
             var matMetaStr = $@"fileFormatVersion: 2
 guid: {shaderGuid}
 labels:
 {string.Join("\n", tags.Select(x => $"- {x}"))}
-NativeFormatImporter:
+NativeFormatImporter:texType
   externalObjects: {{}}
   mainObjectFileID: 2100000
   userData: 
@@ -30,7 +30,7 @@ NativeFormatImporter:
             File.WriteAllText($"{matPath}.meta", matMetaStr);
         }
 
-        public static string GetMatText(string matName, string texId, string shaderId, float tiling = 1f)
+        public static string GetMatText(string matName, string texId, string shaderId, float tiling = 1f, int texType = 2)
         {
             var matStr = $@"%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
@@ -57,7 +57,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {{fileID: 2800000, guid: {texId}, type: 3}}
+        m_Texture: {{fileID: 2800000, guid: {texId}, type: {texType}}}
         m_Scale: {{x: {tiling}, y: {tiling}}}
         m_Offset: {{x: 0, y: 0}}
     m_Ints: []
@@ -68,6 +68,24 @@ Material:
 ";
 
             return matStr;
+        }
+
+        public static void CreateMetaForTexture(string filePath, string guid)
+        {
+            var lines = new string[]
+            {
+                "fileFormatVersion: 2",
+                $"guid: {guid}",
+                "NativeFormatImporter:",
+                "  externalObjects: {}",
+                "  mainObjectFileID: 2800000",
+                "  userData: ",
+                "  assetBundleName: ",
+                "  assetBundleVariant: ",
+            };
+            
+            File.Delete(filePath);
+            File.WriteAllLines(filePath, lines);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Pfim;
 using UnityEditor;
 using UnityEngine;
 using RampancyInst = Rampancy.Rampancy;
@@ -171,6 +172,34 @@ namespace RampantC20
         public static void RunExeIfExists(string exePath)
         {
             if (File.Exists(exePath)) Rampancy.Rampancy.LaunchProgram(exePath, "");
+        }
+
+        // Import a DDS, convert to a Texture2d and save
+        public static void ImportDDS(string importPath, string savePath)
+        {
+            if (File.Exists(importPath)) {
+                using (var image = Pfim.Pfim.FromFile(importPath)) {
+                    var format = image.Format switch
+                    {
+                        ImageFormat.Rgb24  => TextureFormat.RGB24,
+                        ImageFormat.Rgba16 => TextureFormat.RGBA4444,
+                        ImageFormat.Rgba32 => TextureFormat.BGRA32,
+                        ImageFormat.Rgb8   => TextureFormat.R8
+                    };
+
+                    var tex = new Texture2D(image.Width, image.Height, format, true);
+                    tex.SetPixelData(image.Data, 0);
+                    tex.Apply();
+                            
+                    if (image.Width % 4 == 0 && image.Height % 4 == 0)
+                        tex.Compress(true);
+                    
+                    AssetDatabase.CreateAsset(tex, savePath);
+                }
+            }
+            else {
+                Debug.LogWarning($"Error importing {importPath}, no file found");
+            }
         }
     }
 }

@@ -96,7 +96,7 @@ namespace Rampancy
             ToolTaskRunner.OnTaskComplete += (completedCount, pendingCount, errorMsg) =>
             {
                 if (errorMsg != null) {
-                    Debug.Log($"Erro completing task ({completedCount}/{pendingCount}):\n {errorMsg}");
+                    Debug.Log($"Error completing task ({completedCount}/{pendingCount}):\n {errorMsg}");
                 }
                 
                 Progress.Report(ToolTaskRunnerProgressId, completedCount, pendingCount);

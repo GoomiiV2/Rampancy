@@ -41,13 +41,13 @@ namespace Rampancy.AssetProcessors
                     gameVersion = GameVersions.Halo3ODST;
                 }
 
-                if (paths.Any(x => imported.Contains(x)) && (imported.EndsWith(".tga") || imported.EndsWith(".hdds")))
+                if (paths.Any(x => imported.Contains(x)) && (imported.EndsWith(".tga") || imported.EndsWith(".dds") || imported.EndsWith("_00.asset")))
                     try {
                         var metaPath = $"{imported}.meta";
                         var trimed   = TrimPath(imported);
                         var metaTxt  = File.ReadAllText(metaPath);
 
-                        var texPath = trimed.Replace("/", "\\").Replace("_00.tga", "").Replace("_00.hdds", ""); // To match the tag path
+                        var texPath = trimed.Replace("/", "\\").Replace("_00.tga", "").Replace("_00.dds", "").Replace("_00.asset", ""); // To match the tag path
                         var guid    = TagPathHash.GetHash(texPath, gameVersion);
                         metaTxt = Regex.Replace(metaTxt, @"guid: ([\d|\w]+)", $"guid: {guid}");
                         File.WriteAllText(metaPath, metaTxt);

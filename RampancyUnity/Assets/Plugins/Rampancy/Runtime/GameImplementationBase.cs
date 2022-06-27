@@ -13,6 +13,7 @@ namespace Rampancy
     public class GameImplementationBase
     {
         public virtual string GetUnityBasePath() => Path.Combine("Assets", $"{GameVersions.Halo1Mcc}");
+        public virtual string GetUnityTempPathFull() => Path.Combine(Environment.CurrentDirectory, "Temp", $"{GameVersions.Halo1Mcc}");
 
         public    ImportedAssetDb   ImportedDB;
         protected bool              IsImportingAssets = false;
