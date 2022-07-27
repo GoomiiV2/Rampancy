@@ -1,5 +1,4 @@
 ﻿using RampantC20.Halo3;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,7 +9,7 @@ namespace Rampancy.Halo3
     {
         void OnEnable()
         {
-            target.GetComponent<UnityEngine.Light>().hideFlags = HideFlags.HideInInspector;
+            ((GameObject)target).GetComponent<UnityEngine.Light>().hideFlags = HideFlags.HideInInspector;
         }
 
         public override void OnInspectorGUI()

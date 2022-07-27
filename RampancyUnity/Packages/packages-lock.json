@@ -1,11 +1,27 @@
 {
   "dependencies": {
+    "com.goomiiv2.rampancy": {
+      "version": "file:com.rampancy.editor",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.prenominal.realtimecsg": "1.57.2",
+        "com.ionic.zlib": ""
+      }
+    },
     "com.ionic.zlib": {
       "version": "https://github.com/PixelWizards/com.ionic.zlib.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
       "hash": "c2603651d2947fe3995bdd0bd2540fe4543f034e"
+    },
+    "com.prenominal.realtimecsg": {
+      "version": "https://github.com/LogicalError/realtime-CSG-for-unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "a3ccdb6d13be59bd7f9a31dfebfd7cd47d3f872c"
     },
     "com.unity.collab-proxy": {
       "version": "1.15.15",

@@ -1,0 +1,23 @@
+{
+  "name": "com.goomiiv2.rampancy",
+  "version": "0.1.0",
+  "description": "A new level editor for the Halo games based on a CSG/Brush workflow, similar to Source/Quake level editing.",
+  "displayName": "Rampancy",
+  "unity": "2022.1",
+  "author": {
+    "name": "GoomiiV2",
+    "url": ""
+  },
+  "keywords": [
+    "CSG",
+    "BSP",
+    "Level",
+    "Editor",
+    "Halo"
+  ],
+  "hideInEditor": false,
+  "dependencies": {
+    "com.prenominal.realtimecsg": "1.57.2",
+    "com.ionic.zlib": ""
+  }
+}
