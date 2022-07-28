@@ -21,9 +21,13 @@ The project is still early in development and some core issues need to be worked
 
 * Download and Install [Unity 2021.2.0b4](https://unity3d.com/unity/beta/2021.2.0b4)
 * Download the mod tools for the Halo games you want, eg. [Halo 1 on Steam](steam://install/1532190)
-* Clone this project from a command promt with admin (this is due to windows being annoying about creating symlinks) ```git clone --recurse-submodules -c core.symlinks=true https://github.com/GoomiiV2/Rampancy.git```
-* Open the project (Rampancy/Unity directory) in Unity
-* Browse and set the paths for the mod tools you will use
+* Create a new Unity project. (this will be where your map sources will be)
+* Open the project.
+  * Go to ``Window > Package Manager``
+  * In the top left corner of that new window click the + icon
+  * Select ``add package from git url`` and enter ``https://github.com/GoomiiV2/Rampancy.git?path=RampancyUnity/Packages/com.goomiiv2.rampancyinstaller#Halo3``
+  * Wait a moment for the packages to be installed, when its done you should see a ``Settings`` menu open askingyou for the Halo tool installs
+  * Browse and set the paths for the mod tools you will use
 * Click the Rampancy menu at the top and then `Debug > Open Level UI > Materials` and then click `Sync Materials from`
 * Click `Rampancy > Create Level` give it a name with no spaces and then click `Create new Level`.
 * Click `Window > Realtime CSG Window` and dock it some where.
@@ -36,6 +40,10 @@ The project is still early in development and some core issues need to be worked
 * * Once configured (if needed), press `F5` in Unity to run the map in `halo_tag_test`
 
 A bit more indepth example of creating a level: https://github.com/GoomiiV2/Rampancy/wiki/Creating-a-new-level
+
+# Updating
+
+To update open the package manger ``Window > Package Manager`` and select and update both ``Rampancy`` and ``Rampancy Installer``
 
 ## Supported Games
 ### Halo 1 MCC

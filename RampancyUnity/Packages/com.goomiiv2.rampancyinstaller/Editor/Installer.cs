@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -23,6 +24,7 @@ namespace RampancyInstaller
         private static List<int>   PackagesMissingIdxs = new ();
         private static AddRequest  Request;
         private static ListRequest ListRequest;
+        private static DateTime    LastPackageInstallTime;
 
         static Installer()
         {
@@ -48,11 +50,17 @@ namespace RampancyInstaller
         
         private static void InstallNextPackage()
         {
+            if ((LastPackageInstallTime + TimeSpan.FromSeconds(2)) > DateTime.UtcNow) {
+                return;
+            }
+            
             if ((Request == null || Request.IsCompleted) && PackagesMissingIdxs.Count > 0) {
                 var package = PckgsToInstall[PackagesMissingIdxs[PackageIdx]];
                 Request = Client.Add(package.GitUrl);
                 Debug.Log($"Added package {package.Name}");
                 PackageIdx++;
+
+                LastPackageInstallTime = DateTime.UtcNow;
             }
 
             if (PackageIdx >= PackagesMissingIdxs.Count || PackagesMissingIdxs.Count == 0) {
