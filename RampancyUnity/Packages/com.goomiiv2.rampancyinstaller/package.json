@@ -1,6 +1,6 @@
 {
   "name": "com.goomiiv2.rampancyinstaller",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A plugin to install the packages needed for Rampancy, because Unitys package manage doesn't support git packages as dependencies of packages, because it like to cause me pain :<",
   "displayName": "Rampancy Installer",
   "unity": "2022.1",
