@@ -18,6 +18,6 @@
   "hideInEditor": false,
   "dependencies": {
     "com.prenominal.realtimecsg": "1.57.2",
-    "com.ionic.zlib": ""
+    "com.ionic.zlib": "1.0.1"
   }
 }
