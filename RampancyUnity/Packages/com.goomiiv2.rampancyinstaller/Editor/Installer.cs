@@ -16,7 +16,7 @@ namespace RampancyInstaller
         {
             new("com.ionic.zlib", "https://github.com/PixelWizards/com.ionic.zlib.git"),
             new("com.prenominal.realtimecsg", "https://github.com/LogicalError/realtime-CSG-for-unity.git"),
-            new("com.goomiiv2.rampancy", "https://github.com/GoomiiV2/Rampancy.git?path=RampancyUnity/Packages/com.goomiiv2.rampancy")
+            new("com.goomiiv2.rampancy", "https://github.com/GoomiiV2/Rampancy.git?path=RampancyUnity/Packages/com.goomiiv2.rampancy#Halo3")
         };
         
         private static int         PackageIdx          = 0;
