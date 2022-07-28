@@ -6,7 +6,9 @@
       "source": "embedded",
       "dependencies": {
         "com.prenominal.realtimecsg": "1.57.2",
-        "com.ionic.zlib": "1.0.1"
+        "com.ionic.zlib": "1.0.1",
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.visualscripting": "1.7.8"
       }
     },
     "com.goomiiv2.rampancyinstaller": {
@@ -128,7 +130,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.7.5",
+      "version": "1.7.8",
       "depth": 0,
       "source": "registry",
       "dependencies": {
