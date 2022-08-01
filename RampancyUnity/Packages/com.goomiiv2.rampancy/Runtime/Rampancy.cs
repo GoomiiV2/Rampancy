@@ -14,6 +14,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.VersionControl;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
@@ -71,22 +72,19 @@ namespace Rampancy
                 SetupTagDb();
             }
 
-            EditorSceneManager.sceneSaving += (scene, path) =>
-            {
-                var rampancySentinelGO = GameObject.Find(RampancySentinel.NAME);
-                if (rampancySentinelGO != null) {
-                    var rampancySentinel = rampancySentinelGO.GetComponent<RampancySentinel>();
-                    rampancySentinel.BuildMatIdToPathList();
-                }
+            CreateBaseDirs();
 
-                var meshes                                  = Object.FindObjectsOfType<GameObject>().Where(x => x.name == "[generated-meshes]");
-                foreach (var mesh in meshes) mesh.hideFlags = HideFlags.DontSaveInEditor;
-            };
+            EditorSceneManager.sceneSaving += OnSceneSave;
 
             EditorSceneManager.sceneOpened += (scene, mode) => { Actions.UpdateSceneMatRefs(); };
 
             Selection.selectionChanged += SelectionChanged;
 
+            SetupToolTasker();
+        }
+
+        public static void SetupToolTasker()
+        {
             ToolTaskRunner.OnBatchStart += () =>
             {
                 Debug.Log("Tool tasker batch start");
@@ -113,6 +111,33 @@ namespace Rampancy
             {
                 ToolTaskRunner.MainThreadTick();
             };
+        }
+
+        public static void OnSceneSave(Scene scene, string path)
+        {
+            var rampancySentinelGO = GameObject.Find(RampancySentinel.NAME);
+            if (rampancySentinelGO != null) {
+                var rampancySentinel = rampancySentinelGO.GetComponent<RampancySentinel>();
+                rampancySentinel.BuildMatIdToPathList();
+            }
+
+            var meshes                                  = Object.FindObjectsOfType<GameObject>().Where(x => x.name == "[generated-meshes]");
+            foreach (var mesh in meshes) mesh.hideFlags = HideFlags.DontSaveInEditor;
+        }
+
+        public static void CreateBaseDirs()
+        {
+            var gameDirs = new [] { "Halo1Mcc", "Halo2Mcc", "Halo3", "Halo3ODST" };
+            var subDirs  = new [] { "SrcLevels", "TagData", "Instances", "Prefabs" };
+
+            foreach (var gameDir in gameDirs) {
+                foreach (var subDir in subDirs) {
+                    var path = Path.Combine("Assets", gameDir, subDir);
+                    if (!Directory.Exists(path)) {
+                        Directory.CreateDirectory(path);
+                    }
+                }
+            }
         }
 
         public static void SetupTagDb()
