@@ -67,6 +67,8 @@ namespace Rampancy
 
     public class H3GameConfig : GameConfig
     {
+        public bool CreateAdvancedShaders = false;
+        
         public override string TagTestPath => Path.Combine(ToolBasePath, "halo3_tag_test.exe");
 
         [JsonIgnore] public virtual string ToolFastPath => Path.Combine(ToolBasePath, "tool_fast.exe");

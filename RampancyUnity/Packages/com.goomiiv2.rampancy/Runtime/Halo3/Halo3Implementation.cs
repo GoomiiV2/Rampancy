@@ -83,12 +83,21 @@ namespace Rampancy.Halo3
 
             // Get info for the shader
             var shdData = ShaderData.GetDataFromScan(fullTagPath);
+            if (shdData == null) return;
+            
             shdData.TagPath    = tagPath;
             shdData.Collection = collection;
 
             if (shdData is BasicShaderData shdBasic) {
                 // import the bitmaps needed
                 Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(shdBasic.DiffuseTex, assetRecord)));
+
+                if (((H3GameConfig)Rampancy.Cfg.GetGameConfig(GameVersion)).CreateAdvancedShaders) {
+                    Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(shdBasic.BumpTex, assetRecord)));
+                    Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(shdBasic.DetailTex, assetRecord)));
+                    Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(shdBasic.SelfIllum, assetRecord)));
+                    Rampancy.ToolTaskRunner.Queue(new ToolTasker.ToolTask(() => ImportBitmap(shdBasic.BumpDetailTex, assetRecord)));
+                }
 
                 parentAssetRecord?.AddRef(tagPath, "shader");
             }
@@ -196,9 +205,11 @@ namespace Rampancy.Halo3
                 if (basicShader.DiffuseTex != null) {
                     if (basicShader.IsAlphaTested) tags.Add("AlphaTested");
 
-                    var guid       = TagPathHash.GetHash(basicShader.DiffuseTex, GameVersion);
-                    var shaderGuid = TagPathHash.GetHash(basicShader.TagPath.Replace("/", "\\"), GameVersion);
-                    FastMatCreate.CreateBasicMat(guid, shaderPath, shaderGuid, tags.ToArray(), basicShader.IsAlphaTested, basicShader.BaseMapScale);
+                    //var guid       = TagPathHash.GetHash(basicShader.DiffuseTex, GameVersion);
+                    //var shaderGuid = TagPathHash.GetHash(basicShader.TagPath.Replace("/", "\\"), GameVersion);
+                    //FastMatCreate.CreateBasicMat(guid, shaderPath, shaderGuid, tags.ToArray(), basicShader.IsAlphaTested, basicShader.BaseMapScale);
+
+                    var shaderGuid = FastMatCreate.CreateBasicMat(GameVersion, shaderPath, basicShader, tags.ToArray());
                     AddMetaDataToMat(shaderData.Collection, shaderPath, shaderData.TagPath);
 
                     return shaderGuid;

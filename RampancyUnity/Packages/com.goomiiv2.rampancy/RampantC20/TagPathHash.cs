@@ -32,10 +32,10 @@ namespace Rampancy
             return guid;
         }
 
-        public static string GetPathHash(Guid nameSpace, string path) => GuidUtility.Create(nameSpace, path.Replace("/", "\\"), HASH_VERSION).ToString("N");
-        public static string H1MccPathHash(string path)               => GetPathHash(Halo1MccNamespace, path);
-        public static string H2MccPathHash(string path)               => GetPathHash(Halo2MccNamespace, path);
-        public static string H3MccPathHash(string path)               => GetPathHash(Halo3MccNamespace, path);
-        public static string H3MccODSTPathHash(string path)           => GetPathHash(Halo3ODSTMccNamespace, path);
+        public static string GetPathHash(Guid         nameSpace, string path) => path != null ? GuidUtility.Create(nameSpace, path.Replace("/", "\\"), HASH_VERSION).ToString("N") : null;
+        public static string H1MccPathHash(string     path) => GetPathHash(Halo1MccNamespace, path);
+        public static string H2MccPathHash(string     path) => GetPathHash(Halo2MccNamespace, path);
+        public static string H3MccPathHash(string     path) => GetPathHash(Halo3MccNamespace, path);
+        public static string H3MccODSTPathHash(string path) => GetPathHash(Halo3ODSTMccNamespace, path);
     }
 }

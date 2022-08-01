@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.goomiiv2.rampancy": "https://github.com/GoomiiV2/Rampancy.git?path=RampancyUnity/Packages/com.goomiiv2.rampancy#Halo3",
     "com.ionic.zlib": "https://github.com/PixelWizards/com.ionic.zlib.git",
     "com.prenominal.realtimecsg": "https://github.com/LogicalError/realtime-CSG-for-unity.git",
     "com.unity.collab-proxy": "1.15.15",
@@ -7,6 +8,7 @@
     "com.unity.ide.visualstudio": "2.0.14",
     "com.unity.ide.vscode": "1.2.5",
     "com.unity.nuget.newtonsoft-json": "3.0.2",
+    "com.unity.render-pipelines.universal": "13.1.7",
     "com.unity.test-framework": "1.1.31",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.7.1",

@@ -1,4 +1,5 @@
-﻿using RampantC20;
+﻿using System;
+using RampantC20;
 using UnityEditor;
 using UnityEngine;
 
@@ -28,8 +29,8 @@ namespace Rampancy.UI
 
             // Game configs
             DrawGameConfig("Halo 1 MCC", Rampancy.Cfg.Halo1MccGameConfig);
-            DrawGameConfig("Halo 3 MCC", Rampancy.Cfg.Halo3MccGameConfig);
-            DrawGameConfig("Halo 3 ODST", Rampancy.Cfg.Halo3ODSTMccGameConfig);
+            DrawGameConfig("Halo 3 MCC", Rampancy.Cfg.Halo3MccGameConfig, Halo3Settings);
+            DrawGameConfig("Halo 3 ODST", Rampancy.Cfg.Halo3ODSTMccGameConfig, Halo3Settings);
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             if (GUILayout.Button("Save")) {
@@ -54,7 +55,7 @@ namespace Rampancy.UI
             EditorGUILayout.EndHorizontal();
         }
 
-        private void DrawGameConfig(string name, GameConfig config)
+        private void DrawGameConfig(string name, GameConfig config, Action<GameConfig> gameSpecficFunc = null)
         {
             GUILayout.Space(5);
             EditorGUILayout.BeginHorizontal();
@@ -75,6 +76,25 @@ namespace Rampancy.UI
                     var path                            = EditorUtility.OpenFolderPanel("Base dir", "", "");
                     if (path != "") config.ToolBasePath = path;
                 }
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            gameSpecficFunc?.Invoke(config);
+        }
+
+        private void Halo3Settings(GameConfig config)
+        {
+            var cfg = config as H3GameConfig;
+            EditorGUILayout.BeginHorizontal();
+            {
+                cfg.CreateAdvancedShaders = GUILayout.Toggle(
+                    cfg.CreateAdvancedShaders,
+                    new GUIContent(
+                        "Create Advanced Shaders",
+                        "Enabling this will create more accurate recreations of the shader tags, eg. normal mapping, detail maps.\n" +
+                        "But it can take longer to sync and more disk space."
+                        )
+                    );
             }
             EditorGUILayout.EndHorizontal();
         }
