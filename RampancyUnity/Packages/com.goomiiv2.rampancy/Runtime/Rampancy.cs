@@ -80,6 +80,12 @@ namespace Rampancy
 
             Selection.selectionChanged += SelectionChanged;
 
+            EditorApplication.hierarchyChanged += () =>
+            {
+                CurrentGameImplementation.GetMatsInScene();
+                Debug.Log("Hierarchy Changed");
+            };
+
             SetupToolTasker();
         }
 

@@ -158,10 +158,10 @@ namespace RampantC20.Halo3
                 Res                   = float.Parse(args[1]),
                 PhotonFidelity        = int.Parse(args[2]),
                 TransparentTint       = new Vector3(float.Parse(args[3]), float.Parse(args[4]), float.Parse(args[5])),
-                LightmapTransparency  = int.Parse(args[6]),
+                LightmapTransparency  = int.Parse(args[6]) == 1,
                 AdditiveTint          = new Vector3(float.Parse(args[7]), float.Parse(args[8]), float.Parse(args[9])),
                 UseShaderGel          = int.Parse(args[10]) == 1,
-                IngoreDefaultResScale = int.Parse(args[11]) == 1
+                IgnoreDefaultResScale = int.Parse(args[11]) == 1
             };
 
             return lmRes;
@@ -474,7 +474,7 @@ namespace RampantC20.Halo3
 
         private static string FormatLmRes(LmRes lmRes)
         {
-            var str = $"{lmRes.Res:F10} {lmRes.PhotonFidelity} {Vec3ToStr(lmRes.TransparentTint)} {lmRes.LightmapTransparency} {Vec3ToStr(lmRes.AdditiveTint)} {BoolToStr(lmRes.UseShaderGel)} {BoolToStr(lmRes.IngoreDefaultResScale)}";
+            var str = $"{lmRes.Res:F10} {lmRes.PhotonFidelity} {Vec3ToStr(lmRes.TransparentTint)} {BoolToStr(lmRes.LightmapTransparency)} {Vec3ToStr(lmRes.AdditiveTint)} {BoolToStr(lmRes.UseShaderGel)} {BoolToStr(lmRes.IgnoreDefaultResScale)}";
             return str;
         }
         

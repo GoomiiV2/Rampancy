@@ -85,18 +85,27 @@ namespace Rampancy
             // Lights
             var lights = Object.FindObjectsOfType<Light>();
             foreach (var light in lights.Where(x => x.enabled)) {
-                var lightInst =  CreateLightInstance(light, ass, instIdx++);
+                var lightInst = CreateLightInstance(light, ass, instIdx++);
                 ass.Instances.Add(lightInst);
             }
 
             // Mats
             ass.Materials = new List<Ass.Material>(MatList.Count);
-            foreach (var mat in MatList.Values.OrderBy(x => x.Id))
-                ass.Materials.Add(new Ass.Material
-                {
-                    Collection = mat.MatInfo?.Collection ?? "",
-                    Name       = mat.GetName()
-                });
+            foreach (var mat in MatList.Values.OrderBy(x => x.Id)) {
+                if (mat.MatInfo == null) {
+                    ass.Materials.Add(new Ass.Material
+                    {
+                        Collection = mat.MatInfo?.Collection ?? "",
+                        Name       = mat.GetName()
+                    });
+                }
+                else {
+                    var assMat   = mat.MatInfo.ToAssMat();
+                    var assFlags = Ass.MaterialSymbols.FlagToSymbols(mat.MatInfo.Flags);
+                    assMat.Name = $"{assMat.Name}{assFlags}";
+                    ass.Materials.Add(assMat);
+                }
+            }
 
             ass.Save(path);
 
@@ -144,9 +153,9 @@ namespace Rampancy
                 LightShape           = light.LightShape,
                 AspectRatio          = light.AspectRatio
             };
-                
+
             ass.Objects.Add(assLight);
-            
+
             var inst = new Ass.Instance
             {
                 ObjectIdx        = instIdx,
@@ -188,14 +197,18 @@ namespace Rampancy
             var mats     = new List<Material>(meshes.MeshInstances.Length);
 
             foreach (var mesh in meshes.MeshInstances.Where(x => x.name == "[generated-render-mesh]")) {
-                var combineData = new CombineInstance
-                {
-                    mesh      = mesh.SharedMesh,
-                    transform = Matrix4x4.identity //Matrix4x4.Translate(-offset)
-                };
+                var trimmedName = mesh.RenderMaterial.name.Replace(" (Instance)", "").Replace("_mat", "");
+                if (trimmedName != "Skip" && trimmedName != "transparentSpecialSurface_hidden") {
+                    var combineData = new CombineInstance
+                    {
+                        mesh      = mesh.SharedMesh,
+                        transform = Matrix4x4.identity //Matrix4x4.Translate(-offset)
+                    };
 
-                combines.Add(combineData);
-                mats.Add(mesh.RenderMaterial);
+
+                    combines.Add(combineData);
+                    mats.Add(mesh.RenderMaterial);
+                }
             }
 
             var combinedMesh = new Mesh();
@@ -271,7 +284,7 @@ namespace Rampancy
 
         private int GetMatId(Material mat)
         {
-            var path    = AssetDatabase.GetAssetPath(mat);
+            var path = AssetDatabase.GetAssetPath(mat);
             if (!MatList.ContainsKey(path)) {
                 var matInfo = MatInfo.Load(path);
                 MatList.Add(path, new MatInfoAndId(MatIdx++, matInfo, mat?.name ?? "NULL"));

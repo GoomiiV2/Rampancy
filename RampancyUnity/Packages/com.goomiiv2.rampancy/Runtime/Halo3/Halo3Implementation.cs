@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Rampancy.Common;
 using Rampancy.RampantC20;
 using RampantC20;
 using RampantC20.Halo3;
@@ -231,6 +232,18 @@ namespace Rampancy.Halo3
             parentAssetRecord?.AddRef(path, "bitmap");
             ImportedDB.AddRefToEntry(parentAssetRecord, path, "bitmap");
         }
+
+        public override void GetMatsInScene()
+        {
+            base.GetMatsInScene();
+
+            foreach (var sceneMat in SceneMats) {
+                var h3MatInfo = (SceneMatInfoHalo3) sceneMat;
+                h3MatInfo.LoadMatMeta();
+            }
+        }
+
+        protected override SceneMatInfo CreateSceneMatInfo() => new SceneMatInfoHalo3();
 
         // Use Tool to export a texture to a tga in the project dir
         public virtual void ExportBitmapToTga(string tagPath, string outPath = null)

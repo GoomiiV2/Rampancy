@@ -1,0 +1,47 @@
+{
+  "Collection": "arm",
+  "Name": "shop_light_fixtures",
+  "TagPath": "levels\\dlc\\armory\\shaders\\shop_light_fixtures.shader",
+  "IsLevelMat": true,
+  "NameFlags": 0,
+  "Flags": 0,
+  "LmRes": {
+    "Res": 1.0,
+    "PhotonFidelity": 1,
+    "TransparentTint": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "LightmapTransparency": false,
+    "AdditiveTint": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "UseShaderGel": false,
+    "IgnoreDefaultResScale": false
+  },
+  "LmBasic": {
+    "Power": 10.0,
+    "Color": {
+      "X": 0.8584906,
+      "Y": 0.7146761,
+      "Z": 0.238919556
+    },
+    "Quality": 1.0,
+    "PowerPerArea": 1,
+    "EmissiveFocus": 0.0
+  },
+  "LmAttenuation": {
+    "Enabled": false,
+    "Falloff": 1000.0,
+    "Cutoff": 2000.0
+  },
+  "LmFrustum": {
+    "Blend": 0.0,
+    "Falloff": 25.0,
+    "Cutoff": 25.0
+  },
+  "IsDIrty": false
+}

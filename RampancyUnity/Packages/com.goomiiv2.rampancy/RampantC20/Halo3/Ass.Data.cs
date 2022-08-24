@@ -46,19 +46,19 @@ namespace RampantC20.Halo3
         {
             public static readonly char[] Symbols = {'%', '#', '?', '!', '@', '*', '$', '^', '-', '&', '=', '.', ';', ')', '>', '<', '|', '~', '(', '{', '}', '[', '\'', '0', ']'};
 
-            public static char FlagToSymbol(BmFlags flag) => flag == BmFlags.None ? ' ' : Symbols[(int) (Math.Log((double) flag) / Math.Log(2D)) + 1];
+            public static char FlagToSymbol(BmFlags flag) => flag == BmFlags.None ? ' ' : Symbols[(int) (Math.Log((double) flag) / Math.Log(2D))];
 
             public static string FlagToSymbols(BmFlags flags)
             {
                 var sb = new StringBuilder();
 
                 for (int i = 0; i < 32; i++) {
-                    var isSet = (((int)flags >> i) & 1) != 0;
+                    var isSet = (((int) flags >> i) & 1) != 0;
                     if (isSet) {
                         sb.Append(Symbols[i]);
                     }
                 }
-                
+
                 return sb.ToString();
             }
 
@@ -88,7 +88,7 @@ namespace RampantC20.Halo3
             FogPlane                 = 1 << 6,
             Ladder                   = 1 << 7,
             Breakable                = 1 << 8,
-            AiDefeaning              = 1 << 9,
+            AiDeafening              = 1 << 9,
             NoShadow                 = 1 << 10,
             ShadowOnly               = 1 << 11,
             LightmapOnly             = 1 << 12,
@@ -97,11 +97,13 @@ namespace RampantC20.Halo3
             PortalOneWay             = 1 << 15,
             PortalDoor               = 1 << 16,
             PortalVisBlocker         = 1 << 17,
-            IngoredByLightmaps       = 1 << 18,
-            BlocksSound              = 1 << 19,
-            DecalOffset              = 1 << 10,
-            SlipSurface              = 1 << 21,
-            GroupTransparentsbyPlane = 1 << 22
+            DislikesPhotons          = 1 << 18,
+            IgnoredByLightmaps       = 1 << 19,
+            BlocksSound              = 1 << 20,
+            DecalOffset              = 1 << 21,
+            WaterSurface             = 1 << 22,
+            SlipSurface              = 1 << 23,
+            GroupTransparentsbyPlane = 1 << 24
         }
 
         [Serializable]
@@ -110,10 +112,15 @@ namespace RampantC20.Halo3
             public float   Res;
             public int     PhotonFidelity;
             public Vector3 TransparentTint;
-            public int     LightmapTransparency;
+            public bool     LightmapTransparency;
             public Vector3 AdditiveTint;
             public bool    UseShaderGel;
-            public bool    IngoreDefaultResScale;
+            public bool    IgnoreDefaultResScale;
+            
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Res, PhotonFidelity, TransparentTint, LightmapTransparency, AdditiveTint, UseShaderGel, IgnoreDefaultResScale);
+            }
         }
 
         [Serializable]
@@ -124,6 +131,11 @@ namespace RampantC20.Halo3
             public float   Quality;
             public int     PowerPerArea;
             public float   EmissiveFocus;
+            
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Power, Color, Quality, PowerPerArea, EmissiveFocus);
+            }
         }
 
         [Serializable]
@@ -132,6 +144,11 @@ namespace RampantC20.Halo3
             public bool  Enabled;
             public float Falloff;
             public float Cutoff;
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Enabled, Falloff, Cutoff);
+            }
         }
 
         [Serializable]
@@ -140,6 +157,11 @@ namespace RampantC20.Halo3
             public float Blend;
             public float Falloff;
             public float Cutoff;
+            
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Blend, Falloff, Cutoff);
+            }
         }
 
         public class AssObject
@@ -183,10 +205,10 @@ namespace RampantC20.Halo3
             public int     MatIdx;
             public Vector3 Extents;
         }
-        
+
         public class PillObject : AssObject
         {
-            public int     MatIdx;
+            public int MatIdx;
         }
 
         public enum ObjectType
@@ -205,10 +227,9 @@ namespace RampantC20.Halo3
             OMNI_LGT,
             AMBIENT_LGT
         }
-        
+
         public enum LightShape
         {
-            
         }
 
         public class Vertex

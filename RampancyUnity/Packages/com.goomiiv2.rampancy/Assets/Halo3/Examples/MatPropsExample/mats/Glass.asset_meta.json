@@ -1,0 +1,47 @@
+{
+  "Collection": "halo",
+  "Name": "120_glass_wall",
+  "TagPath": "levels\\solo\\120_halo\\shaders\\russel\\120_glass_wall.shader",
+  "IsLevelMat": true,
+  "NameFlags": 0,
+  "Flags": 4,
+  "LmRes": {
+    "Res": 1.0,
+    "PhotonFidelity": 1,
+    "TransparentTint": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "LightmapTransparency": false,
+    "AdditiveTint": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "UseShaderGel": false,
+    "IgnoreDefaultResScale": false
+  },
+  "LmBasic": {
+    "Power": 0.0,
+    "Color": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "Quality": 0.0,
+    "PowerPerArea": 0,
+    "EmissiveFocus": 0.0
+  },
+  "LmAttenuation": {
+    "Enabled": false,
+    "Falloff": 1000.0,
+    "Cutoff": 2000.0
+  },
+  "LmFrustum": {
+    "Blend": 0.0,
+    "Falloff": 25.0,
+    "Cutoff": 25.0
+  },
+  "IsDIrty": false
+}

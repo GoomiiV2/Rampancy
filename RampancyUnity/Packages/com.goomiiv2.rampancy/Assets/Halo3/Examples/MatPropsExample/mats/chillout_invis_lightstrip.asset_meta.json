@@ -1,0 +1,47 @@
+{
+  "Collection": "chillout",
+  "Name": "chillout_invis_lightstrip",
+  "TagPath": "levels\\dlc\\chillout\\shaders\\chillout_invis_lightstrip.shader",
+  "IsLevelMat": true,
+  "NameFlags": 0,
+  "Flags": 0,
+  "LmRes": {
+    "Res": 1.0,
+    "PhotonFidelity": 1,
+    "TransparentTint": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "LightmapTransparency": false,
+    "AdditiveTint": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "UseShaderGel": false,
+    "IgnoreDefaultResScale": false
+  },
+  "LmBasic": {
+    "Power": 90.0,
+    "Color": {
+      "X": 0.1986917,
+      "Y": 0.7695437,
+      "Z": 0.8962264
+    },
+    "Quality": 1.0,
+    "PowerPerArea": 0,
+    "EmissiveFocus": 0.0
+  },
+  "LmAttenuation": {
+    "Enabled": false,
+    "Falloff": 0.0,
+    "Cutoff": 0.0
+  },
+  "LmFrustum": {
+    "Blend": 0.0,
+    "Falloff": 24.0,
+    "Cutoff": 45.0
+  },
+  "IsDIrty": false
+}

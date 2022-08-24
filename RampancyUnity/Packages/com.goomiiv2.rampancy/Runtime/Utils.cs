@@ -4,8 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Pfim;
+using Rampancy;
+using Rampancy.Common;
+using RampantC20.Halo3;
+using RealtimeCSG.Components;
+using RealtimeCSG.Legacy;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 using RampancyInst = Rampancy.Rampancy;
 
 namespace RampantC20
@@ -190,15 +196,29 @@ namespace RampantC20
                     var tex = new Texture2D(image.Width, image.Height, format, true);
                     tex.SetPixelData(image.Data, 0);
                     tex.Apply();
-                            
+
                     if (image.Width % 4 == 0 && image.Height % 4 == 0)
                         tex.Compress(true);
-                    
+
                     AssetDatabase.CreateAsset(tex, savePath);
                 }
             }
             else {
                 Debug.LogWarning($"Error importing {importPath}, no file found");
+            }
+        }
+
+        public static void ReplaceMaterailOnBrushesInScene(Material oldMat, Material newMat)
+        {
+            var brushes = Object.FindObjectsOfType<CSGBrush>();
+
+            foreach (var brush in brushes) {
+                foreach (var surface in brush.Shape.Surfaces) {
+                    var texGen = brush.Shape.TexGens[surface.TexGenIndex];
+                    if (texGen.RenderMaterial == oldMat) {
+                        brush.Shape.TexGens[surface.TexGenIndex].RenderMaterial = newMat;
+                    }
+                }
             }
         }
     }

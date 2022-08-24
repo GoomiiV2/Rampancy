@@ -1,23 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Rampancy.Common;
 using RampantC20;
 using RealtimeCSG.Components;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace Rampancy
 {
     // Common interface for game integrations to extend from
     public class GameImplementationBase
     {
-        public virtual string GetUnityBasePath() => Path.Combine("Assets", $"{GameVersions.Halo1Mcc}");
+        public virtual string GetUnityBasePath()     => Path.Combine("Assets", $"{GameVersions.Halo1Mcc}");
         public virtual string GetUnityTempPathFull() => Path.Combine(Environment.CurrentDirectory, "Temp", $"{GameVersions.Halo1Mcc}");
 
         public    ImportedAssetDb   ImportedDB;
         protected bool              IsImportingAssets = false;
         protected PostponableAction PostponableAssetImportingEnd;
+        public    SceneMatInfo[]    SceneMats { get; private set; } = Array.Empty<SceneMatInfo>();
 
         public GameImplementationBase()
         {
@@ -142,6 +147,36 @@ namespace Rampancy
         public virtual void SyncMaterials()
         {
         }
+
+        public virtual void GetMatsInScene()
+        {
+            var allRcsgModels = Object.FindObjectsOfType<CSGModel>();
+            var matSets       = new HashSet<SceneMatInfo>();
+
+            foreach (var model in allRcsgModels.Where(x => x.name != "[default-CSGModel]")) {
+                foreach (var mesh in model.generatedMeshes.MeshInstances.Where(x => x.name == "[generated-render-mesh]")) {
+                    var mat = mesh.RenderMaterial;
+                    if (mat != null) {
+                        var matInfo = CreateSceneMatInfo();
+                        matInfo.Name    = mat.name;
+                        matInfo.Mat     = mat;
+                        matInfo.MatPath = AssetDatabase.GetAssetPath(mat);
+
+                        if (PrefabUtility.IsPartOfPrefabInstance(model)) {
+                            var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(model);
+                            matInfo.IsInPrefab = true;
+                            matInfo.PrefabPath = prefabPath;
+                        }
+
+                        matSets.Add(matInfo);
+                    }
+                }
+            }
+
+            SceneMats = matSets.ToArray();
+        }
+
+        protected virtual SceneMatInfo CreateSceneMatInfo() => new SceneMatInfo();
 
         protected void StartImportingAssets()
         {
