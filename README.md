@@ -19,7 +19,7 @@ The project is still early in development and some core issues need to be worked
  
 # How to Setup
 
-* Download and Install [Unity 2021.2.0b4](https://unity3d.com/unity/beta/2021.2.0b4)
+* Download and Install [Unity 2022.1.0b16](https://unity3d.com/unity/beta/2022.1.0b16)
 * Download and install [Git](https://git-scm.com/downloads) (This is needed for Unity)
 * Download the mod tools for the Halo games you want, eg. [Halo 1 on Steam](steam://install/1532190)
 * Create a new Unity project. (this will be where your map sources will be)
