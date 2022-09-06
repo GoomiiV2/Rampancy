@@ -36,13 +36,13 @@ namespace Rampancy.Halo3
             Debug.Log("Compiled Halo 3 structure");
         }
 
-        public override void CreateNewScene(string name, bool isSinglePlayer = true, Action customAction = null)
+        public override void CreateNewScene(string name, string location, GameVersions gameVersion, Action customAction = null)
         {
-            base.CreateNewScene(name, isSinglePlayer, () =>
+            base.CreateNewScene(name, location, gameVersion, () =>
             {
                 var rs = RampancySentinel.GetOrCreateInScene();
                 rs.LevelName   = name;
-                rs.DataDir     = isSinglePlayer ? $"levels/solo/{name}" : $"levels/multi/{name}";
+                rs.DataDir     =  $"levels/{location}/{name}";
                 rs.GameVersion = GameVersion;
             });
         }

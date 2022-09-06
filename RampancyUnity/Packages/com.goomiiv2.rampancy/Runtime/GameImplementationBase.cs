@@ -81,9 +81,9 @@ namespace Rampancy
         {
         }
 
-        public virtual void CreateNewScene(string name, bool isSinglePlayer = true, Action customAction = null)
+        public virtual void CreateNewScene(string name, string location, GameVersions gameVersion, Action customAction = null)
         {
-            if (DoesSceneExist(name)) return;
+            if (DoesSceneExist(name, location, gameVersion)) return;
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = name;
@@ -102,7 +102,7 @@ namespace Rampancy
             var csgModel = levelGeo.AddComponent<CSGModel>();
             csgModel.Settings = ModelSettingsFlags.InvertedWorld | ModelSettingsFlags.NoCollider;
 
-            var baseDir   = $"{Rampancy.SceneDir}/{name}";
+            var baseDir   = $"{Path.Combine("Assets", $"{gameVersion}", Statics.SrcLevelsName)}/{location}/{name}";
             var scenePath = $"{baseDir}/{name}.unity";
             Directory.CreateDirectory(baseDir);
             Directory.CreateDirectory(Path.Combine(baseDir, "mats"));
@@ -114,10 +114,10 @@ namespace Rampancy
             SceneManager.SetActiveScene(currentScene);
         }
 
-        public virtual bool DoesSceneExist(string name)
+        public virtual bool DoesSceneExist(string name, string location, GameVersions gameVersion)
         {
-            var baseDir   = $"{Rampancy.SceneDir}/{name}";
-            var scenePath = $"{baseDir}/{name}.unity";
+            var              baseDir   = $"{Path.Combine("Assets", $"{gameVersion}", Statics.SrcLevelsName)}/{location}/{name}";
+            var              scenePath = $"{baseDir}/{name}.unity";
 
             var exists = File.Exists(scenePath);
             return exists;
@@ -153,24 +153,29 @@ namespace Rampancy
             var allRcsgModels = Object.FindObjectsOfType<CSGModel>();
             var matSets       = new HashSet<SceneMatInfo>();
 
-            foreach (var model in allRcsgModels.Where(x => x.name != "[default-CSGModel]")) {
-                foreach (var mesh in model.generatedMeshes.MeshInstances.Where(x => x.name == "[generated-render-mesh]")) {
-                    var mat = mesh.RenderMaterial;
-                    if (mat != null) {
-                        var matInfo = CreateSceneMatInfo();
-                        matInfo.Name    = mat.name;
-                        matInfo.Mat     = mat;
-                        matInfo.MatPath = AssetDatabase.GetAssetPath(mat);
+            try {
+                foreach (var model in allRcsgModels.Where(x => x.name != "[default-CSGModel]")) {
+                    foreach (var mesh in model.generatedMeshes.MeshInstances.Where(x => x.name == "[generated-render-mesh]")) {
+                        var mat = mesh.RenderMaterial;
+                        if (mat != null) {
+                            var matInfo = CreateSceneMatInfo();
+                            matInfo.Name    = mat.name;
+                            matInfo.Mat     = mat;
+                            matInfo.MatPath = AssetDatabase.GetAssetPath(mat);
 
-                        if (PrefabUtility.IsPartOfPrefabInstance(model)) {
-                            var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(model);
-                            matInfo.IsInPrefab = true;
-                            matInfo.PrefabPath = prefabPath;
+                            if (PrefabUtility.IsPartOfPrefabInstance(model)) {
+                                var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(model);
+                                matInfo.IsInPrefab = true;
+                                matInfo.PrefabPath = prefabPath;
+                            }
+
+                            matSets.Add(matInfo);
                         }
-
-                        matSets.Add(matInfo);
                     }
                 }
+            }
+            catch (Exception e) {
+                
             }
 
             SceneMats = matSets.ToArray();

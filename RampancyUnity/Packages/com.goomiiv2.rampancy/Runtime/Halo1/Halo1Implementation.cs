@@ -87,13 +87,13 @@ namespace Rampancy.Halo1
             CompileLightmaps();
         }
 
-        public override void CreateNewScene(string name, bool isSinglePlayer = true, Action customAction = null)
+        public override void CreateNewScene(string name, string location, GameVersions gameVersion, Action customAction = null)
         {
-            base.CreateNewScene(name, isSinglePlayer, () =>
+            base.CreateNewScene(name, location, gameVersion, () =>
             {
                 var rs = RampancySentinel.GetOrCreateInScene();
                 rs.LevelName   = name;
-                rs.DataDir     = isSinglePlayer ? $"levels/{name}" : $"levels/test/{name}";
+                rs.DataDir     = $"levels/{location}/{name}";
                 rs.GameVersion = GameVersions.Halo1Mcc;
             });
         }

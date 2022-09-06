@@ -11,9 +11,7 @@ namespace Rampancy.UI
         [MenuItem("Rampancy/Create New Level", false, 0)]
         public static void CreateNewLevel()
         {
-            var window = CreateInstance<CreateLevelPopup>();
-            window.position = new Rect(Screen.width, Screen.height, 300, 100);
-            window.ShowPopup();
+            CreateLevelPopup.Show();
         }
 
     #region Launch
