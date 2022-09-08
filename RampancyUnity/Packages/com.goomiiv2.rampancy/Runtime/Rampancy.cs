@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Rampancy.Halo_Reach;
 using Rampancy.Halo1;
 using Rampancy.Halo3;
 using Rampancy.Halo3_ODST;
 using Rampancy.RampantC20;
+using Rampancy.RampantC20.HaloReach;
 using Rampancy.UI;
 using RampantC20;
 using Unity.VisualScripting;
@@ -30,7 +32,8 @@ namespace Rampancy
         {
             {GameVersions.Halo1Mcc, new Halo1Implementation()},
             {GameVersions.Halo3, new Halo3Implementation()},
-            {GameVersions.Halo3ODST, new Halo3ODSTImplementation()}
+            {GameVersions.Halo3ODST, new Halo3ODSTImplementation()},
+            {GameVersions.HaloReach, new HaloReachImplementation()}
         };
 
         public static int        ToolTaskRunnerProgressId;
@@ -38,9 +41,10 @@ namespace Rampancy
 
         public static GameImplementationBase CurrentGameImplementation => GameImplementation[Cfg.GameVersion];
 
-        public static Halo1Implementation Halo1Implementation     => GameImplementation[GameVersions.Halo1Mcc] as Halo1Implementation;
-        public static Halo3Implementation Halo3Implementation     => GameImplementation[GameVersions.Halo3] as Halo3Implementation;
-        public static Halo3Implementation Halo3ODSTImplementation => GameImplementation[GameVersions.Halo3ODST] as Halo3ODSTImplementation;
+        public static Halo1Implementation     Halo1Implementation     => GameImplementation[GameVersions.Halo1Mcc] as Halo1Implementation;
+        public static Halo3Implementation     Halo3Implementation     => GameImplementation[GameVersions.Halo3] as Halo3Implementation;
+        public static Halo3Implementation     Halo3ODSTImplementation => GameImplementation[GameVersions.Halo3ODST] as Halo3ODSTImplementation;
+        public static HaloReachImplementation HaloReachImplementation => GameImplementation[GameVersions.HaloReach] as HaloReachImplementation;
 
         public static GameVersions ActiveGameVersion => Cfg.GameVersion;
 
@@ -51,6 +55,9 @@ namespace Rampancy
         static Rampancy()
         {
             Init();
+
+            var sidecar = Sidecar.CreateStructureSidecar();
+            sidecar.Save("Sidecar.xml");
         }
 
         public static void Init()

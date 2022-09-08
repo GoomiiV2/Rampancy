@@ -191,7 +191,7 @@ namespace Rampancy
             return sceneRootInst;
         }
 
-        private static MeshAndMats GetRcsgCombinedMesh(GeneratedMeshes meshes, UnityEngine.Vector3 offset)
+        public static MeshAndMats GetRcsgCombinedMesh(GeneratedMeshes meshes, UnityEngine.Vector3 offset)
         {
             var combines = new List<CombineInstance>(meshes.MeshInstances.Length);
             var mats     = new List<Material>(meshes.MeshInstances.Length);
