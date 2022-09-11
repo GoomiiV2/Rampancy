@@ -31,6 +31,7 @@ namespace Rampancy.UI
             DrawGameConfig("Halo 1 MCC", Rampancy.Cfg.Halo1MccGameConfig);
             DrawGameConfig("Halo 3 MCC", Rampancy.Cfg.Halo3MccGameConfig, Halo3Settings);
             DrawGameConfig("Halo 3 ODST", Rampancy.Cfg.Halo3ODSTMccGameConfig, Halo3Settings);
+            DrawGameConfig("Halo Reach", Rampancy.Cfg.HaloReachGameConfig);
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             if (GUILayout.Button("Save")) {

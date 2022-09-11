@@ -8,11 +8,12 @@ namespace Rampancy
     {
         public static readonly string FileName = "RampancyConfig.json";
 
-        public GameVersions     GameVersion              = GameVersions.Halo1Mcc;
-        public bool             ToolOutputClearOnCompile = true;
-        public H1MccGameConfig  Halo1MccGameConfig       = new();
-        public H3GameConfig     Halo3MccGameConfig       = new();
-        public H3ODSTGameConfig Halo3ODSTMccGameConfig   = new();
+        public GameVersions        GameVersion              = GameVersions.Halo1Mcc;
+        public bool                ToolOutputClearOnCompile = true;
+        public H1MccGameConfig     Halo1MccGameConfig       = new();
+        public H3GameConfig        Halo3MccGameConfig       = new();
+        public H3ODSTGameConfig    Halo3ODSTMccGameConfig   = new();
+        public HaloReachGameConfig HaloReachGameConfig      = new();
 
         //public string ToolBasePath = "";
 
@@ -23,6 +24,7 @@ namespace Rampancy
                 GameVersions.Halo1Mcc  => Halo1MccGameConfig,
                 GameVersions.Halo3     => Halo3MccGameConfig,
                 GameVersions.Halo3ODST => Halo3ODSTMccGameConfig,
+                GameVersions.HaloReach => HaloReachGameConfig,
                 _                      => Halo1MccGameConfig
             };
         }
@@ -51,7 +53,7 @@ namespace Rampancy
 
         [JsonIgnore] public         string ToolPath     => Path.Combine(ToolBasePath, "tool.exe");
         [JsonIgnore] public         string SapienPath   => Path.Combine(ToolBasePath, "sapien.exe");
-        [JsonIgnore] public         string GuerillaPath => Path.Combine(ToolBasePath, "guerilla.exe");
+        [JsonIgnore] public virtual string GuerillaPath => Path.Combine(ToolBasePath, "guerilla.exe");
         [JsonIgnore] public         string DataPath     => Path.Combine(ToolBasePath, "data");
         [JsonIgnore] public         string TagsPath     => Path.Combine(ToolBasePath, "tags");
         [JsonIgnore] public virtual string TagTestPath  => null;
@@ -79,5 +81,11 @@ namespace Rampancy
         public override string TagTestPath => Path.Combine(ToolBasePath, "atlas_tag_test.exe");
         
         [JsonIgnore] public string H3_ToolFastPath => Path.Combine(ToolBasePath, "h3_tool_fast.exe");
+    }
+    
+    public class HaloReachGameConfig : GameConfig
+    {
+        public override string GuerillaPath => Path.Combine(ToolBasePath, "Foundation.exe");
+        public override string TagTestPath  => Path.Combine(ToolBasePath, "reach_tag_test.exe");
     }
 }
